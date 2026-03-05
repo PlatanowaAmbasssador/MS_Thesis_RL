@@ -17,8 +17,8 @@ Outputs saved to Results/ folder:
     - turnover_{tag}.csv
 
 Usage (from notebook):
-    from data_pipeline import build_dataset
-    from baselines import run_all_baselines
+    from functions.data_pipeline import build_dataset
+    from functions.baseline import run_all_baselines
 
     dataset = build_dataset("../Data/Outputs/Filtered/Data")
     all_results = run_all_baselines(dataset, results_dir="../Results")
@@ -29,7 +29,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from typing import Optional
-from functions.environment import PortfolioEnv
+from .environment import PortfolioEnv
 
 
 # =============================================================================

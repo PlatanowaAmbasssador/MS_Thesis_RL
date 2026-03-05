@@ -1,11 +1,9 @@
 # 03 — Train RL Agent v2 (LSTM + Attention + Dirichlet)
 
-import sys, os, time
+import os, time
 import numpy as np
 import pandas as pd
 import torch
-
-sys.path.insert(0, os.path.join(os.getcwd(), 'functions'))
 
 print(f'PyTorch: {torch.__version__}')
 if torch.cuda.is_available():
@@ -15,8 +13,8 @@ elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
 else:
     print('Device: CPU')
 
-from data_pipeline import build_dataset
-from RL_1.train import train_walk_forward, generate_wfo_folds, count_wfo_folds, plot_wfo_folds
+from functions.data_pipeline import build_dataset
+from functions.RL_1.train import train_walk_forward, generate_wfo_folds, count_wfo_folds, plot_wfo_folds
 
 dataset = build_dataset('../Data/Outputs/Filtered/Data')
 

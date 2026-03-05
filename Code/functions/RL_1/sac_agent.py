@@ -20,7 +20,7 @@ import copy
 from collections import deque
 from typing import Optional
 
-from RL_1.networks import DirichletActor, Critic
+from .networks import DirichletActor, Critic
 
 EPSILON = 1e-6
 

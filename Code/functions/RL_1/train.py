@@ -21,15 +21,10 @@ import gc
 from pathlib import Path
 from typing import Optional, Dict, List
 
-import sys, os
-_parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if _parent not in sys.path:
-    sys.path.insert(0, _parent)
-
 import torch
-from environment import PortfolioEnv
-from baseline import compute_all_metrics
-from RL_1.sac_agent import SACAgent
+from ..environment import PortfolioEnv
+from ..baseline import compute_all_metrics
+from .sac_agent import SACAgent
 
 
 # =============================================================================
