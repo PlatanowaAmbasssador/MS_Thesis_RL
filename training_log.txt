@@ -1,6 +1,25 @@
 PyTorch: 2.7.1+cu128
 CUDA: NVIDIA L4
+============================================================
+DATA PIPELINE — RL Portfolio Allocation
+============================================================
+
+[1/5] Loading raw data...
 Traceback (most recent call last):
-  File "/home/kamilkashif/MS_Thesis_RL/Code/03_Train_RL.py", line 18, in <module>
-    from data_pipeline import build_dataset
-ModuleNotFoundError: No module named 'data_pipeline'
+  File "/home/kamilkashif/MS_Thesis_RL/Code/03_Train_RL.py", line 19, in <module>
+    dataset = build_dataset('../Data/Outputs/Filtered/Data')
+  File "/home/kamilkashif/MS_Thesis_RL/Code/functions/data_pipeline.py", line 398, in build_dataset
+    raw = load_raw_data(data_dir)
+  File "/home/kamilkashif/MS_Thesis_RL/Code/functions/data_pipeline.py", line 47, in load_raw_data
+    prices = pd.read_csv(
+  File "/home/kamilkashif/MS_Thesis_RL/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1026, in read_csv
+    return _read(filepath_or_buffer, kwds)
+  File "/home/kamilkashif/MS_Thesis_RL/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 620, in _read
+    parser = TextFileReader(filepath_or_buffer, **kwds)
+  File "/home/kamilkashif/MS_Thesis_RL/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1620, in __init__
+    self._engine = self._make_engine(f, self.engine)
+  File "/home/kamilkashif/MS_Thesis_RL/venv/lib/python3.10/site-packages/pandas/io/parsers/readers.py", line 1880, in _make_engine
+    self.handles = get_handle(
+  File "/home/kamilkashif/MS_Thesis_RL/venv/lib/python3.10/site-packages/pandas/io/common.py", line 873, in get_handle
+    handle = open(
+FileNotFoundError: [Errno 2] No such file or directory: '../Data/Outputs/Filtered/Data/close_prices.csv'

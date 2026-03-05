@@ -5,6 +5,9 @@ import numpy as np
 import pandas as pd
 import torch
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
+
 print(f'PyTorch: {torch.__version__}')
 if torch.cuda.is_available():
     print(f'CUDA: {torch.cuda.get_device_name(0)}')
@@ -28,8 +31,6 @@ if wfo_info['n_folds'] > 0:
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
 folds = generate_wfo_folds(dataset['trading_dates'], train_months=24, val_months=1, test_months=1, step_months=1, embargo_days=5)
-fig = plot_wfo_folds(folds)
-if fig: fig.show()
 
 ## 2. Train (Walk-Forward)
 ### 5 HP configs → sliding 24m window → checkpoint after each fold
@@ -63,16 +64,16 @@ print('=' * 60)
 print('OUT-OF-SAMPLE PERFORMANCE')
 print('=' * 60)
 rl_m = pd.read_csv('../Results/rl_performance_metrics.csv', index_col=0)
-display(rl_m)
+print(rl_m.to_string())
 
 fold_log = pd.read_csv('../Results/rl_fold_log.csv')
 print(f'Retrains: {fold_log["retrained"].sum()} / {len(fold_log)} folds')
-display(fold_log)
+print(fold_log.to_string())
 
 bl_metrics = pd.read_csv('../Results/performance_metrics_full.csv', index_col=0)
 rl_row = rl_m.loc[['RL Agent']]
 combined = pd.concat([bl_metrics, rl_row]).sort_values('IR2', ascending=False)
-display(combined[['ARC (%)', 'ASD (%)', 'Max Drawdown (%)', 'IR1', 'IR2']])
+print(combined[['ARC (%)', 'ASD (%)', 'Max Drawdown (%)', 'IR1', 'IR2']].to_string())
 
 ## 4. Files Saved
 
