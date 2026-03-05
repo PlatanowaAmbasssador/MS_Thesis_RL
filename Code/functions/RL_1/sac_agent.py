@@ -38,17 +38,20 @@ class ReplayBuffer:
             "next_weights": next_state_dict["weights"].copy(),
             "done": done,
             "n_tradable": n_tradable,
+            "next_n_tradable": next_state_dict["n_tradable"],
         })
 
     def sample(self, batch_size, device):
         indices = np.random.randint(0, len(self.buffer), size=batch_size)
         batch = [self.buffer[i] for i in indices]
+        # Group by BOTH n_tradable AND next_n_tradable so all arrays in a group
+        # have identical shapes for stacking
         groups = {}
         for item in batch:
-            n = item["n_tradable"]
-            if n not in groups:
-                groups[n] = []
-            groups[n].append(item)
+            key = (item["n_tradable"], item["next_n_tradable"])
+            if key not in groups:
+                groups[key] = []
+            groups[key].append(item)
         return groups
 
     def __len__(self):
@@ -73,7 +76,7 @@ def _batch_group(items, device):
             "asset_features": torch.FloatTensor(np.stack([it["next_asset_features"] for it in items])).to(device),
             "global_features": torch.FloatTensor(np.stack([it["next_global_features"] for it in items])).to(device),
             "weights": torch.FloatTensor(np.stack([it["next_weights"] for it in items])).to(device),
-            "n_tradable": n,
+            "n_tradable": items[0]["next_n_tradable"],
         },
         "dones": torch.FloatTensor([it["done"] for it in items]).unsqueeze(1).to(device),
         "n_tradable": n,
@@ -186,11 +189,12 @@ class SACAgent:
         total_alpha_loss = 0.0
         total_count = 0
 
-        for n_t, items in groups.items():
+        for group_key, items in groups.items():
             if len(items) < 2:
                 continue
             batch = _batch_group(items, self.device)
             B = len(items)
+            n_t = group_key[0]  # current n_tradable
             K = n_t + 1  # action dimension (stocks + cash)
 
             # --- Critic ---
