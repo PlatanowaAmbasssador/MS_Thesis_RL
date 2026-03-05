@@ -116,7 +116,7 @@ def count_wfo_folds(trading_dates, train_months=24, val_months=1,
 # =============================================================================
 
 def plot_wfo_folds(folds: List[Dict]):
-    """Plot WFO folds as horizontal Gantt bars. Returns plotly figure."""
+    """Plot WFO folds as horizontal Gantt bars with concatenated test bar. Returns plotly figure."""
     try:
         import plotly.graph_objects as go
     except ImportError:
@@ -125,6 +125,16 @@ def plot_wfo_folds(folds: List[Dict]):
 
     fig = go.Figure()
     n = len(folds)
+
+    # Add invisible trace to establish datetime x-axis
+    all_dates = []
+    for fold in folds:
+        all_dates.extend([fold["train_start"], fold["test_end"]])
+    fig.add_trace(go.Scatter(
+        x=[min(all_dates), max(all_dates)], y=[-1, n + 1],
+        mode="markers", marker=dict(size=0, opacity=0),
+        showlegend=False, hoverinfo="skip"))
+
     for i, fold in enumerate(folds):
         y = n - i
         for phase, color, key_s, key_e in [
@@ -132,19 +142,40 @@ def plot_wfo_folds(folds: List[Dict]):
             ("Val", "rgba(255,255,0,0.7)", "val_start", "val_end"),
             ("Test", "rgba(255,0,0,0.7)", "test_start", "test_end"),
         ]:
-            fig.add_shape(type="rect", x0=fold[key_s], x1=fold[key_e],
+            fig.add_shape(type="rect",
+                          x0=fold[key_s], x1=fold[key_e],
                           y0=y - 0.4, y1=y + 0.4, fillcolor=color,
                           line=dict(color="black", width=0.5))
+            # Hover trace
+            fig.add_trace(go.Scatter(
+                x=[fold[key_s]], y=[y], mode="markers",
+                marker=dict(size=0, opacity=0), showlegend=False,
+                hovertemplate=f"<b>Fold {fold['fold_id']} — {phase}</b><br>"
+                              f"{fold[key_s]} → {fold[key_e]}<extra></extra>"))
+
+    # Concatenated test bar at bottom (y=0)
+    if folds:
+        fig.add_shape(type="rect",
+                      x0=folds[0]["test_start"], x1=folds[-1]["test_end"],
+                      y0=-0.4, y1=0.4,
+                      fillcolor="rgba(139,0,0,0.8)",
+                      line=dict(color="white", width=0.5))
+        fig.add_trace(go.Scatter(
+            x=[folds[0]["test_start"]], y=[0], mode="markers",
+            marker=dict(size=0, opacity=0), showlegend=False,
+            hovertemplate=f"<b>Full OOS Test Period</b><br>"
+                          f"{folds[0]['test_start']} → {folds[-1]['test_end']}<extra></extra>"))
 
     fig.update_layout(
         title=f"Walk-Forward Folds ({n} folds, sliding window)",
         xaxis_title="Date", yaxis_title="Fold",
-        height=max(400, n * 35), template="plotly_white",
-        yaxis=dict(tickmode="linear", tick0=1, dtick=1, range=[0, n + 1]),
+        height=max(400, n * 30 + 100), template="plotly_white",
+        yaxis=dict(tickmode="linear", tick0=0, dtick=1,
+                   range=[-1, n + 1]),
         xaxis=dict(type="date"),
     )
     fig.add_annotation(x=0.98, y=0.98, xref="paper", yref="paper",
-                       text="<b>Legend:</b><br>🟢 Train<br>🟡 Val<br>🔴 Test",
+                       text="<b>Legend:</b><br>🟢 Train<br>🟡 Val<br>🔴 Test<br>🟤 Full OOS",
                        showarrow=False, align="right",
                        bgcolor="rgba(255,255,255,0.8)", borderwidth=1)
     return fig
@@ -319,13 +350,11 @@ def select_hyperparameters(dataset, first_fold, hp_configs, n_epochs=20,
 # =============================================================================
 
 def _save_checkpoint(out_dir, fold_id, agent, fold_log, all_test_returns,
-                     all_test_qqq_returns, val_sharpe_history, last_retrain_fold,
-                     selected_config):
+                     all_test_qqq_returns, val_sharpe_history, selected_config):
     ckpt = {
         "fold_id": fold_id,
         "fold_log": fold_log,
         "val_sharpe_history": val_sharpe_history,
-        "last_retrain_fold": last_retrain_fold,
         "selected_config": selected_config,
         "n_test_returns": len(all_test_returns),
     }
@@ -361,7 +390,6 @@ def train_walk_forward(
     turnover_penalty: float = 0.001,
     variance_penalty: float = 0.5,
     tc_curriculum_frac: float = 0.3,
-    retrain_cooldown: int = 3,
     lookback_window: int = 60,
     results_dir: str = "../Results",
     verbose: bool = True,
@@ -410,7 +438,6 @@ def train_walk_forward(
     all_test_turnover = []
     fold_log = []
     val_sharpe_history = []  # rolling window for retrain decision
-    last_retrain_fold = -999  # track cooldown
     selected_config = None
     agent = None
 
@@ -418,7 +445,6 @@ def train_walk_forward(
         start_fold = ckpt["fold_id"]  # resume from NEXT fold
         fold_log = ckpt["fold_log"]
         val_sharpe_history = ckpt.get("val_sharpe_history", [])
-        last_retrain_fold = ckpt.get("last_retrain_fold", -999)
         selected_config = ckpt["selected_config"]
         # Load saved test returns
         for i in range(ckpt["n_test_returns"]):
@@ -522,7 +548,6 @@ def train_walk_forward(
             )
             current_val_ir2 = train_result["best_val_ir2"]
             n_retrains += 1
-            last_retrain_fold = i
         else:
             if verbose:
                 print(f"  Fold {fid:2d}/{len(folds)} | CARRY (Sharpe: {current_val_sharpe:.3f})", end="")
@@ -573,7 +598,7 @@ def train_walk_forward(
         # Checkpoint
         _save_checkpoint(out_dir, i + 1, agent, fold_log,
                          all_test_returns, all_test_qqq_returns,
-                         val_sharpe_history, last_retrain_fold, selected_config)
+                         val_sharpe_history, selected_config)
 
         # Memory cleanup
         gc.collect()
