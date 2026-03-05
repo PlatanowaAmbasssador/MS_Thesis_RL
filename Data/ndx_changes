@@ -1,0 +1,179 @@
+PERIOD: 2021-08-01 ---
+ADD:
++ HON UW Equity
+DEL:
+- ALNUW Equity
+TOTAL_COUNT: 102
+PERIOD: 2021-09-01 ---
+ADD:
++ CRWD UW Equity
+DEL:
+- MXIM UW Equity
+TOTAL_COUNT: 102
+-- PERIOD: 2022-01-01 ---
+ADD:
++ ABNB UW Equity + DDOG UW Equity + FTNT UW Equity
++ LCID UW Equity
++ PANW UW Equity + ZS UW Equity
+DEL:
+- CDW UW Equity
+CERN UW Equity
+CHKP UW Equity
+FOX UW Equity
+- FOXA UW Equity
+- INCY UW Equity
+- TCOM UW Equity
+TOTAL COUNT: 101
+--- PERIOD: 2022-02-01
+ADD :
++ ODFL UW Equity
+DEL:
+- PTON UW Equity
+TOTAL_COUNT: 101
+
+2022-03-01
+ADD:
++ 9996651D UW Equity + CEG UW Equity
+DEL:
+-XLNX UW Equity
+TOTAL_COUNT: 102
+PERIOD: 2022-12-01 ---
+ADD
++ ENPH UQ Equity
+DEL:
+- OKTA UW Equity
+TOTAL_COUNT: 102
+•-- PERIOD: 2023-01-01
+ADD:
++ BKR UWEquity
++ CSGP UW Equity
++ FANG UN Equity
++ GFS UW Equity + RIVN UW Equity + WBD UW Equity
+DEL:
+- BIDU UW Equity
+- DOCU UN Equity
+- MTCH UW Equity
+NTES UW Equity
+SPLK UW Equity
+SWKS UW Equity
+- VRSN UW Equity
+TOTAL_COUNT: 101
+PERIOD: 2023-07-01
+ADD:
++ GEHC UW Equity + ON UW Equity
+DEL:
+- FISV UW Equity
+- RIVN UW Equity
+TOTAL COUNT: 101
+PERIOD: 2023-08-01
+ADD :
++ TD UQ Equity
+DEL:
+- ATVI UW Equity
+TOTAL_COUNT: 101
+-- PERIOD: 2024-01-01
+ADD:
++ CCEP Ub Equity + CDW UN Equity + DASH UN Equity + MDB UQ Equity
+* ROP UN Equity
+* SPLK UN Equity + TWO Ul Equity
+DEL:
+- ALGN UN Equity
+EBAY Uw Equity
+ENPH UQ Equity
+JD UN Equity
+LCID UW Equity
+SGEN UW Equity
+ZM UW Equity
+TOTAL_COUNT: 101
+
+File Edit Format View Help
+- - PERIOD: 2024-02-01
+ADD :
++ DASH UW Equity + ROP UW Equity
+DEL:
+- DASH UN Equity
+- ROP UN Equity
+TOTAL_COUNT: 101
+- -- PERIOD: 2024-04-01
+ADD:
++ LIN UW Equity
+DEL:
+- SPLK UW Equity
+TOTAL_COUNT: 101
+-- PERIOD: 2024-07-01
+ADD:
++ ARM UW Equity + GRAL UW Equity
+DEL:
+- 9210611D UW Equity
+TOTAL_COUNT: 102
+- -- PERIOD: 2024-08-01
+ADD:
++ SMCI UW Equity
+DEL:
+- GRAL UW Equity
+- WBA UW Equity
+TOTAL_COUNT: 101
+PERIOD: 2024-12-01 ---
+ADD:
++ APP UW Equity
+DEL:
+- DLTR UW Equity
+TOTAL_COUNT: 101
+PERIOD: 2025-01-01
+ADD:
++ AXON UW Equity + MSTR UW Equity + PLTR UW Equity
+DEL:
+- ILMN UW Equity
+- MRNA UW Equity
+- SMCI UW Equity
+TOTAL_COUNT: 101
+
+File Edit Format View Help
+-- PERIOD: 2025-06-01 ---
+ADD:
++ SHOP UN Equity
+DEL:
+- MDBUQ Equity
+TOTAL_COUNT: 101
+-- PERIOD: 2025-08-01 - --
+ADD:
++ SHOP UW Equity + TRI UN Equity
+DEL:
+- ANSS UW Equity
+- SHOP UN Equity
+TOTAL_COUNT: 101
+--- PERIOD: 2025-09-01
+ADD:
++ TRI UW Equity
+DEL:
+- TRI UN Equity
+TOTAL COUNT: 101
+PERIOD: 2025-11-01
+ADD:
++ SOLS UW Equity
+TOTAL_COUNT: 102
+•-- PERIOD: 2025-12-01 ---
+DEL:
+- SOLS UW Equity
+TOTAL_COUNT: 101
+PERIOD: 2026-01-01
+ADD:
++ ALNY UW Equity + FER UW Equity + INSM UW Equity + MPWRUW Equity
++ STX UW Equity + WDC UW Equity
+DEL:
+- BIIB UW Equity
+- CDW UW Equity
+GFS UW Equity
+- LULU UW Equity
+- ON UW Equity
+TTD UQ Equity
+TOTAL_COUNT: 101
+
+PERIOD: 2026-02-01
+-
+ADD:
++ WMT UW Equity
+DEL:
+- 9996651D UW Equity
+TOTAL_COUNT: 101
+LEND OF REPORT]
