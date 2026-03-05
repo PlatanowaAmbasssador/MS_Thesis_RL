@@ -172,6 +172,10 @@ def evaluate_agent(agent, dataset, start_date, end_date,
     metrics = compute_all_metrics(equity)
     metrics["Avg Daily Turnover (%)"] = round(results["turnover"].mean() * 100, 4)
     metrics["Avg Cash (%)"] = round(results["cash_weight"].mean() * 100, 2) if "cash_weight" in results else 0
+    # Trade counting: a trade = any day where weights change meaningfully
+    turnover_series = results["turnover"]
+    metrics["N Trades"] = int((turnover_series > 0.01).sum())  # days with >1% turnover
+    metrics["Total TC (%)"] = round(results["transaction_cost"].sum() * 100, 4)
     return {"results": results, "metrics": metrics, "equity": equity}
 
 
@@ -559,6 +563,10 @@ def train_walk_forward(
             "test_ir2": round(test_ir2, 4),
             "test_arc": round(test_arc, 2),
             "test_mdd": round(test_r["metrics"]["Max Drawdown (%)"], 2),
+            "test_sharpe": round(test_r["metrics"].get("Sharpe", 0), 4),
+            "test_sortino": round(test_r["metrics"].get("Sortino", 0), 4),
+            "test_n_trades": test_r["metrics"].get("N Trades", 0),
+            "test_total_tc": round(test_r["metrics"].get("Total TC (%)", 0), 4),
             "test_cash": round(test_r["metrics"].get("Avg Cash (%)", 0), 2),
         })
 
@@ -597,7 +605,7 @@ def train_walk_forward(
     print(f"  Days: {len(stitched_rl)}, Retrains: {n_retrains}/{len(folds)}")
     print(f"\n  {'METRIC':<25} {'RL':>10} {'QQQ':>10}")
     print(f"  {'-'*47}")
-    for k in ["ARC (%)", "ASD (%)", "Max Drawdown (%)", "IR1", "IR2"]:
+    for k in ["ARC (%)", "ASD (%)", "Max Drawdown (%)", "IR1", "IR2", "Sharpe", "Sortino"]:
         print(f"  {k:<25} {rl_m[k]:>10.4f} {qqq_m[k]:>10.4f}")
 
     # Save

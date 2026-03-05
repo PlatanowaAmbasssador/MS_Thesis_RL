@@ -134,14 +134,42 @@ def IR2(tab):
 def compute_all_metrics(equity_curve) -> dict:
     """Compute all performance metrics from an equity curve (starting at 1.0)."""
     tab = np.array(equity_curve, dtype=np.float64)
+    ret = equity_to_returns(tab)
+
+    # Annualized Sharpe (daily returns → annualized)
+    if len(ret) > 1 and np.std(ret) > 0:
+        sharpe_ann = (np.mean(ret) / np.std(ret)) * np.sqrt(252)
+    else:
+        sharpe_ann = 0.0
+
+    # Sortino (penalizes only downside vol)
+    downside = np.array([r for r in ret if r < 0])
+    if len(downside) > 1 and np.std(downside) > 0:
+        sortino = (np.mean(ret) / np.std(downside)) * np.sqrt(252)
+    else:
+        sortino = 0.0
+
+    # Calmar (ARC / MaxDD)
+    arc_val = ARC(tab)
+    mdd_val = MaximumDrawdown(tab)
+    calmar = arc_val / mdd_val if mdd_val > 0 else 0.0
+
+    # Number of trades (position changes in the equity curve)
+    # This counts sign changes in daily returns as a proxy when positions aren't available
+    n_days = len(ret)
+
     return {
         "Absolute Return (%)": round(absolute_return(tab), 4),
-        "ARC (%)": round(ARC(tab), 4),
+        "ARC (%)": round(arc_val, 4),
         "ASD (%)": round(ASD(tab), 4),
-        "Max Drawdown (%)": round(MaximumDrawdown(tab), 4),
+        "Max Drawdown (%)": round(mdd_val, 4),
         "MLD (years)": round(MLD(tab), 4),
         "IR1": round(IR1(tab), 4),
         "IR2": round(IR2(tab), 4),
+        "Sharpe": round(sharpe_ann, 4),
+        "Sortino": round(sortino, 4),
+        "Calmar": round(calmar, 4),
+        "N Days": n_days,
     }
 
 
