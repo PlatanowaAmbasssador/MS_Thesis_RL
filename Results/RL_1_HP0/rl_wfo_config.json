@@ -1,0 +1,13 @@
+{
+  "train_months": 24,
+  "val_months": 1,
+  "test_months": 1,
+  "step_months": 1,
+  "embargo_days": 5,
+  "n_folds": 33,
+  "n_retrains": 12,
+  "lookback_window": 20,
+  "variance_penalty": 0.5,
+  "tc_curriculum_frac": 0.3,
+  "window_type": "SLIDING (non-anchored)"
+}
