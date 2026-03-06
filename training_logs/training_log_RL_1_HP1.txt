@@ -1,0 +1,600 @@
+PyTorch: 2.7.1+cu128
+CUDA: NVIDIA L4
+============================================================
+DATA PIPELINE — RL Portfolio Allocation
+============================================================
+
+[1/5] Loading raw data...
+  Prices: (18692, 144)
+  Mask:   (27240, 152)
+  QQQ:    (1249, 1)
+  VIX:    (1249, 1)
+
+[2/5] Cleaning & aligning...
+  Tickers:       144
+  Trading dates: 1239
+  Date range:    2021-03-01 → 2026-02-18
+  Hourly bars:   7434
+  Bars/day:      6
+  Close coverage (members): 98.9% mean, 97.0% min
+
+[3/5] Building per-asset features (cross-sectionally ranked)...
+  Features per asset:  7
+  Feature names:       ['intraday_ret', 'intraday_rvol', 'ret_1d', 'ret_20d', 'ret_5d', 'rvol_20d', 'rvol_5d']
+  Total columns:       1008
+
+[4/5] Building global features...
+  Global features: ['vix_level', 'vix_change_5d', 'market_ret_1d', 'market_rvol_5d', 'dow']
+
+[5/5] Applying warmup period (20 days for rolling windows)...
+  Valid date range: 2021-03-29 → 2026-02-18
+  Valid days:       1219
+  Per-asset NaN:    31.087%
+  Global NaN:       0.000%
+
+============================================================
+PIPELINE COMPLETE
+============================================================
+Total folds: 33
+First test: 2023-05-05 → 2023-06-02
+Last test:  2026-01-05 → 2026-02-04
+OOS: 2023-05-05 → 2026-02-04
+
+======================================================================
+WALK-FORWARD RL TRAINING (SLIDING WINDOW)
+======================================================================
+  WFO: train=24m (sliding), val=1m, test=1m, step=1m, embargo=5d
+  Folds: 33
+  OOS test: 2023-05-05 → 2026-02-04
+  HP configs: 5
+  Lookback window: 20 days
+  Variance penalty: 0.0
+  TC curriculum: 0% of episode
+======================================================================
+  Fold plot saved to ../Results/wfo_folds_plot.html
+
+  HP Selection on fold 1:
+    Train: 2021-03-29 → 2023-03-28 (502d)
+    Val:   2023-04-05 → 2023-05-04 (21d)
+
+    --- Config: baseline ---
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.001 | 39.2s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.001 | 56.8s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.002 | 57.5s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.9% | α: 0.002 | 57.1s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.002 | 57.5s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.003 | 57.0s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.004 | 56.7s
+    Ep  7 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.004 | 58.5s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.005 | 58.7s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.006 | 58.0s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.007 | 57.4s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.008 | 58.2s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.010 | 57.4s
+    Early stop at epoch 12 (best: 4)
+    → Val IR2: 0.0000
+
+    --- Config: conservative ---
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.001 | 37.6s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.001 | 56.7s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.002 | 57.0s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.1% | α: 0.002 | 57.1s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.0% | α: 0.002 | 57.4s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.6% | α: 0.003 | 57.4s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.5% | α: 0.003 | 58.3s
+    Ep  7 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.6% | α: 0.004 | 58.4s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.005 | 57.6s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.6% | α: 0.005 | 57.7s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.5% | α: 0.006 | 57.3s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.4% | α: 0.007 | 57.7s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.009 | 58.0s
+    Early stop at epoch 12 (best: 6)
+    → Val IR2: 0.0000
+
+    --- Config: large_model ---
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.6% | α: 0.001 | 62.8s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.001 | 80.9s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.002 | 80.7s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -25.0% | α: 0.002 | 81.6s
+    Ep  4 | Train IR2: 0.1095 Val IR2: 0.0000 | Val ARC: -37.9% | α: 0.002 | 81.3s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0016 | Val ARC: +0.0% | α: 0.003 | 81.4s
+    Ep  6 | Train IR2: 1.1102 Val IR2: 0.0000 | Val ARC: -1.5% | α: 0.003 | 81.5s
+    Ep  7 | Train IR2: 0.7912 Val IR2: 0.0000 | Val ARC: -14.6% | α: 0.004 | 81.6s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.3% | α: 0.004 | 81.5s
+    Ep  9 | Train IR2: 0.0131 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.005 | 80.9s
+    Ep 10 | Train IR2: 0.5153 Val IR2: 0.0000 | Val ARC: -20.7% | α: 0.006 | 80.9s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.007 | 82.0s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.008 | 81.7s
+    Early stop at epoch 12 (best: 5)
+    → Val IR2: 0.0016
+
+    --- Config: aggressive ---
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.001 | 38.2s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.001 | 56.1s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.002 | 57.4s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.002 | 56.1s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.002 | 58.0s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.003 | 56.7s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -22.0% | α: 0.003 | 57.1s
+    Ep  7 | Train IR2: 0.0268 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.004 | 57.0s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.005 | 56.9s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.006 | 57.2s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.6% | α: 0.006 | 57.1s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.6% | α: 0.007 | 57.6s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.008 | 57.3s
+    Early stop at epoch 12 (best: 1)
+    → Val IR2: 0.0000
+
+    --- Config: high_cap_con ---
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.2% | α: 0.001 | 61.1s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.8% | α: 0.001 | 80.1s
+    Ep  2 | Train IR2: 0.0558 Val IR2: 0.0000 | Val ARC: -17.6% | α: 0.002 | 79.4s
+    Ep  3 | Train IR2: 0.0643 Val IR2: 0.0000 | Val ARC: -16.7% | α: 0.002 | 79.6s
+    Ep  4 | Train IR2: 0.9446 Val IR2: 0.0000 | Val ARC: -13.3% | α: 0.002 | 79.5s
+    Ep  5 | Train IR2: 9.1189 Val IR2: 0.0000 | Val ARC: -11.1% | α: 0.003 | 79.9s
+    Ep  6 | Train IR2: 17.9091 Val IR2: 0.0000 | Val ARC: -13.3% | α: 0.003 | 80.5s
+    Ep  7 | Train IR2: 32.3409 Val IR2: 0.0000 | Val ARC: -19.3% | α: 0.004 | 79.9s
+    Ep  8 | Train IR2: 46.5320 Val IR2: 0.0000 | Val ARC: -20.5% | α: 0.004 | 78.7s
+    Ep  9 | Train IR2: 58.4368 Val IR2: 0.0000 | Val ARC: -20.7% | α: 0.005 | 79.8s
+    Ep 10 | Train IR2: 51.8087 Val IR2: 0.0000 | Val ARC: -23.4% | α: 0.006 | 80.2s
+    Ep 11 | Train IR2: 59.5551 Val IR2: 0.0000 | Val ARC: -31.0% | α: 0.007 | 79.2s
+    Ep 12 | Train IR2: 108.9478 Val IR2: 0.0000 | Val ARC: -23.4% | α: 0.008 | 79.2s
+    Early stop at epoch 12 (best: 5)
+    → Val IR2: 0.0000
+
+  ★ Selected: 'large_model' (Val IR2: 0.0016)
+
+======================================================================
+WALKING FORWARD — 33 folds
+======================================================================
+  SAC Agent using device: cuda
+
+  Fold  1/33 | RETRAIN (initial)
+    Train: 2021-03-29→2023-03-28 (502d) Val: 2023-04-05→2023-05-04 (21d)
+  SAC Agent using device: cuda
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.001 | 63.9s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.001 | 81.6s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.002 | 82.0s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.002 | 80.8s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.0% | α: 0.002 | 80.6s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.1% | α: 0.003 | 80.8s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -20.9% | α: 0.003 | 80.5s
+    Ep  7 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.004 | 81.4s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.004 | 81.7s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.005 | 81.1s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.006 | 81.7s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.8% | α: 0.007 | 81.3s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.009 | 81.1s
+    Ep 13 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.7% | α: 0.010 | 81.1s
+    Ep 14 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -19.9% | α: 0.012 | 81.3s
+    Early stop at epoch 14 (best: 0)
+    Test: 2023-05-05→2023-06-02 → IR2: 179.5713, ARC: +72.7%
+  Fold  2/33 | CARRY (Sharpe: 4.600) → Test IR2: 55.4004, ARC: +50.8%
+  Fold  3/33 | CARRY (Sharpe: 3.413) → Test IR2: 19.0058, ARC: +29.3%
+  Fold  4/33 | CARRY (Sharpe: 2.610) → Test IR2: 0.0000, ARC: -3.0%
+
+  Fold  5/33 | RETRAIN (Sharpe -0.134 < 0.610 (med=3.011 - 1*std=2.401))
+    Train: 2021-07-29→2023-07-28 (500d) Val: 2023-08-07→2023-09-01 (20d)
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.8% | α: 0.001 | 66.2s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.001 | 74.7s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.002 | 74.4s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.002 | 73.5s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.002 | 73.2s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.002 | 73.4s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.003 | 74.6s
+    Ep  7 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.003 | 74.2s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.004 | 74.1s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.005 | 73.9s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.006 | 73.5s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.007 | 73.6s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.008 | 73.9s
+    Ep 13 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.009 | 73.3s
+    Ep 14 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.011 | 73.1s
+    Ep 15 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.013 | 73.0s
+    Ep 16 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.015 | 73.4s
+    Ep 17 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.8% | α: 0.018 | 73.3s
+    Ep 18 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -5.7% | α: 0.021 | 73.6s
+    Early stop at epoch 18 (best: 13)
+    Test: 2023-09-05→2023-10-04 → IR2: 0.0000, ARC: -50.7%
+
+  Fold  6/33 | RETRAIN (Sharpe -4.404 < 0.265 (med=2.610 - 1*std=2.344))
+    Train: 2021-08-30→2023-08-28 (499d) Val: 2023-09-05→2023-10-04 (22d)
+    Ep  0 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.001 | 63.4s
+    Ep  1 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.5% | α: 0.001 | 72.7s
+    Ep  2 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.5% | α: 0.002 | 72.8s
+    Ep  3 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.002 | 72.1s
+    Ep  4 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.2% | α: 0.002 | 72.3s
+    Ep  5 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.4% | α: 0.003 | 72.2s
+    Ep  6 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -48.2% | α: 0.003 | 72.7s
+    Ep  7 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.1% | α: 0.003 | 72.7s
+    Ep  8 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.004 | 73.2s
+    Ep  9 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.005 | 72.5s
+    Ep 10 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.006 | 72.3s
+    Ep 11 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -51.0% | α: 0.007 | 72.6s
+    Ep 12 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.7% | α: 0.007 | 72.1s
+    Ep 13 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.6% | α: 0.008 | 72.5s
+    Ep 14 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -50.8% | α: 0.009 | 72.7s
+    Early stop at epoch 14 (best: 6)
+    Test: 2023-10-05→2023-11-03 → IR2: 0.0000, ARC: -6.7%
+  Fold  7/33 | CARRY (Sharpe: -0.270) → Test IR2: 763.0774, ARC: +124.8%
+  Fold  8/33 | CARRY (Sharpe: 5.934) → Test IR2: 185.5128, ARC: +87.0%
+  Fold  9/33 | CARRY (Sharpe: 4.103) → Test IR2: 192.6147, ARC: +49.7%
+  Fold 10/33 | CARRY (Sharpe: 6.032) → Test IR2: 65.5220, ARC: +52.8%
+  Fold 11/33 | CARRY (Sharpe: 2.338) → Test IR2: 6.0701, ARC: +14.3%
+
+  Fold 12/33 | RETRAIN (Sharpe -0.264 < 1.729 (med=4.103 - 1*std=2.374))
+    Train: 2022-02-28→2024-02-27 (499d) Val: 2024-03-06→2024-04-05 (22d)
+    Ep  0 | Train IR2: 0.0714 Val IR2: 0.0000 | Val ARC: -13.9% | α: 0.001 | 59.4s
+    Ep  1 | Train IR2: 0.1716 Val IR2: 0.0000 | Val ARC: -14.5% | α: 0.001 | 76.1s
+    Ep  2 | Train IR2: 0.0123 Val IR2: 0.0000 | Val ARC: -14.2% | α: 0.001 | 77.2s
+    Ep  3 | Train IR2: 0.0108 Val IR2: 0.0000 | Val ARC: -14.1% | α: 0.002 | 77.3s
+    Ep  4 | Train IR2: 0.0010 Val IR2: 0.0000 | Val ARC: -14.5% | α: 0.002 | 77.9s
+    Ep  5 | Train IR2: 0.0841 Val IR2: 0.0000 | Val ARC: -14.6% | α: 0.002 | 77.5s
+    Ep  6 | Train IR2: 0.1144 Val IR2: 0.0000 | Val ARC: -13.4% | α: 0.002 | 77.4s
+    Ep  7 | Train IR2: 0.0740 Val IR2: 0.0000 | Val ARC: -14.4% | α: 0.003 | 77.7s
+    Ep  8 | Train IR2: 0.0876 Val IR2: 0.0000 | Val ARC: -13.3% | α: 0.003 | 77.9s
+    Ep  9 | Train IR2: 0.0362 Val IR2: 0.0000 | Val ARC: -15.1% | α: 0.003 | 78.6s
+    Ep 10 | Train IR2: 0.0385 Val IR2: 0.0000 | Val ARC: -13.9% | α: 0.004 | 78.0s
+    Ep 11 | Train IR2: 0.0735 Val IR2: 0.0000 | Val ARC: -14.0% | α: 0.005 | 78.0s
+    Ep 12 | Train IR2: 0.0726 Val IR2: 0.0000 | Val ARC: -13.7% | α: 0.005 | 78.1s
+    Ep 13 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -14.5% | α: 0.006 | 77.5s
+    Ep 14 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -14.4% | α: 0.007 | 77.4s
+    Early stop at epoch 14 (best: 8)
+    Test: 2024-04-08→2024-05-03 → IR2: 0.0000, ARC: -34.3%
+
+  Fold 13/33 | RETRAIN (Sharpe -0.692 < 1.731 (med=4.103 - 1*std=2.372))
+    Train: 2022-03-28→2024-03-27 (500d) Val: 2024-04-04→2024-05-03 (22d)
+    Ep  0 | Train IR2: 0.0708 Val IR2: 0.0000 | Val ARC: -22.9% | α: 0.001 | 60.3s
+    Ep  1 | Train IR2: 0.0466 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.001 | 77.3s
+    Ep  2 | Train IR2: 0.0146 Val IR2: 0.0000 | Val ARC: -22.9% | α: 0.001 | 77.7s
+    Ep  3 | Train IR2: 0.0646 Val IR2: 0.0000 | Val ARC: -22.8% | α: 0.002 | 77.2s
+    Ep  4 | Train IR2: 0.0425 Val IR2: 0.0000 | Val ARC: -22.9% | α: 0.002 | 77.6s
+    Ep  5 | Train IR2: 0.0396 Val IR2: 0.0000 | Val ARC: -23.2% | α: 0.002 | 77.7s
+    Ep  6 | Train IR2: 0.0122 Val IR2: 0.0000 | Val ARC: -23.2% | α: 0.002 | 77.4s
+    Ep  7 | Train IR2: 0.1114 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.003 | 77.3s
+    Ep  8 | Train IR2: 0.0224 Val IR2: 0.0000 | Val ARC: -22.7% | α: 0.003 | 77.0s
+    Ep  9 | Train IR2: 0.0342 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.004 | 77.2s
+    Ep 10 | Train IR2: 0.0214 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.005 | 77.0s
+    Ep 11 | Train IR2: 0.0224 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.005 | 77.6s
+    Ep 12 | Train IR2: 0.0202 Val IR2: 0.0000 | Val ARC: -22.2% | α: 0.006 | 77.8s
+    Ep 13 | Train IR2: 0.0060 Val IR2: 0.0000 | Val ARC: -21.9% | α: 0.007 | 77.5s
+    Ep 14 | Train IR2: 0.0025 Val IR2: 0.0000 | Val ARC: -22.1% | α: 0.009 | 78.3s
+    Ep 15 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -22.2% | α: 0.010 | 77.6s
+    Ep 16 | Train IR2: 0.0002 Val IR2: 0.0000 | Val ARC: -21.9% | α: 0.012 | 77.5s
+    Ep 17 | Train IR2: 0.0172 Val IR2: 0.0000 | Val ARC: -21.8% | α: 0.014 | 77.3s
+    Ep 18 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.8% | α: 0.016 | 77.8s
+    Ep 19 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.6% | α: 0.019 | 77.3s
+    Ep 20 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.5% | α: 0.022 | 77.2s
+    Ep 21 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.026 | 77.9s
+    Ep 22 | Train IR2: 0.0011 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.031 | 77.5s
+    Ep 23 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.036 | 78.1s
+    Ep 24 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.043 | 77.3s
+    Ep 25 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.050 | 77.0s
+    Ep 26 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.059 | 77.1s
+    Ep 27 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.069 | 77.2s
+    Ep 28 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.081 | 77.7s
+    Ep 29 | Train IR2: 0.0000 Val IR2: 0.0000 | Val ARC: -21.4% | α: 0.095 | 78.2s
+    Test: 2024-05-06→2024-06-03 → IR2: 1.1240, ARC: +5.2%
+  Fold 14/33 | CARRY (Sharpe: 0.254) → Test IR2: 35.5736, ARC: +12.5%
+  Fold 15/33 | CARRY (Sharpe: 5.150) → Test IR2: 0.0000, ARC: -36.4%
+
+  Fold 16/33 | RETRAIN (Sharpe -3.926 < -1.909 (med=0.254 - 1*std=2.163))
+    Train: 2022-06-28→2024-06-27 (500d) Val: 2024-07-05→2024-08-02 (21d)
+    Ep  0 | Train IR2: 0.4642 Val IR2: 0.0000 | Val ARC: -36.9% | α: 0.001 | 61.5s
+    Ep  1 | Train IR2: 0.7800 Val IR2: 0.0000 | Val ARC: -36.6% | α: 0.001 | 73.4s
+    Ep  2 | Train IR2: 0.8099 Val IR2: 0.0000 | Val ARC: -37.5% | α: 0.001 | 73.3s
+    Ep  3 | Train IR2: 0.8237 Val IR2: 0.0000 | Val ARC: -37.4% | α: 0.002 | 73.1s
+    Ep  4 | Train IR2: 0.8013 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.002 | 72.9s
+    Ep  5 | Train IR2: 0.8372 Val IR2: 0.0000 | Val ARC: -36.5% | α: 0.002 | 73.0s
+    Ep  6 | Train IR2: 0.8098 Val IR2: 0.0000 | Val ARC: -36.5% | α: 0.003 | 72.9s
+    Ep  7 | Train IR2: 0.8035 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.003 | 73.4s
+    Ep  8 | Train IR2: 0.7920 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.004 | 72.7s
+    Ep  9 | Train IR2: 0.7925 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.005 | 72.5s
+    Ep 10 | Train IR2: 0.7608 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.005 | 72.3s
+    Ep 11 | Train IR2: 0.7732 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.006 | 72.6s
+    Ep 12 | Train IR2: 0.6975 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.007 | 72.3s
+    Ep 13 | Train IR2: 0.7795 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.009 | 71.8s
+    Ep 14 | Train IR2: 0.6773 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.010 | 72.5s
+    Ep 15 | Train IR2: 0.6746 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.012 | 72.4s
+    Ep 16 | Train IR2: 0.5238 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.014 | 71.9s
+    Ep 17 | Train IR2: 0.5020 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.016 | 72.7s
+    Ep 18 | Train IR2: 0.4216 Val IR2: 0.0000 | Val ARC: -36.4% | α: 0.019 | 72.3s
+    Early stop at epoch 18 (best: 13)
+    Test: 2024-08-05→2024-09-04 → IR2: 103.0874, ARC: +87.1%
+  Fold 17/33 | CARRY (Sharpe: 3.385) → Test IR2: 75.7118, ARC: +43.6%
+  Fold 18/33 | CARRY (Sharpe: 2.492) → Test IR2: 0.0000, ARC: -16.1%
+  Fold 19/33 | CARRY (Sharpe: 0.173) → Test IR2: 94.5826, ARC: +83.4%
+  Fold 20/33 | CARRY (Sharpe: 3.945) → Test IR2: 0.0000, ARC: -54.6%
+
+  Fold 21/33 | RETRAIN (Sharpe -2.641 < -0.382 (med=2.492 - 1*std=2.874))
+    Train: 2022-11-28→2024-11-27 (501d) Val: 2024-12-05→2025-01-03 (19d)
+    Ep  0 | Train IR2: 1.9635 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.001 | 69.2s
+    Ep  1 | Train IR2: 1.9868 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.001 | 84.6s
+    Ep  2 | Train IR2: 1.9236 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.002 | 83.6s
+    Ep  3 | Train IR2: 1.9088 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.002 | 83.4s
+    Ep  4 | Train IR2: 1.9633 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.002 | 83.8s
+    Ep  5 | Train IR2: 1.7746 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.003 | 84.5s
+    Ep  6 | Train IR2: 1.7881 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.003 | 84.4s
+    Ep  7 | Train IR2: 1.8139 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.004 | 83.7s
+    Ep  8 | Train IR2: 1.8010 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.004 | 83.4s
+    Ep  9 | Train IR2: 1.5441 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.005 | 82.9s
+    Ep 10 | Train IR2: 1.7249 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.006 | 84.0s
+    Ep 11 | Train IR2: 1.6879 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.007 | 83.9s
+    Ep 12 | Train IR2: 1.3725 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.009 | 83.7s
+    Ep 13 | Train IR2: 1.4931 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.010 | 83.5s
+    Ep 14 | Train IR2: 1.4682 Val IR2: 0.0000 | Val ARC: -51.9% | α: 0.012 | 84.1s
+    Early stop at epoch 14 (best: 1)
+    Test: 2025-01-06→2025-02-04 → IR2: 58.2807, ARC: +42.0%
+  Fold 22/33 | CARRY (Sharpe: 2.789) → Test IR2: 0.0000, ARC: -23.8%
+
+  Fold 23/33 | RETRAIN (Sharpe -2.480 < 0.150 (med=2.492 - 1*std=2.342))
+    Train: 2023-01-30→2025-01-27 (495d) Val: 2025-02-04→2025-03-03 (19d)
+    Ep  0 | Train IR2: 1.5135 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.001 | 62.7s
+    Ep  1 | Train IR2: 1.4962 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.001 | 82.2s
+    Ep  2 | Train IR2: 1.5058 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.001 | 83.2s
+    Ep  3 | Train IR2: 1.4396 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.002 | 82.4s
+    Ep  4 | Train IR2: 1.3901 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.002 | 82.9s
+    Ep  5 | Train IR2: 1.4632 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.002 | 82.5s
+    Ep  6 | Train IR2: 1.1703 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.003 | 83.3s
+    Ep  7 | Train IR2: 1.6683 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.003 | 83.7s
+    Ep  8 | Train IR2: 0.7614 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.004 | 82.8s
+    Ep  9 | Train IR2: 0.8526 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.005 | 82.1s
+    Ep 10 | Train IR2: 1.2389 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.005 | 82.2s
+    Ep 11 | Train IR2: 0.7427 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.006 | 82.6s
+    Ep 12 | Train IR2: 0.8752 Val IR2: 0.0000 | Val ARC: -23.8% | α: 0.007 | 82.5s
+    Ep 13 | Train IR2: 0.8738 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.008 | 82.9s
+    Ep 14 | Train IR2: 1.2229 Val IR2: 0.0000 | Val ARC: -23.9% | α: 0.010 | 82.7s
+    Early stop at epoch 14 (best: 3)
+    Test: 2025-03-04→2025-04-03 → IR2: 0.0000, ARC: -35.2%
+
+  Fold 24/33 | RETRAIN (Sharpe -4.876 < -2.505 (med=0.173 - 1*std=2.678))
+    Train: 2023-02-28→2025-02-27 (497d) Val: 2025-03-07→2025-04-04 (21d)
+    Ep  0 | Train IR2: 1.4792 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.001 | 63.6s
+    Ep  1 | Train IR2: 1.5354 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.001 | 82.8s
+    Ep  2 | Train IR2: 1.4927 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.002 | 83.5s
+    Ep  3 | Train IR2: 1.4668 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.002 | 83.7s
+    Ep  4 | Train IR2: 1.4394 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.002 | 83.0s
+    Ep  5 | Train IR2: 1.4148 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.002 | 83.2s
+    Ep  6 | Train IR2: 1.3482 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.003 | 83.4s
+    Ep  7 | Train IR2: 1.2417 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.003 | 82.9s
+    Ep  8 | Train IR2: 1.3185 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.004 | 82.3s
+    Ep  9 | Train IR2: 1.1783 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.005 | 83.2s
+    Ep 10 | Train IR2: 1.2645 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.005 | 82.9s
+    Ep 11 | Train IR2: 1.0549 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.006 | 84.0s
+    Ep 12 | Train IR2: 1.1109 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.007 | 83.9s
+    Ep 13 | Train IR2: 1.0931 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.009 | 83.5s
+    Ep 14 | Train IR2: 1.0018 Val IR2: 0.0000 | Val ARC: -58.7% | α: 0.010 | 83.2s
+    Early stop at epoch 14 (best: 6)
+    Test: 2025-04-07→2025-05-06 → IR2: 612.1364, ARC: +380.0%
+  Fold 25/33 | CARRY (Sharpe: 3.989) → Test IR2: 126.9655, ARC: +79.4%
+  Fold 26/33 | CARRY (Sharpe: 4.285) → Test IR2: 142.4248, ARC: +59.4%
+  Fold 27/33 | CARRY (Sharpe: 4.186) → Test IR2: 0.0000, ARC: -7.0%
+
+  Fold 28/33 | RETRAIN (Sharpe -0.656 < 0.077 (med=3.989 - 1*std=3.912))
+    Train: 2023-06-28→2025-06-27 (497d) Val: 2025-07-07→2025-08-04 (21d)
+    Ep  0 | Train IR2: 0.4916 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.001 | 66.3s
+    Ep  1 | Train IR2: 0.4933 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.001 | 82.7s
+    Ep  2 | Train IR2: 0.4818 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.002 | 83.6s
+    Ep  3 | Train IR2: 0.4718 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.002 | 83.1s
+    Ep  4 | Train IR2: 0.4506 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.002 | 84.0s
+    Ep  5 | Train IR2: 0.4291 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.003 | 84.0s
+    Ep  6 | Train IR2: 0.4544 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.003 | 83.8s
+    Ep  7 | Train IR2: 0.4287 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.004 | 83.3s
+    Ep  8 | Train IR2: 0.4080 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.004 | 83.6s
+    Ep  9 | Train IR2: 0.3853 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.005 | 83.9s
+    Ep 10 | Train IR2: 0.3522 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.006 | 83.4s
+    Ep 11 | Train IR2: 0.3632 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.007 | 83.5s
+    Ep 12 | Train IR2: 0.2899 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.009 | 84.1s
+    Ep 13 | Train IR2: 0.3202 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.010 | 83.6s
+    Ep 14 | Train IR2: 0.2842 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.012 | 83.7s
+    Ep 15 | Train IR2: 0.2301 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.014 | 83.8s
+    Ep 16 | Train IR2: 0.2454 Val IR2: 0.0000 | Val ARC: -22.3% | α: 0.017 | 83.7s
+    Ep 17 | Train IR2: 0.1632 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.020 | 83.7s
+    Ep 18 | Train IR2: 0.1384 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.024 | 84.2s
+    Ep 19 | Train IR2: 0.1579 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.028 | 83.9s
+    Ep 20 | Train IR2: 0.0921 Val IR2: 0.0000 | Val ARC: -22.3% | α: 0.034 | 84.1s
+    Ep 21 | Train IR2: 0.1773 Val IR2: 0.0000 | Val ARC: -22.3% | α: 0.040 | 84.2s
+    Ep 22 | Train IR2: 0.0819 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.048 | 84.0s
+    Ep 23 | Train IR2: 0.0529 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.057 | 83.7s
+    Ep 24 | Train IR2: 0.0172 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.067 | 83.2s
+    Ep 25 | Train IR2: 0.0308 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.080 | 83.7s
+    Ep 26 | Train IR2: 0.0406 Val IR2: 0.0000 | Val ARC: -22.4% | α: 0.094 | 83.2s
+    Early stop at epoch 26 (best: 21)
+    Test: 2025-08-05→2025-09-04 → IR2: 2.0109, ARC: +6.3%
+
+  Fold 29/33 | RETRAIN (Sharpe -0.173 < 0.344 (med=3.989 - 1*std=3.644))
+    Train: 2023-07-28→2025-07-25 (495d) Val: 2025-08-04→2025-09-03 (22d)
+    Ep  0 | Train IR2: 0.2757 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.001 | 66.2s
+    Ep  1 | Train IR2: 0.3648 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.001 | 81.1s
+    Ep  2 | Train IR2: 0.3492 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.002 | 81.4s
+    Ep  3 | Train IR2: 0.3356 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.002 | 82.1s
+    Ep  4 | Train IR2: 0.3360 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.002 | 83.8s
+    Ep  5 | Train IR2: 0.3444 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.003 | 83.7s
+    Ep  6 | Train IR2: 0.3498 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.003 | 83.6s
+    Ep  7 | Train IR2: 0.3138 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.004 | 82.8s
+    Ep  8 | Train IR2: 0.2950 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.004 | 81.8s
+    Ep  9 | Train IR2: 0.3035 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.005 | 81.2s
+    Ep 10 | Train IR2: 0.2960 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.006 | 81.6s
+    Ep 11 | Train IR2: 0.2692 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.007 | 80.9s
+    Ep 12 | Train IR2: 0.2476 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.009 | 81.0s
+    Ep 13 | Train IR2: 0.1888 Val IR2: 0.0000 | Val ARC: -2.1% | α: 0.010 | 81.3s
+    Ep 14 | Train IR2: 0.2133 Val IR2: 0.0000 | Val ARC: -2.2% | α: 0.012 | 82.2s
+    Early stop at epoch 14 (best: 7)
+    Test: 2025-09-04→2025-10-03 → IR2: 679.8446, ARC: +74.0%
+  Fold 30/33 | CARRY (Sharpe: 6.844) → Test IR2: 1.6417, ARC: +9.8%
+
+  Fold 31/33 | RETRAIN (Sharpe -0.392 < 1.315 (med=4.186 - 1*std=2.871))
+    Train: 2023-09-28→2025-09-26 (496d) Val: 2025-10-06→2025-11-04 (22d)
+    Ep  0 | Train IR2: 0.6913 Val IR2: 1.4158 | Val ARC: +9.2% | α: 0.001 | 68.7s
+    Ep  1 | Train IR2: 0.7215 Val IR2: 1.4149 | Val ARC: +9.2% | α: 0.001 | 81.7s
+    Ep  2 | Train IR2: 0.6881 Val IR2: 1.4099 | Val ARC: +9.2% | α: 0.002 | 82.6s
+    Ep  3 | Train IR2: 0.6808 Val IR2: 1.4237 | Val ARC: +9.2% | α: 0.002 | 83.8s
+    Ep  4 | Train IR2: 0.6578 Val IR2: 1.4182 | Val ARC: +9.2% | α: 0.002 | 82.6s
+    Ep  5 | Train IR2: 0.6510 Val IR2: 1.4180 | Val ARC: +9.2% | α: 0.003 | 83.0s
+    Ep  6 | Train IR2: 0.6393 Val IR2: 1.4120 | Val ARC: +9.2% | α: 0.003 | 83.2s
+    Ep  7 | Train IR2: 0.6815 Val IR2: 1.4040 | Val ARC: +9.2% | α: 0.004 | 83.8s
+    Ep  8 | Train IR2: 0.6156 Val IR2: 1.4122 | Val ARC: +9.2% | α: 0.005 | 82.2s
+    Ep  9 | Train IR2: 0.3746 Val IR2: 1.4195 | Val ARC: +9.2% | α: 0.006 | 82.6s
+    Ep 10 | Train IR2: 0.5450 Val IR2: 1.4011 | Val ARC: +9.2% | α: 0.007 | 83.2s
+    Ep 11 | Train IR2: 0.4649 Val IR2: 1.4188 | Val ARC: +9.2% | α: 0.008 | 83.1s
+    Ep 12 | Train IR2: 0.5241 Val IR2: 1.4291 | Val ARC: +9.3% | α: 0.010 | 83.0s
+    Ep 13 | Train IR2: 0.4452 Val IR2: 1.4216 | Val ARC: +9.2% | α: 0.012 | 82.5s
+    Ep 14 | Train IR2: 0.3831 Val IR2: 1.4184 | Val ARC: +9.2% | α: 0.014 | 83.7s
+    Ep 15 | Train IR2: 0.3719 Val IR2: 1.4083 | Val ARC: +9.2% | α: 0.017 | 82.1s
+    Ep 16 | Train IR2: 0.4226 Val IR2: 1.4271 | Val ARC: +9.3% | α: 0.020 | 82.8s
+    Ep 17 | Train IR2: 0.2579 Val IR2: 1.4243 | Val ARC: +9.2% | α: 0.024 | 82.3s
+    Early stop at epoch 17 (best: 12)
+    Test: 2025-11-05→2025-12-04 → IR2: 4.8727, ARC: +17.7%
+  Fold 32/33 | CARRY (Sharpe: 2.048) → Test IR2: 0.0000, ARC: -5.6%
+  Fold 33/33 | CARRY (Sharpe: -2.145) → Test IR2: 0.0000, ARC: -16.7%
+
+======================================================================
+STITCHING TEST RETURNS
+======================================================================
+
+  OOS: 2023-05-08 → 2026-02-04
+  Days: 650, Retrains: 12/33
+
+  METRIC                            RL        QQQ
+  -----------------------------------------------
+  ARC (%)                      17.6200    27.9592
+  ASD (%)                      17.0709    19.5031
+  Max Drawdown (%)             15.7139    18.2037
+  IR1                           1.0322     1.4336
+  IR2                           1.1574     2.2019
+  Sharpe                        1.0436     1.3284
+  Sortino                       1.6017     1.8846
+
+  All saved to ../Results
+
+
+Total time: 356.5 minutes
+============================================================
+OUT-OF-SAMPLE PERFORMANCE
+============================================================
+          Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+RL Agent              52.5185  17.6200  17.0709           15.7139       0.2143  1.0322  1.1574  1.0436   1.6017  1.1213   650.0                  1.6502
+QQQ                   85.7581  27.9592  19.5031           18.2037       0.3769  1.4336  2.2019  1.3284   1.8846  1.5359   650.0                     NaN
+Retrains: 12 / 33 folds
+    fold_id train_start   train_end   val_start     val_end  test_start    test_end  n_train  n_test  retrained    val_ir2  val_sharpe  test_ir2  test_arc  test_mdd  test_sharpe  test_sortino  test_n_trades  test_total_tc  test_cash
+0         1  2021-03-29  2023-03-28  2023-04-05  2023-05-04  2023-05-05  2023-06-02      502      20       True     0.0000     -1.7577  179.5713     72.74      1.98       4.9718       11.7282             19         0.0210       0.38
+1         2  2021-04-29  2023-04-28  2023-05-08  2023-06-05  2023-06-06  2023-07-05      502      19      False   289.2649      4.5999   55.4004     50.75      3.38       3.5143        7.1847             18         0.0176       0.50
+2         3  2021-06-01  2023-05-26  2023-06-05  2023-06-30  2023-07-05  2023-08-04      500      23      False    24.3585      3.4129   19.0058     29.28      3.10       1.4620        1.9891             22         0.0242       0.48
+3         4  2021-06-29  2023-06-28  2023-07-06  2023-08-04  2023-08-07  2023-09-05      501      21      False    61.0571      2.6097    0.0000     -3.05      3.48      -0.4410       -0.7463             19         0.0169       0.42
+4         5  2021-07-29  2023-07-28  2023-08-07  2023-09-01  2023-09-05  2023-10-04      500      22       True     0.0000     -0.1342    0.0000    -50.67      5.88      -4.5129       -6.0200             12         0.0112       0.00
+5         6  2021-08-30  2023-08-28  2023-09-05  2023-10-04  2023-10-05  2023-11-03      499      22       True     0.0000     -4.4043    0.0000     -6.66      7.63       0.8029        1.5460             21         0.0257       0.00
+6         7  2021-09-29  2023-09-28  2023-10-06  2023-11-03  2023-11-06  2023-12-05      500      20      False     0.0000     -0.2698  763.0774    124.81      1.37       5.3923       24.8912             18         0.0157       0.00
+7         8  2021-10-29  2023-10-27  2023-11-06  2023-12-04  2023-12-05  2024-01-04      499      21      False  1173.8900      5.9343  185.5128     87.02      3.23       4.7590        7.7636             18         0.0205       0.00
+8         9  2021-11-29  2023-11-28  2023-12-06  2024-01-05  2024-01-08  2024-02-05      500      20      False   113.0772      4.1034  192.6147     49.69      1.36       3.9236        8.5395             18         0.0137       0.00
+9        10  2021-12-29  2023-12-28  2024-01-05  2024-02-02  2024-02-05  2024-03-04      500      20      False   419.4957      6.0315   65.5220     52.77      2.52       2.3940        3.7718             19         0.0177       0.00
+10       11  2022-01-31  2024-01-26  2024-02-05  2024-03-04  2024-03-05  2024-04-04      497      22      False    65.7606      2.3383    6.0701     14.30      2.83      -0.2628       -0.4812             21         0.0167       0.00
+11       12  2022-02-28  2024-02-27  2024-03-06  2024-04-05  2024-04-08  2024-05-03      499      20       True     0.0000     -0.2645    0.0000    -34.29      5.96      -1.6948       -2.9924             19         0.0300       0.00
+12       13  2022-03-28  2024-03-27  2024-04-04  2024-05-03  2024-05-06  2024-06-03      500      20       True     0.0000     -0.6916    1.1240      5.16      2.71       0.2485        0.3570             15         0.0121       0.01
+13       14  2022-04-28  2024-04-26  2024-05-06  2024-06-04  2024-06-05  2024-07-02      499      19      False     0.1200      0.2541   35.5736     12.51      0.66       3.7250        9.1713             16         0.0128       0.01
+14       15  2022-05-31  2024-05-24  2024-06-04  2024-07-02  2024-07-05  2024-08-02      497      21      False   215.7146      5.1503    0.0000    -36.42      8.58      -4.0299       -5.8199             19         0.0184       0.01
+15       16  2022-06-28  2024-06-27  2024-07-05  2024-08-02  2024-08-05  2024-09-04      500      22       True     0.0000     -3.9259  103.0874     87.10      3.64       2.9817        5.5646             17         0.0144       0.00
+16       17  2022-07-28  2024-07-26  2024-08-05  2024-09-03  2024-09-04  2024-10-03      498      22      False   411.7331      3.3847   75.7118     43.64      1.89       2.5530        3.8706             16         0.0131       0.00
+17       18  2022-08-29  2024-08-27  2024-09-04  2024-10-03  2024-10-04  2024-11-01      498      21      False    75.7993      2.4925    0.0000    -16.05      3.77      -0.6092       -0.9186             14         0.0127       0.00
+18       19  2022-09-28  2024-09-27  2024-10-07  2024-11-04  2024-11-05  2024-12-04      499      20      False     0.0510      0.1731   94.5826     83.37      3.98       4.0375        5.7684             19         0.0156       0.00
+19       20  2022-10-28  2024-10-25  2024-11-04  2024-12-03  2024-12-04  2025-01-03      497      20      False   158.3839      3.9453    0.0000    -54.62      5.88      -3.2308       -6.0223             14         0.0147       0.00
+20       21  2022-11-28  2024-11-27  2024-12-05  2025-01-03  2025-01-06  2025-02-04      501      20       True     0.0000     -2.6415   58.2807     42.03      2.24       3.0010        5.9476             19         0.0142       0.00
+21       22  2022-12-28  2024-12-27  2025-01-06  2025-02-03  2025-02-04  2025-03-03      498      19      False    85.2614      2.7886    0.0000    -23.84      5.74      -2.5515       -3.7975             18         0.0138       0.00
+22       23  2023-01-30  2025-01-27  2025-02-04  2025-03-03  2025-03-04  2025-04-03      495      23       True     0.0000     -2.4801    0.0000    -35.16      8.68      -3.7392       -4.5130             20         0.0167       0.00
+23       24  2023-02-28  2025-02-27  2025-03-07  2025-04-04  2025-04-07  2025-05-06      497      21       True     0.0000     -4.8762  612.1364    380.05      5.17       3.5936        8.8422             17         0.0158       0.00
+24       25  2023-03-28  2025-03-27  2025-04-04  2025-05-02  2025-05-05  2025-06-03      497      21      False   448.2783      3.9888  126.9655     79.43      2.82       4.3420        9.2142             17         0.0197       0.00
+25       26  2023-04-28  2025-04-25  2025-05-05  2025-06-04  2025-06-05  2025-07-02      495      19      False   201.3805      4.2851  142.4248     59.36      2.05       4.6039        7.8946             12         0.0109       0.00
+26       27  2023-05-30  2025-05-27  2025-06-04  2025-07-02  2025-07-07  2025-08-01      495      20      False   116.0682      4.1862    0.0000     -7.01      3.75      -2.6362       -3.1100             16         0.0125       0.00
+27       28  2023-06-28  2025-06-27  2025-07-07  2025-08-04  2025-08-05  2025-09-04      497      22       True     0.0000     -0.6562    2.0109      6.33      1.76       1.4275        3.5549             18         0.0140       0.00
+28       29  2023-07-28  2025-07-25  2025-08-04  2025-09-03  2025-09-04  2025-10-03      495      22       True     0.0000     -0.1732  679.8446     74.00      1.00       7.0131       18.5897             20         0.0147       0.00
+29       30  2023-08-28  2025-08-27  2025-09-04  2025-10-03  2025-10-06  2025-11-03      497      21      False   679.9713      6.8439    1.6417      9.82      3.57       0.6714        0.8490             19         0.0148       0.00
+30       31  2023-09-28  2025-09-26  2025-10-06  2025-11-04  2025-11-05  2025-12-04      496      20       True     1.4291     -0.3916    4.8727     17.72      4.41       1.0833        1.6924             19         0.0147       0.00
+31       32  2023-10-30  2025-10-27  2025-11-04  2025-12-03  2025-12-04  2026-01-02      495      19      False     5.9948      2.0484    0.0000     -5.62      2.37      -0.7324       -1.3652             12         0.0105       0.00
+32       33  2023-11-28  2025-11-26  2025-12-05  2026-01-02  2026-01-05  2026-02-04      498      22      False     0.0000     -2.1447    0.0000    -16.72      4.35      -0.9027       -1.2839             21         0.0201       0.00
+                      ARC (%)  ASD (%)  Max Drawdown (%)     IR1     IR2
+RL Agent              17.6200  17.0709           15.7139  1.0322  1.1574
+QQQ Buy-and-Hold      14.9126  22.4795           35.1187  0.6634  0.2817
+Inverse Volatility     8.0979  20.3985           32.2320  0.3970  0.0997
+Equal-Weight Monthly   8.0377  20.2418           32.5878  0.3971  0.0979
+Momentum Top-20%       5.3805  22.5546           38.6482  0.2386  0.0332
+Supervised + MVO      -3.7547  22.9542           44.9105  0.0000  0.0000
+RL files in ../Results/:
+  agent_checkpoint.pt                             6828.8 KB
+  agent_final.pt                                  6827.1 KB
+  rl_daily_returns_oos.csv                          34.5 KB
+  rl_equity_oos.csv                                 30.8 KB
+  rl_fold_10_qqq_returns.csv                         0.6 KB
+  rl_fold_10_test_returns.csv                        0.6 KB
+  rl_fold_11_qqq_returns.csv                         0.7 KB
+  rl_fold_11_test_returns.csv                        0.7 KB
+  rl_fold_12_qqq_returns.csv                         0.6 KB
+  rl_fold_12_test_returns.csv                        0.6 KB
+  rl_fold_13_qqq_returns.csv                         0.6 KB
+  rl_fold_13_test_returns.csv                        0.6 KB
+  rl_fold_14_qqq_returns.csv                         0.6 KB
+  rl_fold_14_test_returns.csv                        0.6 KB
+  rl_fold_15_qqq_returns.csv                         0.7 KB
+  rl_fold_15_test_returns.csv                        0.7 KB
+  rl_fold_16_qqq_returns.csv                         0.7 KB
+  rl_fold_16_test_returns.csv                        0.7 KB
+  rl_fold_17_qqq_returns.csv                         0.7 KB
+  rl_fold_17_test_returns.csv                        0.7 KB
+  rl_fold_18_qqq_returns.csv                         0.7 KB
+  rl_fold_18_test_returns.csv                        0.7 KB
+  rl_fold_19_qqq_returns.csv                         0.6 KB
+  rl_fold_19_test_returns.csv                        0.6 KB
+  rl_fold_1_qqq_returns.csv                          0.6 KB
+  rl_fold_1_test_returns.csv                         0.6 KB
+  rl_fold_20_qqq_returns.csv                         0.6 KB
+  rl_fold_20_test_returns.csv                        0.6 KB
+  rl_fold_21_qqq_returns.csv                         0.6 KB
+  rl_fold_21_test_returns.csv                        0.6 KB
+  rl_fold_22_qqq_returns.csv                         0.6 KB
+  rl_fold_22_test_returns.csv                        0.6 KB
+  rl_fold_23_qqq_returns.csv                         0.7 KB
+  rl_fold_23_test_returns.csv                        0.7 KB
+  rl_fold_24_qqq_returns.csv                         0.6 KB
+  rl_fold_24_test_returns.csv                        0.7 KB
+  rl_fold_25_qqq_returns.csv                         0.6 KB
+  rl_fold_25_test_returns.csv                        0.7 KB
+  rl_fold_26_qqq_returns.csv                         0.6 KB
+  rl_fold_26_test_returns.csv                        0.6 KB
+  rl_fold_27_qqq_returns.csv                         0.6 KB
+  rl_fold_27_test_returns.csv                        0.6 KB
+  rl_fold_28_qqq_returns.csv                         0.7 KB
+  rl_fold_28_test_returns.csv                        0.7 KB
+  rl_fold_29_qqq_returns.csv                         0.7 KB
+  rl_fold_29_test_returns.csv                        0.7 KB
+  rl_fold_2_qqq_returns.csv                          0.6 KB
+  rl_fold_2_test_returns.csv                         0.6 KB
+  rl_fold_30_qqq_returns.csv                         0.7 KB
+  rl_fold_30_test_returns.csv                        0.7 KB
+  rl_fold_31_qqq_returns.csv                         0.6 KB
+  rl_fold_31_test_returns.csv                        0.6 KB
+  rl_fold_32_qqq_returns.csv                         0.6 KB
+  rl_fold_32_test_returns.csv                        0.6 KB
+  rl_fold_33_qqq_returns.csv                         0.7 KB
+  rl_fold_33_test_returns.csv                        0.7 KB
+  rl_fold_3_qqq_returns.csv                          0.7 KB
+  rl_fold_3_test_returns.csv                         0.7 KB
+  rl_fold_4_qqq_returns.csv                          0.7 KB
+  rl_fold_4_test_returns.csv                         0.7 KB
+  rl_fold_5_qqq_returns.csv                          0.7 KB
+  rl_fold_5_test_returns.csv                         0.7 KB
+  rl_fold_6_qqq_returns.csv                          0.7 KB
+  rl_fold_6_test_returns.csv                         0.7 KB
+  rl_fold_7_qqq_returns.csv                          0.6 KB
+  rl_fold_7_test_returns.csv                         0.6 KB
+  rl_fold_8_qqq_returns.csv                          0.6 KB
+  rl_fold_8_test_returns.csv                         0.7 KB
+  rl_fold_9_qqq_returns.csv                          0.6 KB
+  rl_fold_9_test_returns.csv                         0.6 KB
+  rl_fold_log.csv                                    4.8 KB
+  rl_performance_metrics.csv                         0.3 KB
+  rl_wfo_config.json                                 0.3 KB
+  wfo_checkpoint.json                               19.3 KB
+  wfo_folds_plot.html                             4781.6 KB

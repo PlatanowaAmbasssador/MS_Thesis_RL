@@ -596,10 +596,10 @@ def print_comparison_table(all_results: dict) -> None:
         reverse=True,
     )
 
-    print("\n" + "=" * 95)
+    print("\n" + "=" * 130)
     print(f"{'STRATEGY':<25} {'ARC%':>7} {'ASD%':>7} {'MDD%':>7} "
-          f"{'MLD':>6} {'IR1':>7} {'IR2':>7} {'TO%':>7}")
-    print("=" * 95)
+          f"{'MLD':>6} {'IR1':>7} {'IR2':>7} {'Sharpe':>7} {'Sortino':>8} {'Calmar':>7} {'TO%':>7}")
+    print("=" * 130)
 
     for name, res in sorted_results:
         m = res["metrics"]
@@ -611,8 +611,11 @@ def print_comparison_table(all_results: dict) -> None:
             f"{m['MLD (years)']:>5.2f} "
             f"{m['IR1']:>6.3f} "
             f"{m['IR2']:>6.4f} "
+            f"{m.get('Sharpe', 0):>6.3f} "
+            f"{m.get('Sortino', 0):>7.3f} "
+            f"{m.get('Calmar', 0):>6.3f} "
             f"{m.get('Avg Daily Turnover (%)', 0):>6.2f}"
         )
 
-    print("=" * 95)
+    print("=" * 130)
     print("  (Sorted by IR2 — primary optimization target)")

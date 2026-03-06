@@ -1,15 +1,13 @@
 """
-train.py — Walk-Forward Optimization for SAC Portfolio Agent (v2)
+train.py — Walk-Forward Optimization for SAC Portfolio Agent (v3)
 ==================================================================
 Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
 
-Key changes from v1:
-    - SLIDING (non-anchored) training window — fixed width, moves forward
-    - Checkpoint-resume: saves state after each fold, auto-resumes on restart
-    - 5 HP configs for fold-1 selection
-    - 5-day embargo between train end and val start
-    - Fine-tune on retrain (not fresh agent)
-    - Dirichlet policy + lookback state integration
+Key changes from v2:
+    - Full HP re-selection (10 configs) at EVERY retrain fold, not just fold 1
+    - Expanded HP grid: 10 configs covering model capacity, LR, and gamma
+    - select_hyperparameters returns trained agent (no redundant retraining)
+    - Calmar added to OOS summary printout
 """
 
 import numpy as np
@@ -288,56 +286,77 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 
 
 # =============================================================================
-# HP CONFIGS (5 configs)
+# HP CONFIGS (10 configs)
 # =============================================================================
 
 DEFAULT_HP_CONFIGS = [
-    {"name": "baseline",     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
-    {"name": "conservative", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
-    {"name": "large_model",  "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0},
-    {"name": "aggressive",   "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 64,  "n_attn_heads": 2, "variance_penalty": 0.0},
-    {"name": "high_cap_con", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "baseline",      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "conservative",  "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "large_model",   "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0},
+    {"name": "aggressive",    "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 64,  "n_attn_heads": 2, "variance_penalty": 0.0},
+    {"name": "high_cap_con",  "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "short_horizon", "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0, "gamma": 0.8},
+    {"name": "long_horizon",  "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0, "gamma": 0.95},
+    {"name": "tiny_fast",     "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 32,  "n_attn_heads": 2, "variance_penalty": 0.0},
+    {"name": "large_slow",    "lr_actor": 1e-4, "lr_critic": 1e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0, "gamma": 0.95},
+    {"name": "med_balanced",  "lr_actor": 2e-4, "lr_critic": 3e-4, "lstm_hidden": 96,  "n_attn_heads": 4, "variance_penalty": 0.0},
 ]
 
 
-def select_hyperparameters(dataset, first_fold, hp_configs, n_epochs=20,
+def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
                            patience=5, min_epochs=8, transaction_cost_bps=5.0,
-                           turnover_penalty=0.001, lookback_window=60, verbose=True):
-    print(f"\n  HP Selection on fold 1:")
-    print(f"    Train: {first_fold['train_start']} → {first_fold['train_end']} ({first_fold['n_train']}d)")
-    print(f"    Val:   {first_fold['val_start']} → {first_fold['val_end']} ({first_fold['n_val']}d)")
+                           turnover_penalty=0.001, lookback_window=60,
+                           variance_penalty=0.0, tc_curriculum_frac=0.0,
+                           verbose=True):
+    """Run all HP configs on a fold, return best config and trained agent."""
+    fold_id = fold.get("fold_id", "?")
+    print(f"\n  HP Selection on fold {fold_id}:")
+    print(f"    Train: {fold['train_start']} → {fold['train_end']} ({fold['n_train']}d)")
+    print(f"    Val:   {fold['val_start']} → {fold['val_end']} ({fold['n_val']}d)")
 
     results = []
+    best_agent = None
+    best_val_ir2 = -np.inf
+
     for hp in hp_configs:
-        print(f"\n    --- Config: {hp['name']} ---")
-        vp = hp.pop("variance_penalty", 0.5)
+        hp_copy = hp.copy()
+        print(f"\n    --- Config: {hp_copy['name']} ---")
+        vp = hp_copy.pop("variance_penalty", variance_penalty)
         config = {
             "n_asset_features": dataset["metadata"]["n_per_asset_features"],
             "n_global_features": dataset["metadata"]["n_global_features"],
-            **{k: v for k, v in hp.items() if k != "name"},
+            **{k: v for k, v in hp_copy.items() if k != "name"},
         }
         agent = SACAgent(config)
         result = train_agent(
             agent, dataset,
-            first_fold["train_start"], first_fold["train_end"],
-            first_fold["val_start"], first_fold["val_end"],
+            fold["train_start"], fold["train_end"],
+            fold["val_start"], fold["val_end"],
             n_epochs=n_epochs, patience=patience, min_epochs=min_epochs,
             transaction_cost_bps=transaction_cost_bps,
             turnover_penalty=turnover_penalty,
-            variance_penalty=vp, lookback_window=lookback_window, verbose=verbose,
+            variance_penalty=vp, tc_curriculum_frac=tc_curriculum_frac,
+            lookback_window=lookback_window, verbose=verbose,
         )
-        hp["variance_penalty"] = vp  # restore
-        results.append({"name": hp["name"], "config": hp, "val_ir2": result["best_val_ir2"],
+        val_ir2 = result["best_val_ir2"]
+        results.append({"name": hp["name"], "config": hp, "val_ir2": val_ir2,
                          "variance_penalty": vp})
-        print(f"    → Val IR2: {result['best_val_ir2']:.4f}")
-        del agent
+        print(f"    → Val IR2: {val_ir2:.4f}")
+
+        if val_ir2 > best_val_ir2:
+            if best_agent is not None:
+                del best_agent
+            best_val_ir2 = val_ir2
+            best_agent = agent
+        else:
+            del agent
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
     best = max(results, key=lambda x: x["val_ir2"])
     print(f"\n  ★ Selected: '{best['name']}' (Val IR2: {best['val_ir2']:.4f})")
-    return best, results
+    return best, results, best_agent
 
 
 # =============================================================================
@@ -383,9 +402,9 @@ def train_walk_forward(
     min_epochs: int = 10,
     transaction_cost_bps: float = 5.0,
     turnover_penalty: float = 0.001,
-    variance_penalty: float = 0.5,
-    tc_curriculum_frac: float = 0.3,
-    lookback_window: int = 60,
+    variance_penalty: float = 0.0,
+    tc_curriculum_frac: float = 0.0,
+    lookback_window: int = 20,
     results_dir: str = "../Results",
     verbose: bool = True,
 ) -> Dict:
@@ -432,16 +451,15 @@ def train_walk_forward(
     all_test_qqq_returns = []
     all_test_turnover = []
     fold_log = []
-    val_sharpe_history = []  # rolling window for retrain decision
+    val_sharpe_history = []
     selected_config = None
     agent = None
 
     if ckpt:
-        start_fold = ckpt["fold_id"]  # resume from NEXT fold
+        start_fold = ckpt["fold_id"]
         fold_log = ckpt["fold_log"]
         val_sharpe_history = ckpt.get("val_sharpe_history", [])
         selected_config = ckpt["selected_config"]
-        # Load saved test returns
         for i in range(ckpt["n_test_returns"]):
             p = out_dir / f"rl_fold_{i+1}_test_returns.csv"
             if p.exists():
@@ -450,39 +468,22 @@ def train_walk_forward(
             p2 = out_dir / f"rl_fold_{i+1}_qqq_returns.csv"
             if p2.exists():
                 all_test_qqq_returns.append(pd.read_csv(p2, index_col=0, parse_dates=True).iloc[:, 0])
+        # Rebuild agent from checkpoint
+        agent_config = {
+            "n_asset_features": dataset["metadata"]["n_per_asset_features"],
+            "n_global_features": dataset["metadata"]["n_global_features"],
+            **{k: v for k, v in selected_config.items() if k not in ("name", "variance_penalty")},
+        }
+        agent = SACAgent(agent_config)
+        agent_ckpt_path = out_dir / "agent_checkpoint.pt"
+        if agent_ckpt_path.exists():
+            agent.load(str(agent_ckpt_path))
         print(f"\n  *** RESUMING from fold {start_fold + 1} (completed {start_fold} folds) ***\n")
-
-    # --- HP selection on fold 1 ---
-    if selected_config is None:
-        best_hp, hp_results = select_hyperparameters(
-            dataset, folds[0], hp_configs, n_epochs=min(n_epochs, 20),
-            patience=patience, min_epochs=min(min_epochs, 8),
-            transaction_cost_bps=transaction_cost_bps,
-            turnover_penalty=turnover_penalty,
-            lookback_window=lookback_window, verbose=verbose,
-        )
-        selected_config = best_hp["config"]
-        variance_penalty = best_hp.get("variance_penalty", variance_penalty)
-
-    # Build agent config
-    agent_config = {
-        "n_asset_features": dataset["metadata"]["n_per_asset_features"],
-        "n_global_features": dataset["metadata"]["n_global_features"],
-        **{k: v for k, v in selected_config.items() if k not in ("name", "variance_penalty")},
-    }
 
     # --- Walk-forward loop ---
     print(f"\n{'='*70}")
     print(f"WALKING FORWARD — {len(folds)} folds")
     print(f"{'='*70}")
-
-    if agent is None:
-        agent = SACAgent(agent_config)
-    # Load checkpoint weights if resuming
-    agent_ckpt_path = out_dir / "agent_checkpoint.pt"
-    if ckpt and agent_ckpt_path.exists():
-        agent.load(str(agent_ckpt_path))
-        print(f"  Loaded agent checkpoint from {agent_ckpt_path}")
 
     n_retrains = sum(1 for f in fold_log if f.get("retrained", False))
 
@@ -492,60 +493,58 @@ def train_walk_forward(
 
         fid = fold["fold_id"]
 
-        # Evaluate current agent on val
-        val_r = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
-                               transaction_cost_bps, lookback_window)
-        current_val_ir2 = val_r["metrics"]["IR2"]
-        # Compute val Sharpe for retrain decision (more stable on short windows)
-        val_rets = val_r["results"]["portfolio_return_net"]
-        current_val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
-
-        # --- Retrain decision: rolling Sharpe (no cooldown) ---
+        # --- Retrain decision ---
         need_retrain = False
+        current_val_sharpe = 0.0
+        current_val_ir2 = 0.0
 
         if i == 0 and not ckpt:
-            need_retrain = True  # always train first fold
+            need_retrain = True
             reason = "initial"
-        elif len(val_sharpe_history) >= 3:
-            # Retrain when current Sharpe < median(last 5) - 1*std(last 5)
-            recent = val_sharpe_history[-5:]
-            med = np.median(recent)
-            std = np.std(recent) if len(recent) > 1 else 0.0
-            threshold = med - 1.0 * std
-            if current_val_sharpe < threshold:
-                need_retrain = True
-                reason = f"Sharpe {current_val_sharpe:.3f} < {threshold:.3f} (med={med:.3f} - 1*std={std:.3f})"
-        # else: not enough history yet, carry forward
+        else:
+            val_r = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
+                                   transaction_cost_bps, lookback_window)
+            current_val_ir2 = val_r["metrics"]["IR2"]
+            val_rets = val_r["results"]["portfolio_return_net"]
+            current_val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
 
-        val_sharpe_history.append(current_val_sharpe)
+            if len(val_sharpe_history) >= 3:
+                recent = val_sharpe_history[-5:]
+                med = np.median(recent)
+                std = np.std(recent) if len(recent) > 1 else 0.0
+                threshold = med - 1.0 * std
+                if current_val_sharpe < threshold:
+                    need_retrain = True
+                    reason = f"Sharpe {current_val_sharpe:.3f} < {threshold:.3f} (med={med:.3f} - 1*std={std:.3f})"
 
         if need_retrain:
             if verbose:
                 print(f"\n  Fold {fid:2d}/{len(folds)} | RETRAIN ({reason})")
-                print(f"    Train: {fold['train_start']}→{fold['train_end']} ({fold['n_train']}d) "
-                      f"Val: {fold['val_start']}→{fold['val_end']} ({fold['n_val']}d)")
 
-            if i == 0 and not ckpt:
-                agent = SACAgent(agent_config)
-            else:
-                agent.reset_for_fine_tune()
-
-            train_result = train_agent(
-                agent, dataset,
-                fold["train_start"], fold["train_end"],
-                fold["val_start"], fold["val_end"],
-                n_epochs=n_epochs, patience=patience, min_epochs=min_epochs,
+            best_hp, _, agent = select_hyperparameters(
+                dataset, fold, hp_configs,
+                n_epochs=min(n_epochs, 20), patience=patience,
+                min_epochs=min(min_epochs, 8),
                 transaction_cost_bps=transaction_cost_bps,
                 turnover_penalty=turnover_penalty,
+                lookback_window=lookback_window,
                 variance_penalty=variance_penalty,
                 tc_curriculum_frac=tc_curriculum_frac,
-                lookback_window=lookback_window, verbose=verbose,
+                verbose=verbose,
             )
-            current_val_ir2 = train_result["best_val_ir2"]
+            selected_config = best_hp["config"]
+            current_val_ir2 = best_hp["val_ir2"]
+
+            val_r_post = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
+                                        transaction_cost_bps, lookback_window)
+            post_rets = val_r_post["results"]["portfolio_return_net"]
+            current_val_sharpe = (post_rets.mean() / post_rets.std() * np.sqrt(252)) if post_rets.std() > 0 else 0.0
             n_retrains += 1
         else:
             if verbose:
                 print(f"  Fold {fid:2d}/{len(folds)} | CARRY (Sharpe: {current_val_sharpe:.3f})", end="")
+
+        val_sharpe_history.append(current_val_sharpe)
 
         # Test
         test_r = evaluate_agent(agent, dataset, fold["test_start"], fold["test_end"],
@@ -565,7 +564,7 @@ def train_walk_forward(
         if "turnover" in test_r["results"]:
             all_test_turnover.append(test_r["results"]["turnover"])
 
-        # Save per-fold returns (for checkpoint resume)
+        # Save per-fold returns
         test_r["results"]["portfolio_return_net"].to_csv(
             out_dir / f"rl_fold_{fid}_test_returns.csv")
         test_r["results"]["qqq_return"].to_csv(
@@ -578,6 +577,7 @@ def train_walk_forward(
             "test_start": fold["test_start"], "test_end": fold["test_end"],
             "n_train": fold["n_train"], "n_test": fold["n_test"],
             "retrained": need_retrain,
+            "selected_config": selected_config.get("name", "unknown") if selected_config else "unknown",
             "val_ir2": round(current_val_ir2, 4),
             "val_sharpe": round(current_val_sharpe, 4),
             "test_ir2": round(test_ir2, 4),
@@ -623,10 +623,22 @@ def train_walk_forward(
 
     print(f"\n  OOS: {stitched_rl.index[0].date()} → {stitched_rl.index[-1].date()}")
     print(f"  Days: {len(stitched_rl)}, Retrains: {n_retrains}/{len(folds)}")
-    print(f"\n  {'METRIC':<25} {'RL':>10} {'QQQ':>10}")
-    print(f"  {'-'*47}")
-    for k in ["ARC (%)", "ASD (%)", "Max Drawdown (%)", "IR1", "IR2", "Sharpe", "Sortino"]:
-        print(f"  {k:<25} {rl_m[k]:>10.4f} {qqq_m[k]:>10.4f}")
+    print(f"\n  {'METRIC':<25} {'RL':>12} {'QQQ':>12}")
+    print(f"  {'-'*51}")
+    # All metrics from compute_all_metrics (baseline.py)
+    metric_keys = [
+        "Absolute Return (%)", "ARC (%)", "ASD (%)", "Max Drawdown (%)",
+        "MLD (years)", "IR1", "IR2", "Sharpe", "Sortino", "Calmar", "N Days",
+    ]
+    for k in metric_keys:
+        rv = rl_m.get(k, "N/A")
+        qv = qqq_m.get(k, "N/A")
+        if isinstance(rv, (int, float)) and isinstance(qv, (int, float)):
+            print(f"  {k:<25} {rv:>12.4f} {qv:>12.4f}")
+        else:
+            print(f"  {k:<25} {str(rv):>12} {str(qv):>12}")
+    if "Avg Daily Turnover (%)" in rl_m:
+        print(f"  {'Avg Daily Turnover (%)':<25} {rl_m['Avg Daily Turnover (%)']:>12.4f} {'N/A':>12}")
 
     # Save
     equity_df = pd.DataFrame({"RL Agent": rl_equity, "QQQ": qqq_equity})
@@ -644,6 +656,7 @@ def train_walk_forward(
                "n_retrains": n_retrains, "lookback_window": lookback_window,
                "variance_penalty": variance_penalty,
                "tc_curriculum_frac": tc_curriculum_frac,
+               "hp_configs": len(hp_configs),
                "window_type": "SLIDING (non-anchored)"}
     with open(out_dir / "rl_wfo_config.json", "w") as f:
         json.dump(wfo_cfg, f, indent=2)

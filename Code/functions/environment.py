@@ -217,7 +217,7 @@ class PortfolioEnv:
         new_stock = stock_w * (1 + returns_t1)
         total = new_stock.sum() + cash_w
         if total > 0:
-            drifted_stock = new_stock / total * (1 - cash_w / total)
+            drifted_stock = new_stock / total
             drifted_cash = cash_w / total
         else:
             drifted_stock = stock_w

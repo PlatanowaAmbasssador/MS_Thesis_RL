@@ -1,9 +1,12 @@
-# 03 — Train RL Agent v2 (LSTM + Attention + Dirichlet)
+# 03 — Train RL Agent v3 (LSTM + Attention + Dirichlet)
+# Phase 0: Fixed methodology — HP re-tuning at every retrain fold, 10 configs
 
 import os, time
 import numpy as np
 import pandas as pd
 import torch
+
+RUN_BASELINES = True
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
@@ -18,6 +21,7 @@ else:
 
 from functions.data_pipeline import build_dataset
 from functions.RL_1.train import train_walk_forward, generate_wfo_folds, count_wfo_folds, plot_wfo_folds
+from functions.baseline import run_all_baselines
 
 dataset = build_dataset('../Data/Outputs/Filtered/Data')
 
@@ -33,7 +37,7 @@ if wfo_info['n_folds'] > 0:
 folds = generate_wfo_folds(dataset['trading_dates'], train_months=24, val_months=1, test_months=1, step_months=1, embargo_days=5)
 
 ## 2. Train (Walk-Forward)
-### 5 HP configs → sliding 24m window → checkpoint after each fold
+### 10 HP configs → re-tuned at every retrain fold → sliding 24m window
 
 t0 = time.time()
 
@@ -70,14 +74,42 @@ fold_log = pd.read_csv('../Results/rl_fold_log.csv')
 print(f'Retrains: {fold_log["retrained"].sum()} / {len(fold_log)} folds')
 print(fold_log.to_string())
 
-bl_metrics = pd.read_csv('../Results/performance_metrics_full.csv', index_col=0)
-rl_row = rl_m.loc[['RL Agent']]
-combined = pd.concat([bl_metrics, rl_row]).sort_values('IR2', ascending=False)
-print(combined[['ARC (%)', 'ASD (%)', 'Max Drawdown (%)', 'IR1', 'IR2']].to_string())
+## 4. Run baselines on SAME OOS period for fair comparison (optional)
 
-## 4. Files Saved
+if RUN_BASELINES:
+    oos_start = rl_results["rl_equity"].index[0].strftime('%Y-%m-%d')
+    oos_end = rl_results["rl_equity"].index[-1].strftime('%Y-%m-%d')
 
-print('RL files in ../Results/:')
+    print(f'\nRunning baselines on OOS period: {oos_start} → {oos_end}')
+    bl_results = run_all_baselines(
+        dataset,
+        start_date=oos_start,
+        end_date=oos_end,
+        transaction_cost_bps=5.0,
+        results_dir='../Results',
+        tag='oos',
+        verbose=True,
+    )
+
+    bl_metrics = pd.read_csv('../Results/performance_metrics_oos.csv', index_col=0)
+    rl_row = rl_m.loc[['RL Agent']]
+    combined = pd.concat([bl_metrics, rl_row]).sort_values('IR2', ascending=False)
+    # All metrics from baseline.py compute_all_metrics
+    metric_cols = [
+        'Absolute Return (%)', 'ARC (%)', 'ASD (%)', 'Max Drawdown (%)',
+        'MLD (years)', 'IR1', 'IR2', 'Sharpe', 'Sortino', 'Calmar', 'N Days',
+    ]
+    metric_cols = [c for c in metric_cols if c in combined.columns]
+    if 'Avg Daily Turnover (%)' in combined.columns:
+        metric_cols.append('Avg Daily Turnover (%)')
+    print('\n' + '=' * 80)
+    print('COMBINED COMPARISON (same OOS period)')
+    print('=' * 80)
+    print(combined[metric_cols].to_string())
+
+## 5. Files Saved
+
+print('\nRL files in ../Results/:')
 for f in sorted(os.listdir('../Results')):
     if f.startswith('rl_') or f.startswith('agent_') or f.startswith('wfo_'):
         size = os.path.getsize(f'../Results/{f}') / 1024
