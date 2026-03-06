@@ -292,11 +292,11 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 # =============================================================================
 
 DEFAULT_HP_CONFIGS = [
-    {"name": "baseline",     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.5},
-    {"name": "conservative", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 1.0},
-    {"name": "large_model",  "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.5},
-    {"name": "aggressive",   "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 64,  "n_attn_heads": 2, "variance_penalty": 0.2},
-    {"name": "high_cap_con", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 4, "variance_penalty": 1.0},
+    {"name": "baseline",     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "conservative", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "large_model",  "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0},
+    {"name": "aggressive",   "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 64,  "n_attn_heads": 2, "variance_penalty": 0.0},
+    {"name": "high_cap_con", "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 4, "variance_penalty": 0.0},
 ]
 
 

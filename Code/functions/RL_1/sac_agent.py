@@ -94,13 +94,13 @@ class SACAgent:
         "critic_hidden": 256,
         "lr_actor": 1e-4,
         "lr_critic": 3e-4,
-        "lr_alpha": 3e-4,
-        "gamma": 0.99,
+        "lr_alpha": 1e-4,
+        "gamma": 0.9,
         "tau": 0.005,
-        "alpha_init": 0.01,
+        "alpha_init": 0.001,
         "auto_alpha": True,
         "buffer_capacity": 500000,
-        "batch_size": 32,
+        "batch_size": 64,
         "gradient_steps": 1,
         "warmup_steps": 64,
         "device": "auto",
@@ -190,7 +190,7 @@ class SACAgent:
         total_count = 0
 
         for group_key, items in groups.items():
-            if len(items) < 2:
+            if len(items) < 1:
                 continue
             batch = _batch_group(items, self.device)
             B = len(items)
@@ -236,7 +236,7 @@ class SACAgent:
                 self.alpha_optimizer.step()
                 # CLAMP log_alpha to prevent explosion
                 with torch.no_grad():
-                    self.log_alpha.clamp_(-5.0, 2.0)  # alpha in [0.007, 7.4]
+                    self.log_alpha.clamp_(-7.0, 1.0)  # alpha in [0.001, 2.7]
                 total_alpha_loss += alpha_loss.item() * B
 
             total_critic_loss += critic_loss.item() * B

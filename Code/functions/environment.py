@@ -243,7 +243,12 @@ class PortfolioEnv:
         if self.variance_penalty > 0:
             recent = self.history["portfolio_return_net"][-20:]
             if len(recent) >= 5:
-                reward -= self.variance_penalty * np.var(recent)
+                # DOWNSIDE-only variance: only penalize negative returns
+                downside = [r for r in recent if r < 0]
+                if len(downside) >= 2:
+                    reward -= self.variance_penalty * np.var(downside)
+        # Scale reward to make signal dominate entropy term
+        reward *= 100.0
 
         qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
 
