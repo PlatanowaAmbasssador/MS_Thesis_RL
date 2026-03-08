@@ -260,17 +260,16 @@ class EqualWeightMonthly(BaselineStrategy):
     def get_target_weights(self, env, step):
         date = env.dates[step]
         current_month = (date.year, date.month)
+        tradable = env._get_tradable_mask(date)
+        n = tradable.sum()
         if self._last_rebalance_month != current_month:
             self._last_rebalance_month = current_month
-            return np.zeros(env.action_dim, dtype=np.float32)
+            w = np.ones(n, dtype=np.float32) / n
+            return np.concatenate([w, [0.0]])
         else:
-            tradable = env._get_tradable_mask(date)
-            current_w = env.weights[tradable]
-            n = tradable.sum()
-            baseline = np.ones(n) / n
-            current_w_safe = np.clip(current_w, 1e-8, None)
-            action = np.log(current_w_safe) - np.log(baseline)
-            return action.astype(np.float32)
+            current_stocks = env.weights[:env.n_tickers][tradable]
+            current_cash = env.weights[-1]
+            return np.concatenate([current_stocks, [current_cash]]).astype(np.float32)
 
     def run(self, dataset, start_date=None, end_date=None, transaction_cost_bps=5.0):
         self._last_rebalance_month = None
@@ -299,18 +298,14 @@ class InverseVolatility(BaselineStrategy):
 
         log_ret = np.log(hist_close / hist_close.shift(1)).dropna()
         if len(log_ret) < 5:
-            return np.zeros(n, dtype=np.float32)
+            w = np.ones(n, dtype=np.float32) / n
+            return np.concatenate([w, [0.0]])
 
         vol = log_ret.std()
         vol = vol.replace(0, np.nan).fillna(vol.median())
         inv_vol = 1.0 / vol
-        target_w = (inv_vol / inv_vol.sum()).values
-
-        baseline = np.ones(n) / n
-        target_safe = np.clip(target_w, 1e-8, None)
-        target_safe = target_safe / target_safe.sum()
-        action = np.log(target_safe) - np.log(baseline)
-        return action.astype(np.float32)
+        target_w = (inv_vol / inv_vol.sum()).values.astype(np.float32)
+        return np.concatenate([target_w, [0.0]])
 
 
 # =============================================================================
@@ -331,7 +326,8 @@ class MomentumTopQuintile(BaselineStrategy):
 
         date_idx = env.dates.get_loc(date)
         if date_idx < self.lookback:
-            return np.zeros(n, dtype=np.float32)
+            w = np.ones(n, dtype=np.float32) / n
+            return np.concatenate([w, [0.0]])
 
         past_date = env.dates[date_idx - self.lookback]
         close_now = env.daily_close.loc[date, tickers]
@@ -341,16 +337,11 @@ class MomentumTopQuintile(BaselineStrategy):
         n_top = max(1, int(n * self.top_pct))
         top_tickers = set(momentum.nlargest(n_top).index.tolist())
 
-        target_w = np.zeros(n)
+        target_w = np.zeros(n, dtype=np.float32)
         for i, t in enumerate(tickers):
             if t in top_tickers:
                 target_w[i] = 1.0 / n_top
-
-        baseline = np.ones(n) / n
-        target_safe = np.clip(target_w, 1e-8, None)
-        target_safe = target_safe / target_safe.sum()
-        action = np.log(target_safe) - np.log(baseline)
-        return action.astype(np.float32)
+        return np.concatenate([target_w, [0.0]])
 
 
 # =============================================================================
@@ -449,7 +440,8 @@ class SupervisedMVO(BaselineStrategy):
         self._step_count += 1
 
         if self.model is None:
-            return np.zeros(n, dtype=np.float32)
+            w = np.ones(n, dtype=np.float32) / n
+            return np.concatenate([w, [0.0]])
 
         predictions = self._predict_returns(self._dataset, date)
         mu = np.array([predictions.get(t, 0.0) for t in tickers])
@@ -459,13 +451,8 @@ class SupervisedMVO(BaselineStrategy):
         exp_scores = np.exp(scores)
         target_w = exp_scores / exp_scores.sum()
         target_w = np.clip(target_w, 0, self.max_weight)
-        target_w = target_w / target_w.sum()
-
-        baseline = np.ones(n) / n
-        target_safe = np.clip(target_w, 1e-8, None)
-        target_safe = target_safe / target_safe.sum()
-        action = np.log(target_safe) - np.log(baseline)
-        return action.astype(np.float32)
+        target_w = (target_w / target_w.sum()).astype(np.float32)
+        return np.concatenate([target_w, [0.0]])
 
     def run(self, dataset, start_date=None, end_date=None, transaction_cost_bps=5.0):
         self._dataset = dataset
