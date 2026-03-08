@@ -1,1 +1,1 @@
-"""RL_1 — SAC Agent with Dirichlet Policy for Portfolio Allocation (v2)"""
+"""RL_1 — HRA-SAC Agent with Hierarchical Risk-Aware Policy"""

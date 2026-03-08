@@ -1,10 +1,13 @@
 """
-sac_agent.py — Soft Actor-Critic with Dirichlet Policy (v2.1)
-=============================================================
-Fixes from v2:
-    - Alpha tuning uses Dirichlet ENTROPY (not log_prob) — prevents explosion
-    - log_alpha clamped to [-5, 2] (alpha range: 0.007 to 7.4)
-    - Target entropy calibrated for Dirichlet (positive, ~log(K))
+sac_agent.py — Soft Actor-Critic with Hierarchical Risk-Aware Policy (HRA-SAC)
+================================================================================
+Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
+
+Key features:
+    - Hierarchical policy: cash timing head + Dirichlet stock selection
+    - Alpha tuning uses combined entropy (timing + selection)
+    - Backward compatible: hierarchical=False falls back to flat Dirichlet-(N+1)
+    - log_alpha clamped to [-7, 1] (alpha range: 0.001 to 2.7)
 """
 
 import torch
@@ -44,8 +47,6 @@ class ReplayBuffer:
     def sample(self, batch_size, device):
         indices = np.random.randint(0, len(self.buffer), size=batch_size)
         batch = [self.buffer[i] for i in indices]
-        # Group by BOTH n_tradable AND next_n_tradable so all arrays in a group
-        # have identical shapes for stacking
         groups = {}
         for item in batch:
             key = (item["n_tradable"], item["next_n_tradable"])
@@ -104,6 +105,11 @@ class SACAgent:
         "gradient_steps": 1,
         "warmup_steps": 64,
         "device": "auto",
+        # Hierarchical policy config
+        "hierarchical": True,
+        "cash_head_hidden": 64,
+        "min_equity": 0.1,
+        "max_equity": 1.0,
     }
 
     def __init__(self, config=None):
@@ -119,18 +125,23 @@ class SACAgent:
                 self.device = torch.device("cpu")
         else:
             self.device = torch.device(c["device"])
-        print(f"  SAC Agent using device: {self.device}")
+        mode = "hierarchical" if c["hierarchical"] else "flat"
+        print(f"  SAC Agent using device: {self.device} (mode: {mode})")
 
         self.actor = DirichletActor(
             n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
             lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
             n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
+            hierarchical=c["hierarchical"],
+            cash_head_hidden=c["cash_head_hidden"],
+            min_equity=c["min_equity"], max_equity=c["max_equity"],
         ).to(self.device)
 
         self.critic = Critic(
             n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
             lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
             n_attn_heads=c["n_attn_heads"], critic_hidden=c["critic_hidden"],
+            action_stats_dim=7,
         ).to(self.device)
 
         self.critic_target = copy.deepcopy(self.critic).to(self.device)
@@ -194,8 +205,8 @@ class SACAgent:
                 continue
             batch = _batch_group(items, self.device)
             B = len(items)
-            n_t = group_key[0]  # current n_tradable
-            K = n_t + 1  # action dimension (stocks + cash)
+            n_t = group_key[0]
+            K = n_t + 1
 
             # --- Critic ---
             with torch.no_grad():
@@ -220,23 +231,22 @@ class SACAgent:
             nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
             self.actor_optimizer.step()
 
-            # --- Alpha (FIXED: use entropy, not log_prob) ---
+            # --- Alpha (entropy-based tuning) ---
             if self.auto_alpha:
-                # Dirichlet target entropy: log(K) is entropy of uniform Dir(1,1,...,1)
-                # We target slightly below uniform for mild concentration
-                target_ent = np.log(K) * 0.8  # ~3.7 for K=101
-                # Compute actual Dirichlet entropy
+                if c["hierarchical"]:
+                    target_ent = np.log(n_t) * 0.8 + 0.5
+                else:
+                    target_ent = np.log(K) * 0.8
+
                 with torch.no_grad():
-                    actual_entropy = self.actor.entropy(batch["state"])  # (B, 1)
-                # If entropy < target: increase alpha (encourage exploration)
-                # If entropy > target: decrease alpha (allow exploitation)
+                    actual_entropy = self.actor.entropy(batch["state"])
+
                 alpha_loss = (self.log_alpha * (actual_entropy - target_ent).detach()).mean()
                 self.alpha_optimizer.zero_grad()
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
-                # CLAMP log_alpha to prevent explosion
                 with torch.no_grad():
-                    self.log_alpha.clamp_(-7.0, 1.0)  # alpha in [0.001, 2.7]
+                    self.log_alpha.clamp_(-7.0, 1.0)
                 total_alpha_loss += alpha_loss.item() * B
 
             total_critic_loss += critic_loss.item() * B

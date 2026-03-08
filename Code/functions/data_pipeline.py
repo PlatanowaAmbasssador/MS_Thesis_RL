@@ -39,7 +39,7 @@ def load_raw_data(data_dir: str) -> dict:
 
     Returns
     -------
-    dict with keys: 'prices', 'mask', 'qqq', 'vix'
+    dict with keys: 'prices', 'mask', 'qqq', 'vix', 'rf_rate'
     """
     data_dir = Path(data_dir)
 
@@ -75,7 +75,22 @@ def load_raw_data(data_dir: str) -> dict:
     vix = vix[["Close"]].rename(columns={"Close": "vix_close"})
     vix["vix_close"] = vix["vix_close"].astype(float)
 
-    return {"prices": prices, "mask": mask, "qqq": qqq, "vix": vix}
+    # Risk-free rate (3-month T-bill, ^IRX) — same yfinance format
+    rf_path = data_dir / "risk_free_data.csv"
+    if rf_path.exists():
+        rf_rate = pd.read_csv(
+            rf_path, skiprows=[1, 2], index_col=0, parse_dates=True
+        )
+        rf_rate.index.name = "date"
+        rf_rate = rf_rate[["Close"]].rename(columns={"Close": "rf_annualized_pct"})
+        rf_rate["rf_annualized_pct"] = rf_rate["rf_annualized_pct"].astype(float)
+        # Convert annualized % to daily simple rate: (1 + r/100)^(1/252) - 1
+        rf_rate["rf_daily"] = (1 + rf_rate["rf_annualized_pct"] / 100) ** (1/252) - 1
+    else:
+        print("  WARNING: risk_free_data.csv not found — cash will earn 0%")
+        rf_rate = None
+
+    return {"prices": prices, "mask": mask, "qqq": qqq, "vix": vix, "rf_rate": rf_rate}
 
 
 # =============================================================================
@@ -158,6 +173,17 @@ def clean_and_align(raw: dict) -> dict:
     qqq = qqq.reindex(trading_dates).ffill()
     vix = vix.reindex(trading_dates).ffill()
 
+    # --- Align risk-free rate ---
+    rf_rate = raw.get("rf_rate")
+    if rf_rate is not None:
+        rf_rate = rf_rate.reindex(trading_dates).ffill().bfill()
+    else:
+        # Default: zero risk-free rate
+        rf_rate = pd.DataFrame(
+            {"rf_annualized_pct": 0.0, "rf_daily": 0.0},
+            index=trading_dates,
+        )
+
     return {
         "hourly_prices": prices,
         "hourly_mask": mask,
@@ -165,6 +191,7 @@ def clean_and_align(raw: dict) -> dict:
         "daily_mask": daily_mask,
         "qqq": qqq,
         "vix": vix,
+        "rf_rate": rf_rate,
         "tickers": tickers,
         "trading_dates": trading_dates,
     }
@@ -442,6 +469,7 @@ def build_dataset(data_dir: str) -> dict:
     daily_close = clean["daily_close"].loc[valid_dates]
     daily_mask = clean["daily_mask"].loc[valid_dates]
     qqq = clean["qqq"].loc[valid_dates]
+    rf_rate = clean["rf_rate"].loc[valid_dates]
 
     # NaN audit
     pa_nan = per_asset.isna().mean().mean()
@@ -450,6 +478,8 @@ def build_dataset(data_dir: str) -> dict:
     print(f"  Valid days:       {len(valid_dates)}")
     print(f"  Per-asset NaN:    {pa_nan:.3%}")
     print(f"  Global NaN:       {gf_nan:.3%}")
+    rf_mean = rf_rate["rf_annualized_pct"].mean()
+    print(f"  Avg risk-free:    {rf_mean:.2f}% annualized")
 
     metadata = {
         "valid_hours": VALID_HOURS,
@@ -473,6 +503,7 @@ def build_dataset(data_dir: str) -> dict:
         "daily_close": daily_close,
         "daily_mask": daily_mask,
         "qqq": qqq,
+        "rf_rate": rf_rate,
         "tickers": clean["tickers"],
         "trading_dates": valid_dates,
         "metadata": metadata,

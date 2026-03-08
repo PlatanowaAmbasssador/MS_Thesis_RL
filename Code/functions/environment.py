@@ -51,6 +51,13 @@ class PortfolioEnv:
         self.daily_mask = dataset["daily_mask"]
         self.qqq = dataset["qqq"]
 
+        # Risk-free rate for cash returns
+        rf_data = dataset.get("rf_rate")
+        if rf_data is not None and "rf_daily" in rf_data.columns:
+            self.rf_rate = rf_data["rf_daily"]
+        else:
+            self.rf_rate = None  # cash earns 0%
+
         all_dates = dataset["trading_dates"]
         if start_date:
             all_dates = all_dates[all_dates >= pd.Timestamp(start_date)]
@@ -84,7 +91,7 @@ class PortfolioEnv:
         self.history = {k: [] for k in [
             "date", "portfolio_return", "portfolio_return_net", "turnover",
             "transaction_cost", "reward", "portfolio_value", "weights",
-            "qqq_return", "cash_weight",
+            "qqq_return", "cash_weight", "equity_fraction", "rf_earned",
         ]}
 
     def _precompute_feature_arrays(self):
@@ -210,15 +217,22 @@ class PortfolioEnv:
         tc = turnover * self.tc_rate
 
         returns_t1 = np.nan_to_num(self.daily_returns.loc[date_t1].values.copy(), nan=0.0)
-        port_ret_gross = np.dot(stock_w, returns_t1)
+        # Cash earns risk-free rate (if available)
+        rf_daily = 0.0
+        if self.rf_rate is not None and date_t1 in self.rf_rate.index:
+            rf_daily = float(self.rf_rate.loc[date_t1])
+            if np.isnan(rf_daily):
+                rf_daily = 0.0
+        port_ret_gross = np.dot(stock_w, returns_t1) + cash_w * rf_daily
         port_ret_net = port_ret_gross - tc
         self.portfolio_value *= (1 + port_ret_net)
 
         new_stock = stock_w * (1 + returns_t1)
-        total = new_stock.sum() + cash_w
+        new_cash = cash_w * (1 + rf_daily)
+        total = new_stock.sum() + new_cash
         if total > 0:
             drifted_stock = new_stock / total
-            drifted_cash = cash_w / total
+            drifted_cash = new_cash / total
         else:
             drifted_stock = stock_w
             drifted_cash = cash_w
@@ -262,6 +276,8 @@ class PortfolioEnv:
         self.history["weights"].append(stock_w.copy())
         self.history["qqq_return"].append(qqq_ret)
         self.history["cash_weight"].append(cash_w)
+        self.history["equity_fraction"].append(1.0 - cash_w)
+        self.history["rf_earned"].append(cash_w * rf_daily)
 
         self.current_step += 1
         if self.current_step >= self.n_steps:

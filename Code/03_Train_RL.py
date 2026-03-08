@@ -1,5 +1,5 @@
-# 03 — Train RL Agent v3 (LSTM + Attention + Dirichlet)
-# Phase 0: Fixed methodology — HP re-tuning at every retrain fold, 10 configs
+# 03 — Train HRA-SAC Agent (Hierarchical Risk-Aware SAC)
+# 4 HP configs → re-tuned at every retrain fold → sliding 24m window
 
 import os, time
 import numpy as np
@@ -37,7 +37,7 @@ if wfo_info['n_folds'] > 0:
 folds = generate_wfo_folds(dataset['trading_dates'], train_months=24, val_months=1, test_months=1, step_months=1, embargo_days=5)
 
 ## 2. Train (Walk-Forward)
-### 10 HP configs → re-tuned at every retrain fold → sliding 24m window
+### 4 HP configs → re-tuned at every retrain fold → sliding 24m window
 
 t0 = time.time()
 
@@ -94,7 +94,6 @@ if RUN_BASELINES:
     bl_metrics = pd.read_csv('../Results/performance_metrics_oos.csv', index_col=0)
     rl_row = rl_m.loc[['RL Agent']]
     combined = pd.concat([bl_metrics, rl_row]).sort_values('IR2', ascending=False)
-    # All metrics from baseline.py compute_all_metrics
     metric_cols = [
         'Absolute Return (%)', 'ARC (%)', 'ASD (%)', 'Max Drawdown (%)',
         'MLD (years)', 'IR1', 'IR2', 'Sharpe', 'Sortino', 'Calmar', 'N Days',
@@ -114,5 +113,3 @@ for f in sorted(os.listdir('../Results')):
     if f.startswith('rl_') or f.startswith('agent_') or f.startswith('wfo_'):
         size = os.path.getsize(f'../Results/{f}') / 1024
         print(f'  {f:<45} {size:>8.1f} KB')
-
-

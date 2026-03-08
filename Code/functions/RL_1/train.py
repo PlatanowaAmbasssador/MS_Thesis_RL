@@ -1,13 +1,13 @@
 """
-train.py — Walk-Forward Optimization for SAC Portfolio Agent (v3)
-==================================================================
+train.py — Walk-Forward Optimization for HRA-SAC Portfolio Agent (v4)
+======================================================================
 Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
 
-Key changes from v2:
-    - Full HP re-selection (10 configs) at EVERY retrain fold, not just fold 1
-    - Expanded HP grid: 10 configs covering model capacity, LR, and gamma
-    - select_hyperparameters returns trained agent (no redundant retraining)
-    - Calmar added to OOS summary printout
+Key features:
+    - Full HP re-selection at EVERY retrain fold (4 configs)
+    - Sliding (non-anchored) WFO with Sharpe-based retrain trigger
+    - Hierarchical Risk-Aware SAC with cash timing + stock selection
+    - 4 HP configs covering LR, model capacity, and cash timing aggressiveness
 """
 
 import numpy as np
@@ -179,7 +179,7 @@ def plot_wfo_folds(folds: List[Dict]):
 # =============================================================================
 
 def evaluate_agent(agent, dataset, start_date, end_date,
-                   transaction_cost_bps=5.0, lookback_window=60):
+                   transaction_cost_bps=5.0, lookback_window=20):
     env = PortfolioEnv(
         dataset, start_date=start_date, end_date=end_date,
         transaction_cost_bps=transaction_cost_bps,
@@ -200,6 +200,10 @@ def evaluate_agent(agent, dataset, start_date, end_date,
     turnover_series = results["turnover"]
     metrics["N Trades"] = int((turnover_series > 0.01).sum())  # days with >1% turnover
     metrics["Total TC (%)"] = round(results["transaction_cost"].sum() * 100, 4)
+    if "equity_fraction" in results:
+        metrics["Avg Equity (%)"] = round(results["equity_fraction"].mean() * 100, 2)
+    if "rf_earned" in results:
+        metrics["Total RF Earned (%)"] = round(results["rf_earned"].sum() * 100, 4)
     return {"results": results, "metrics": metrics, "equity": equity}
 
 
@@ -210,8 +214,8 @@ def evaluate_agent(agent, dataset, start_date, end_date,
 def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
                 n_epochs=30, patience=5, min_epochs=10,
                 transaction_cost_bps=5.0, turnover_penalty=0.001,
-                variance_penalty=0.5, tc_curriculum_frac=0.3,
-                lookback_window=60, verbose=True):
+                variance_penalty=0.0, tc_curriculum_frac=0.0,
+                lookback_window=20, verbose=True):
     train_env = PortfolioEnv(
         dataset, start_date=train_start, end_date=train_end,
         transaction_cost_bps=transaction_cost_bps,
@@ -290,22 +294,24 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 # =============================================================================
 
 DEFAULT_HP_CONFIGS = [
-    {"name": "baseline",      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
-    {"name": "conservative",  "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0},
-    {"name": "large_model",   "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0},
-    {"name": "aggressive",    "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 64,  "n_attn_heads": 2, "variance_penalty": 0.0},
-    {"name": "high_cap_con",  "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 4, "variance_penalty": 0.0},
-    {"name": "short_horizon", "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0, "gamma": 0.8},
-    {"name": "long_horizon",  "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64,  "n_attn_heads": 4, "variance_penalty": 0.0, "gamma": 0.95},
-    {"name": "tiny_fast",     "lr_actor": 5e-4, "lr_critic": 5e-4, "lstm_hidden": 32,  "n_attn_heads": 2, "variance_penalty": 0.0},
-    {"name": "large_slow",    "lr_actor": 1e-4, "lr_critic": 1e-4, "lstm_hidden": 128, "n_attn_heads": 8, "variance_penalty": 0.0, "gamma": 0.95},
-    {"name": "med_balanced",  "lr_actor": 2e-4, "lr_critic": 3e-4, "lstm_hidden": 96,  "n_attn_heads": 4, "variance_penalty": 0.0},
+    {"name": "standard",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "cash_head_hidden": 64, "hierarchical": True, "variance_penalty": 0.0},
+    {"name": "conservative_lr",
+     "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "cash_head_hidden": 64, "hierarchical": True, "variance_penalty": 0.0},
+    {"name": "large_capacity",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8,
+     "cash_head_hidden": 128, "hierarchical": True, "variance_penalty": 0.0},
+    {"name": "aggressive_timing",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "cash_head_hidden": 128, "hierarchical": True, "variance_penalty": 0.0},
 ]
 
 
 def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
                            patience=5, min_epochs=8, transaction_cost_bps=5.0,
-                           turnover_penalty=0.001, lookback_window=60,
+                           turnover_penalty=0.001, lookback_window=20,
                            variance_penalty=0.0, tc_curriculum_frac=0.0,
                            verbose=True):
     """Run all HP configs on a fold, return best config and trained agent."""
@@ -432,6 +438,7 @@ def train_walk_forward(
     print(f"  Lookback window: {lookback_window} days")
     print(f"  Variance penalty: {variance_penalty}")
     print(f"  TC curriculum: {tc_curriculum_frac*100:.0f}% of episode")
+    print(f"  Policy mode: {'Hierarchical (HRA-SAC)' if hp_configs[0].get('hierarchical', True) else 'Flat Dirichlet'}")
     print("=" * 70)
 
     if not folds:
@@ -657,7 +664,8 @@ def train_walk_forward(
                "variance_penalty": variance_penalty,
                "tc_curriculum_frac": tc_curriculum_frac,
                "hp_configs": len(hp_configs),
-               "window_type": "SLIDING (non-anchored)"}
+               "window_type": "SLIDING (non-anchored)",
+               "hierarchical": hp_configs[0].get("hierarchical", True)}
     with open(out_dir / "rl_wfo_config.json", "w") as f:
         json.dump(wfo_cfg, f, indent=2)
 
