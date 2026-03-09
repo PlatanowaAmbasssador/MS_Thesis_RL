@@ -55,7 +55,7 @@ rl_results = train_walk_forward(
     turnover_penalty=0.001,
     variance_penalty=0.0,
     tc_curriculum_frac=0.0,
-    lookback_window=20,
+    lookback_window=40,
     results_dir='../Results',
     verbose=True,
 )

@@ -227,6 +227,7 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 
     best_val_score = -np.inf
     best_val_ir2 = 0.0
+    best_val_sharpe = -np.inf
     best_epoch = 0
     best_state_bytes = None
     patience_counter = 0
@@ -253,18 +254,21 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
                                transaction_cost_bps, lookback_window)
         val_ir2 = val_r["metrics"]["IR2"]
         val_arc = val_r["metrics"]["ARC (%)"]
+        val_rets = val_r["results"]["portfolio_return_net"]
+        val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
 
         elapsed = time.time() - t0
         if verbose:
             print(f"    Ep {epoch:2d} | Train IR2: {train_m['IR2']:.4f} "
-                  f"Val IR2: {val_ir2:.4f} | Val ARC: {val_arc:+.1f}% | "
+                  f"Val Sharpe: {val_sharpe:.3f} | Val ARC: {val_arc:+.1f}% | "
                   f"α: {agent.alpha.item():.3f} | {elapsed:.1f}s")
 
-        # Early stopping (IR2 when > 0, else ARC)
-        score = val_ir2 if val_ir2 > 0 else val_arc / 100.0
+        # Early stopping on Val Sharpe (more stable than IR2 on 1-month windows)
+        score = val_sharpe
         if score > best_val_score:
             best_val_score = score
             best_val_ir2 = val_ir2
+            best_val_sharpe = val_sharpe
             best_epoch = epoch
             buf = io.BytesIO()
             torch.save({"actor": agent.actor.state_dict(),
@@ -286,7 +290,7 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
         agent.critic.load_state_dict(ckpt["critic"])
         agent.critic_target.load_state_dict(ckpt["critic_target"])
 
-    return {"best_val_ir2": best_val_ir2, "best_epoch": best_epoch}
+    return {"best_val_ir2": best_val_ir2, "best_val_sharpe": best_val_sharpe, "best_epoch": best_epoch}
 
 
 # =============================================================================
@@ -322,7 +326,7 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
 
     results = []
     best_agent = None
-    best_val_ir2 = -np.inf
+    best_val_sharpe = -np.inf
 
     for hp in hp_configs:
         hp_copy = hp.copy()
@@ -345,14 +349,15 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
             lookback_window=lookback_window, verbose=verbose,
         )
         val_ir2 = result["best_val_ir2"]
+        val_sharpe = result["best_val_sharpe"]
         results.append({"name": hp["name"], "config": hp, "val_ir2": val_ir2,
-                         "variance_penalty": vp})
-        print(f"    → Val IR2: {val_ir2:.4f}")
+                         "val_sharpe": val_sharpe, "variance_penalty": vp})
+        print(f"    → Val Sharpe: {val_sharpe:.4f} (IR2: {val_ir2:.4f})")
 
-        if val_ir2 > best_val_ir2:
+        if val_sharpe > best_val_sharpe:
             if best_agent is not None:
                 del best_agent
-            best_val_ir2 = val_ir2
+            best_val_sharpe = val_sharpe
             best_agent = agent
         else:
             del agent
@@ -360,8 +365,8 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-    best = max(results, key=lambda x: x["val_ir2"])
-    print(f"\n  ★ Selected: '{best['name']}' (Val IR2: {best['val_ir2']:.4f})")
+    best = max(results, key=lambda x: x["val_sharpe"])
+    print(f"\n  ★ Selected: '{best['name']}' (Val Sharpe: {best['val_sharpe']:.4f}, IR2: {best['val_ir2']:.4f})")
     return best, results, best_agent
 
 

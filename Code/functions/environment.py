@@ -250,7 +250,12 @@ class PortfolioEnv:
                 self.weights[:self.n_tickers][remaining] += ew * self.weights[:self.n_tickers][remaining] / self.weights[:self.n_tickers][remaining].sum()
 
         if self.reward_type == "sharpe":
-            reward = self.diff_sharpe.compute(port_ret_net)
+            # Use EXCESS return over equal-weight tradable stocks
+            # This penalizes cash-heavy positions when market goes up,
+            # and rewards cash when market goes down.
+            ew_ret = np.mean(returns_t1[tradable_t]) if tradable_t.any() else 0.0
+            excess_ret = port_ret_net - ew_ret
+            reward = self.diff_sharpe.compute(excess_ret)
             reward -= self.turnover_penalty * turnover
         else:
             reward = port_ret_net - self.turnover_penalty * turnover

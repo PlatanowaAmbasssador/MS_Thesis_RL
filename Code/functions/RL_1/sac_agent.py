@@ -108,8 +108,8 @@ class SACAgent:
         # Hierarchical policy config
         "hierarchical": True,
         "cash_head_hidden": 64,
-        "min_equity": 0.1,
-        "max_equity": 1.0,
+        "min_equity": 0.3,
+        "max_equity": 0.95,
     }
 
     def __init__(self, config=None):

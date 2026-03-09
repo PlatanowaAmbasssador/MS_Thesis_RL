@@ -177,6 +177,12 @@ class CashTimingHead(nn.Module):
         self.mu_head = nn.Linear(hidden_dim // 2, 1)
         self.log_std_head = nn.Linear(hidden_dim // 2, 1)
 
+        # Initialize mu bias so sigmoid(2.0)=0.88 → equity_frac ≈ 0.89
+        # This starts the agent mostly invested (sensible default)
+        # and lets it learn to reduce equity when conditions warrant.
+        nn.init.constant_(self.mu_head.bias, 2.0)
+        nn.init.constant_(self.log_std_head.bias, -1.0)  # start with low variance
+
     def forward(self, global_repr):
         """Returns (mu, log_std) for the pre-sigmoid Gaussian."""
         h = self.net(global_repr)

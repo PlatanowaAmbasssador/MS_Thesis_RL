@@ -76,19 +76,27 @@ def load_raw_data(data_dir: str) -> dict:
     vix["vix_close"] = vix["vix_close"].astype(float)
 
     # Risk-free rate (3-month T-bill, ^IRX) — same yfinance format
-    rf_path = data_dir / "risk_free_data.csv"
-    if rf_path.exists():
-        rf_rate = pd.read_csv(
-            rf_path, skiprows=[1, 2], index_col=0, parse_dates=True
-        )
-        rf_rate.index.name = "date"
-        rf_rate = rf_rate[["Close"]].rename(columns={"Close": "rf_annualized_pct"})
-        rf_rate["rf_annualized_pct"] = rf_rate["rf_annualized_pct"].astype(float)
-        # Convert annualized % to daily simple rate: (1 + r/100)^(1/252) - 1
-        rf_rate["rf_daily"] = (1 + rf_rate["rf_annualized_pct"] / 100) ** (1/252) - 1
-    else:
+    # Search both inside data_dir and one level up (common layout mismatch)
+    rf_rate = None
+    rf_candidates = [
+        data_dir / "risk_free_data.csv",
+        data_dir.parent / "risk_free_data.csv",
+    ]
+    for rf_path in rf_candidates:
+        if rf_path.exists():
+            rf_rate = pd.read_csv(
+                rf_path, skiprows=[1, 2], index_col=0, parse_dates=True
+            )
+            rf_rate.index.name = "date"
+            rf_rate = rf_rate[["Close"]].rename(columns={"Close": "rf_annualized_pct"})
+            rf_rate["rf_annualized_pct"] = rf_rate["rf_annualized_pct"].astype(float)
+            # Convert annualized % to daily simple rate: (1 + r/100)^(1/252) - 1
+            rf_rate["rf_daily"] = (1 + rf_rate["rf_annualized_pct"] / 100) ** (1/252) - 1
+            print(f"  Risk-free rate loaded from: {rf_path}")
+            break
+    if rf_rate is None:
         print("  WARNING: risk_free_data.csv not found — cash will earn 0%")
-        rf_rate = None
+        print(f"    Searched: {[str(p) for p in rf_candidates]}")
 
     return {"prices": prices, "mask": mask, "qqq": qqq, "vix": vix, "rf_rate": rf_rate}
 
