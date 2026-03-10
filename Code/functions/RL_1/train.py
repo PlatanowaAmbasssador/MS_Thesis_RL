@@ -212,7 +212,7 @@ def evaluate_agent(agent, dataset, start_date, end_date,
 # =============================================================================
 
 def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
-                n_epochs=30, patience=5, min_epochs=10,
+                n_epochs=40, patience=7, min_epochs=15,
                 transaction_cost_bps=5.0, turnover_penalty=0.001,
                 variance_penalty=0.0, tc_curriculum_frac=0.0,
                 lookback_window=20, verbose=True):
@@ -300,21 +300,25 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 DEFAULT_HP_CONFIGS = [
     {"name": "standard",
      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "cash_head_hidden": 64, "hierarchical": True, "variance_penalty": 0.0},
+     "scorer_hidden": 256, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.0, "max_equity": 1.0, "variance_penalty": 0.0},
     {"name": "conservative_lr",
      "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "cash_head_hidden": 64, "hierarchical": True, "variance_penalty": 0.0},
+     "scorer_hidden": 256, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.0, "max_equity": 1.0, "variance_penalty": 0.0},
     {"name": "large_capacity",
      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8,
-     "cash_head_hidden": 128, "hierarchical": True, "variance_penalty": 0.0},
+     "scorer_hidden": 256, "cash_head_hidden": 128, "hierarchical": True,
+     "min_equity": 0.0, "max_equity": 1.0, "variance_penalty": 0.0},
     {"name": "aggressive_timing",
      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "cash_head_hidden": 128, "hierarchical": True, "variance_penalty": 0.0},
+     "scorer_hidden": 256, "cash_head_hidden": 128, "hierarchical": True,
+     "min_equity": 0.0, "max_equity": 1.0, "variance_penalty": 0.0},
 ]
 
 
-def select_hyperparameters(dataset, fold, hp_configs, n_epochs=20,
-                           patience=5, min_epochs=8, transaction_cost_bps=5.0,
+def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
+                           patience=7, min_epochs=12, transaction_cost_bps=5.0,
                            turnover_penalty=0.001, lookback_window=20,
                            variance_penalty=0.0, tc_curriculum_frac=0.0,
                            verbose=True):
@@ -408,9 +412,9 @@ def train_walk_forward(
     step_months: int = 1,
     embargo_days: int = 5,
     hp_configs: Optional[List[Dict]] = None,
-    n_epochs: int = 30,
-    patience: int = 5,
-    min_epochs: int = 10,
+    n_epochs: int = 40,
+    patience: int = 7,
+    min_epochs: int = 15,
     transaction_cost_bps: float = 5.0,
     turnover_penalty: float = 0.001,
     variance_penalty: float = 0.0,
@@ -520,14 +524,26 @@ def train_walk_forward(
             val_rets = val_r["results"]["portfolio_return_net"]
             current_val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
 
-            if len(val_sharpe_history) >= 3:
+            # Mandatory retrain every 4 folds to prevent stale models
+            folds_since_retrain = 0
+            for fl in reversed(fold_log):
+                if fl.get("retrained", False):
+                    break
+                folds_since_retrain += 1
+            if folds_since_retrain >= 3:
+                need_retrain = True
+                reason = f"mandatory (>{folds_since_retrain} folds since retrain)"
+            elif current_val_sharpe < 0:
+                need_retrain = True
+                reason = f"Sharpe {current_val_sharpe:.3f} < 0"
+            elif len(val_sharpe_history) >= 3:
                 recent = val_sharpe_history[-5:]
                 med = np.median(recent)
                 std = np.std(recent) if len(recent) > 1 else 0.0
-                threshold = med - 1.0 * std
+                threshold = med - 0.5 * std
                 if current_val_sharpe < threshold:
                     need_retrain = True
-                    reason = f"Sharpe {current_val_sharpe:.3f} < {threshold:.3f} (med={med:.3f} - 1*std={std:.3f})"
+                    reason = f"Sharpe {current_val_sharpe:.3f} < {threshold:.3f} (med={med:.3f} - 0.5*std={std:.3f})"
 
         if need_retrain:
             if verbose:
@@ -535,8 +551,8 @@ def train_walk_forward(
 
             best_hp, _, agent = select_hyperparameters(
                 dataset, fold, hp_configs,
-                n_epochs=min(n_epochs, 20), patience=patience,
-                min_epochs=min(min_epochs, 8),
+                n_epochs=min(n_epochs, 25), patience=patience,
+                min_epochs=min(min_epochs, 12),
                 transaction_cost_bps=transaction_cost_bps,
                 turnover_penalty=turnover_penalty,
                 lookback_window=lookback_window,

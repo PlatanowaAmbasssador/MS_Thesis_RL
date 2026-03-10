@@ -258,13 +258,15 @@ class DirichletActor(nn.Module):
         self.hierarchical = hierarchical
         state_dim = self.state_processor.output_dim
 
-        # Stock selection scorer (per-asset Dirichlet concentrations)
+        # Stock selection scorer — deeper network for better stock discrimination
         self.scorer = nn.Sequential(
             nn.Linear(state_dim + embed_dim, scorer_hidden),
             nn.LayerNorm(scorer_hidden), nn.ReLU(),
             nn.Linear(scorer_hidden, scorer_hidden),
             nn.LayerNorm(scorer_hidden), nn.ReLU(),
-            nn.Linear(scorer_hidden, 1),
+            nn.Linear(scorer_hidden, scorer_hidden // 2),
+            nn.LayerNorm(scorer_hidden // 2), nn.ReLU(),
+            nn.Linear(scorer_hidden // 2, 1),
         )
 
         if self.hierarchical:

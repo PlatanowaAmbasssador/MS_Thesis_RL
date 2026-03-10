@@ -86,30 +86,29 @@ def _batch_group(items, device):
 
 class SACAgent:
     DEFAULT_CONFIG = {
-        "n_asset_features": 7,
-        "n_global_features": 5,
+        "n_asset_features": 15,
+        "n_global_features": 9,
         "lstm_hidden": 64,
         "embed_dim": 64,
         "n_attn_heads": 4,
-        "scorer_hidden": 128,
+        "scorer_hidden": 256,
         "critic_hidden": 256,
         "lr_actor": 1e-4,
         "lr_critic": 3e-4,
         "lr_alpha": 1e-4,
-        "gamma": 0.9,
+        "gamma": 0.99,
         "tau": 0.005,
         "alpha_init": 0.001,
         "auto_alpha": True,
         "buffer_capacity": 500000,
         "batch_size": 64,
-        "gradient_steps": 1,
+        "gradient_steps": 4,
         "warmup_steps": 64,
         "device": "auto",
-        # Hierarchical policy config
         "hierarchical": True,
         "cash_head_hidden": 64,
-        "min_equity": 0.3,
-        "max_equity": 0.95,
+        "min_equity": 0.0,
+        "max_equity": 1.0,
     }
 
     def __init__(self, config=None):
