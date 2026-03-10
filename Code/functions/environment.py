@@ -257,8 +257,9 @@ class PortfolioEnv:
             if remaining.any():
                 self.weights[:self.n_tickers][remaining] += ew * self.weights[:self.n_tickers][remaining] / self.weights[:self.n_tickers][remaining].sum()
 
+        qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
+
         if self.reward_type == "sharpe":
-            # Excess return over QQQ with asymmetric penalty (2x for underperformance)
             excess_ret = port_ret_net - qqq_ret
             if excess_ret < 0:
                 excess_ret *= 2.0
@@ -269,14 +270,10 @@ class PortfolioEnv:
         if self.variance_penalty > 0:
             recent = self.history["portfolio_return_net"][-20:]
             if len(recent) >= 5:
-                # DOWNSIDE-only variance: only penalize negative returns
                 downside = [r for r in recent if r < 0]
                 if len(downside) >= 2:
                     reward -= self.variance_penalty * np.var(downside)
-        # Scale reward to make signal dominate entropy term
         reward *= 100.0
-
-        qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
 
         self.history["date"].append(date_t1)
         self.history["portfolio_return"].append(port_ret_gross)
