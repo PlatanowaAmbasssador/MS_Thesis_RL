@@ -1,0 +1,45 @@
+{
+  "fold_id": 1,
+  "fold_log": [
+    {
+      "fold_id": 1,
+      "train_start": "2021-06-02",
+      "train_end": "2023-06-01",
+      "val_start": "2023-06-09",
+      "val_end": "2023-08-08",
+      "test_start": "2023-08-09",
+      "test_end": "2023-10-06",
+      "n_train": 1004,
+      "n_test": 84,
+      "retrained": true,
+      "selected_config": "aggressive_timing",
+      "val_ir2": 2118.3829,
+      "val_sharpe": 6.2374,
+      "test_ir2": 0,
+      "test_arc": -10.53,
+      "test_mdd": 4.7,
+      "test_sharpe": -1.7692,
+      "test_sortino": -1.2015,
+      "test_n_trades": 21,
+      "test_total_tc": 0.5741,
+      "test_cash": 77.43
+    }
+  ],
+  "val_sharpe_history": [
+    6.237360494693228
+  ],
+  "selected_config": {
+    "name": "aggressive_timing",
+    "lr_actor": 0.0003,
+    "lr_critic": 0.0003,
+    "lstm_hidden": 64,
+    "n_attn_heads": 4,
+    "scorer_hidden": 256,
+    "cash_head_hidden": 128,
+    "hierarchical": true,
+    "min_equity": 0.0,
+    "max_equity": 1.0,
+    "variance_penalty": 0.0
+  },
+  "n_test_returns": 1
+}
