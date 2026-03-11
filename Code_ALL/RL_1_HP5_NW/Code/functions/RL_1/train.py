@@ -232,20 +232,16 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
     best_state_bytes = None
     patience_counter = 0
 
-    update_every = 4
     for epoch in range(n_epochs):
         t0 = time.time()
         state = train_env.reset()
-        step_count = 0
         while not train_env.done:
             action = agent.select_action(state, deterministic=False)
             next_state, reward, done, info = train_env.step(action)
             agent.store_transition(state, action, reward, next_state, done,
                                    info["n_tradable"])
-            step_count += 1
-            if step_count % update_every == 0:
-                for _ in range(agent.config["gradient_steps"]):
-                    agent.update()
+            for _ in range(agent.config["gradient_steps"]):
+                agent.update()
             state = next_state
 
         # Train metrics
@@ -321,54 +317,24 @@ DEFAULT_HP_CONFIGS = [
 ]
 
 
-def _compute_monthly_sharpes(returns_series, annualization=252):
-    """
-    Split a return series into calendar-month chunks and compute
-    annualized Sharpe for each month. Returns list of monthly Sharpes.
-    """
-    if returns_series.empty:
-        return []
-    monthly_groups = returns_series.groupby(returns_series.index.to_period("M"))
-    sharpes = []
-    for _, month_rets in monthly_groups:
-        if len(month_rets) < 5:
-            continue
-        mu = month_rets.mean()
-        sigma = month_rets.std()
-        if sigma > 1e-10:
-            sharpes.append(mu / sigma * np.sqrt(annualization))
-        else:
-            sharpes.append(0.0)
-    return sharpes
-
-
 def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
                            patience=7, min_epochs=12, transaction_cost_bps=5.0,
                            turnover_penalty=0.001, lookback_window=20,
                            variance_penalty=0.0, tc_curriculum_frac=0.0,
                            verbose=True):
-    """
-    Run all HP configs on a fold, select best using monthly-Sharpe consistency.
-
-    Selection (3-tier):
-      Tier 1: median(train monthly Sharpes) > 2 AND max(val monthly Sharpes) > 2
-              → pick config with smallest |median_train - max_val| (consistency)
-      Tier 2: both median_train > 0 and max_val > 0
-              → pick config with highest max_val
-      Tier 3: fallback → pick config with highest max_val
-    """
+    """Run all HP configs on a fold, return best config and trained agent."""
     fold_id = fold.get("fold_id", "?")
     print(f"\n  HP Selection on fold {fold_id}:")
     print(f"    Train: {fold['train_start']} → {fold['train_end']} ({fold['n_train']}d)")
     print(f"    Val:   {fold['val_start']} → {fold['val_end']} ({fold['n_val']}d)")
 
-    candidates = []
-    trained_agents = {}
+    results = []
+    best_agent = None
+    best_val_sharpe = -np.inf
 
     for hp in hp_configs:
         hp_copy = hp.copy()
-        hp_name = hp_copy["name"]
-        print(f"\n    --- Config: {hp_name} ---")
+        print(f"\n    --- Config: {hp_copy['name']} ---")
         vp = hp_copy.pop("variance_penalty", variance_penalty)
         config = {
             "n_asset_features": dataset["metadata"]["n_per_asset_features"],
@@ -386,67 +352,26 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
             variance_penalty=vp, tc_curriculum_frac=tc_curriculum_frac,
             lookback_window=lookback_window, verbose=verbose,
         )
+        val_ir2 = result["best_val_ir2"]
+        val_sharpe = result["best_val_sharpe"]
+        results.append({"name": hp["name"], "config": hp, "val_ir2": val_ir2,
+                         "val_sharpe": val_sharpe, "variance_penalty": vp})
+        print(f"    → Val Sharpe: {val_sharpe:.4f} (IR2: {val_ir2:.4f})")
 
-        # Evaluate trained agent on full train and val windows
-        train_r = evaluate_agent(agent, dataset, fold["train_start"],
-                                 fold["train_end"], transaction_cost_bps,
-                                 lookback_window)
-        val_r = evaluate_agent(agent, dataset, fold["val_start"],
-                               fold["val_end"], transaction_cost_bps,
-                               lookback_window)
-
-        train_monthly = _compute_monthly_sharpes(train_r["results"]["portfolio_return_net"])
-        val_monthly = _compute_monthly_sharpes(val_r["results"]["portfolio_return_net"])
-
-        median_train = float(np.median(train_monthly)) if train_monthly else -np.inf
-        max_val = float(np.max(val_monthly)) if val_monthly else -np.inf
-
-        val_ir2 = val_r["metrics"]["IR2"]
-        val_rets = val_r["results"]["portfolio_return_net"]
-        val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
-
-        entry = {
-            "name": hp_name, "config": hp, "val_ir2": val_ir2,
-            "val_sharpe": val_sharpe, "variance_penalty": vp,
-            "median_train_sharpe": median_train, "max_val_sharpe": max_val,
-            "n_train_months": len(train_monthly), "n_val_months": len(val_monthly),
-        }
-        candidates.append(entry)
-        trained_agents[hp_name] = agent
-
-        print(f"    → Med-Train Sharpe: {median_train:.3f} ({len(train_monthly)} months) | "
-              f"Max-Val Sharpe: {max_val:.3f} ({len(val_monthly)} months)")
-
+        if val_sharpe > best_val_sharpe:
+            if best_agent is not None:
+                del best_agent
+            best_val_sharpe = val_sharpe
+            best_agent = agent
+        else:
+            del agent
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-    # === 3-tier selection ===
-    tier1 = [c for c in candidates
-             if c["median_train_sharpe"] > 2.0 and c["max_val_sharpe"] > 2.0]
-    if tier1:
-        best = min(tier1, key=lambda c: abs(c["median_train_sharpe"] - c["max_val_sharpe"]))
-        tier_label = "Tier-1 (both > 2, closest gap)"
-    else:
-        tier2 = [c for c in candidates
-                 if c["median_train_sharpe"] > 0 and c["max_val_sharpe"] > 0]
-        if tier2:
-            best = max(tier2, key=lambda c: c["max_val_sharpe"])
-            tier_label = "Tier-2 (both positive, best max-val)"
-        else:
-            best = max(candidates, key=lambda c: c["max_val_sharpe"])
-            tier_label = "Tier-3 (fallback, best max-val)"
-
-    best_agent = trained_agents[best["name"]]
-    for name, ag in trained_agents.items():
-        if name != best["name"]:
-            del ag
-
-    print(f"\n  ★ Selected: '{best['name']}' [{tier_label}]")
-    print(f"    Med-Train: {best['median_train_sharpe']:.3f} | Max-Val: {best['max_val_sharpe']:.3f} | "
-          f"Val Sharpe: {best['val_sharpe']:.4f} | IR2: {best['val_ir2']:.4f}")
-
-    return best, candidates, best_agent
+    best = max(results, key=lambda x: x["val_sharpe"])
+    print(f"\n  ★ Selected: '{best['name']}' (Val Sharpe: {best['val_sharpe']:.4f}, IR2: {best['val_ir2']:.4f})")
+    return best, results, best_agent
 
 
 # =============================================================================
@@ -655,17 +580,11 @@ def train_walk_forward(
         test_ir2 = test_r["metrics"]["IR2"]
         test_arc = test_r["metrics"]["ARC (%)"]
 
-        # QQQ buy & hold for this test window
-        qqq_rets = test_r["results"]["qqq_return"]
-        qqq_eq = np.array([1.0] + list((1 + qqq_rets).cumprod().values))
-        qqq_test_m = compute_all_metrics(qqq_eq)
-        qqq_test_arc = qqq_test_m["ARC (%)"]
-
         if verbose and not need_retrain:
-            print(f" → RL ARC: {test_arc:+.1f}% | QQQ ARC: {qqq_test_arc:+.1f}%")
+            print(f" → Test IR2: {test_ir2:.4f}, ARC: {test_arc:+.1f}%")
         elif verbose:
             print(f"    Test: {fold['test_start']}→{fold['test_end']} → "
-                  f"RL ARC: {test_arc:+.1f}% | QQQ ARC: {qqq_test_arc:+.1f}%")
+                  f"IR2: {test_ir2:.4f}, ARC: {test_arc:+.1f}%")
 
         # Collect test returns
         all_test_returns.append(test_r["results"]["portfolio_return_net"])
@@ -691,7 +610,6 @@ def train_walk_forward(
             "val_sharpe": round(current_val_sharpe, 4),
             "test_ir2": round(test_ir2, 4),
             "test_arc": round(test_arc, 2),
-            "qqq_test_arc": round(qqq_test_arc, 2),
             "test_mdd": round(test_r["metrics"]["Max Drawdown (%)"], 2),
             "test_sharpe": round(test_r["metrics"].get("Sharpe", 0), 4),
             "test_sortino": round(test_r["metrics"].get("Sortino", 0), 4),

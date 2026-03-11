@@ -102,7 +102,7 @@ class SACAgent:
         "auto_alpha": True,
         "buffer_capacity": 500000,
         "batch_size": 64,
-        "gradient_steps": 1,
+        "gradient_steps": 4,
         "warmup_steps": 64,
         "device": "auto",
         "hierarchical": True,
@@ -233,9 +233,9 @@ class SACAgent:
             # --- Alpha (entropy-based tuning) ---
             if self.auto_alpha:
                 if c["hierarchical"]:
-                    target_ent = np.log(n_t) * 0.3
+                    target_ent = np.log(n_t) * 0.8 + 0.5
                 else:
-                    target_ent = np.log(K) * 0.3
+                    target_ent = np.log(K) * 0.8
 
                 with torch.no_grad():
                     actual_entropy = self.actor.entropy(batch["state"])
@@ -245,7 +245,7 @@ class SACAgent:
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
                 with torch.no_grad():
-                    self.log_alpha.clamp_(-7.0, 0.0)
+                    self.log_alpha.clamp_(-7.0, 1.0)
                 total_alpha_loss += alpha_loss.item() * B
 
             total_critic_loss += critic_loss.item() * B
