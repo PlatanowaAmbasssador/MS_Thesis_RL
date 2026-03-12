@@ -259,7 +259,8 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
         val_ir2 = val_r["metrics"]["IR2"]
         val_arc = val_r["metrics"]["ARC (%)"]
         val_rets = val_r["results"]["portfolio_return_net"]
-        val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
+        val_std = val_rets.std()
+        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
         elapsed = time.time() - t0
         if verbose:
@@ -325,6 +326,7 @@ def _compute_monthly_sharpes(returns_series, annualization=252):
     """
     Split a return series into calendar-month chunks and compute
     annualized Sharpe for each month. Returns list of monthly Sharpes.
+    Sharpe is clamped to [-10, 10] to avoid blow-up from low-vol months.
     """
     if returns_series.empty:
         return []
@@ -335,8 +337,9 @@ def _compute_monthly_sharpes(returns_series, annualization=252):
             continue
         mu = month_rets.mean()
         sigma = month_rets.std()
-        if sigma > 1e-10:
-            sharpes.append(mu / sigma * np.sqrt(annualization))
+        if sigma > 1e-4:
+            s = mu / sigma * np.sqrt(annualization)
+            sharpes.append(float(np.clip(s, -10.0, 10.0)))
         else:
             sharpes.append(0.0)
     return sharpes
@@ -403,7 +406,8 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
 
         val_ir2 = val_r["metrics"]["IR2"]
         val_rets = val_r["results"]["portfolio_return_net"]
-        val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
+        val_std = val_rets.std()
+        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
         entry = {
             "name": hp_name, "config": hp, "val_ir2": val_ir2,
@@ -597,7 +601,8 @@ def train_walk_forward(
                                    transaction_cost_bps, lookback_window)
             current_val_ir2 = val_r["metrics"]["IR2"]
             val_rets = val_r["results"]["portfolio_return_net"]
-            current_val_sharpe = (val_rets.mean() / val_rets.std() * np.sqrt(252)) if val_rets.std() > 0 else 0.0
+            val_std = val_rets.std()
+            current_val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
             # Mandatory retrain every 4 folds to prevent stale models
             folds_since_retrain = 0
@@ -641,7 +646,8 @@ def train_walk_forward(
             val_r_post = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
                                         transaction_cost_bps, lookback_window)
             post_rets = val_r_post["results"]["portfolio_return_net"]
-            current_val_sharpe = (post_rets.mean() / post_rets.std() * np.sqrt(252)) if post_rets.std() > 0 else 0.0
+            post_std = post_rets.std()
+            current_val_sharpe = float(np.clip(post_rets.mean() / post_std * np.sqrt(252), -10.0, 10.0)) if post_std > 1e-4 else 0.0
             n_retrains += 1
         else:
             if verbose:
