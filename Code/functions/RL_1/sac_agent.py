@@ -100,7 +100,7 @@ class SACAgent:
         "tau": 0.005,
         "alpha_init": 0.001,
         "auto_alpha": True,
-        "buffer_capacity": 500000,
+        "buffer_capacity": 20000,
         "batch_size": 64,
         "gradient_steps": 1,
         "warmup_steps": 64,
