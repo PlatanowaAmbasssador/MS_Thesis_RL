@@ -11,37 +11,30 @@ import pandas as pd
 from typing import Optional, Tuple
 
 
-class DifferentialSortino:
-    """
-    Online differential Sortino ratio estimator.
-    Only penalizes downside deviation — rewards for upside are unpenalized.
-    """
+class DifferentialSharpe:
+    """Online differential Sharpe ratio estimator."""
     def __init__(self, eta: float = 0.005):
         self.eta = eta
-        self.A = 0.0       # EMA of returns
-        self.D = 0.0       # EMA of squared negative returns
+        self.A = 0.0
+        self.B = 0.0
         self._initialized = False
 
     def reset(self):
         self.A = 0.0
-        self.D = 0.0
+        self.B = 0.0
         self._initialized = False
 
     def compute(self, portfolio_return: float) -> float:
         R = portfolio_return
-        neg_sq = min(R, 0.0) ** 2
         if not self._initialized:
             self.A = R
-            self.D = neg_sq + 1e-8
+            self.B = R ** 2
             self._initialized = True
             return 0.0
-        downside_vol = self.D ** 0.5
-        if downside_vol < 1e-10:
-            dS = R - self.A
-        else:
-            dS = (self.D * (R - self.A) - 0.5 * self.A * (neg_sq - self.D)) / (self.D ** 1.5 + 1e-12)
+        denom = (self.B - self.A ** 2) ** 1.5
+        dS = 0.0 if abs(denom) < 1e-12 else (self.B * (R - self.A) - 0.5 * self.A * (R ** 2 - self.B)) / denom
         self.A += self.eta * (R - self.A)
-        self.D += self.eta * (neg_sq - self.D)
+        self.B += self.eta * (R ** 2 - self.B)
         return dS
 
 
@@ -87,7 +80,7 @@ class PortfolioEnv:
         self.n_asset_features = len(self.feature_names)
         self.n_global_features = self.global_features.shape[1]
         self.all_trading_dates = dataset["trading_dates"]
-        self.diff_sharpe = DifferentialSortino(eta=sharpe_eta)
+        self.diff_sharpe = DifferentialSharpe(eta=sharpe_eta)
 
         # === PRECOMPUTE feature tensor for fast lookback ===
         self._precompute_feature_arrays()
@@ -260,9 +253,9 @@ class PortfolioEnv:
         qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
 
         if self.reward_type == "sharpe":
-            excess_ret = port_ret_net - qqq_ret
-            if excess_ret < 0:
-                excess_ret *= 2.0
+            # Excess return over equal-weight tradable stocks
+            ew_ret = np.mean(returns_t1[tradable_t]) if tradable_t.any() else 0.0
+            excess_ret = port_ret_net - ew_ret
             reward = self.diff_sharpe.compute(excess_ret)
             reward -= self.turnover_penalty * turnover
         else:

@@ -1,13 +1,6 @@
 """
 sac_agent.py — Soft Actor-Critic with Hierarchical Risk-Aware Policy (HRA-SAC)
 ================================================================================
-Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
-
-Key features:
-    - Hierarchical policy: cash timing head + Dirichlet stock selection
-    - Alpha tuning uses combined entropy (timing + selection)
-    - Backward compatible: hierarchical=False falls back to flat Dirichlet-(N+1)
-    - log_alpha clamped to [-7, 1] (alpha range: 0.001 to 2.7)
 """
 
 import torch
@@ -17,16 +10,13 @@ import torch.optim as optim
 import numpy as np
 import copy
 from collections import deque
-from typing import Optional
-
 from .networks import DirichletActor, Critic
 
 EPSILON = 1e-6
 
 
 class ReplayBuffer:
-    def __init__(self, capacity: int):
-        self.capacity = capacity
+    def __init__(self, capacity):
         self.buffer = deque(maxlen=capacity)
 
     def push(self, state_dict, weights, reward, next_state_dict, done, n_tradable):
@@ -50,9 +40,7 @@ class ReplayBuffer:
         groups = {}
         for item in batch:
             key = (item["n_tradable"], item["next_n_tradable"])
-            if key not in groups:
-                groups[key] = []
-            groups[key].append(item)
+            groups.setdefault(key, []).append(item)
         return groups
 
     def __len__(self):
@@ -86,29 +74,29 @@ def _batch_group(items, device):
 
 class SACAgent:
     DEFAULT_CONFIG = {
-        "n_asset_features": 15,
-        "n_global_features": 9,
+        "n_asset_features": 15,     # 7 ranked + 8 raw (from Cursor's pipeline)
+        "n_global_features": 9,     # 5 original + 4 new
         "lstm_hidden": 64,
         "embed_dim": 64,
         "n_attn_heads": 4,
-        "scorer_hidden": 256,
+        "scorer_hidden": 128,       # back to 128 (256 was unjustified)
         "critic_hidden": 256,
         "lr_actor": 1e-4,
         "lr_critic": 3e-4,
         "lr_alpha": 1e-4,
-        "gamma": 0.99,
+        "gamma": 0.95,              # 10-day horizon at 2x/day steps
         "tau": 0.005,
         "alpha_init": 0.001,
         "auto_alpha": True,
-        "buffer_capacity": 20000,
+        "buffer_capacity": 10000,   # OOM-safe for 30GB RAM
         "batch_size": 64,
         "gradient_steps": 1,
         "warmup_steps": 64,
         "device": "auto",
         "hierarchical": True,
         "cash_head_hidden": 64,
-        "min_equity": 0.0,
-        "max_equity": 1.0,
+        "min_equity": 0.3,          # never below 30% in stocks
+        "max_equity": 0.95,         # always keep ≥5% cash
     }
 
     def __init__(self, config=None):
@@ -207,7 +195,6 @@ class SACAgent:
             n_t = group_key[0]
             K = n_t + 1
 
-            # --- Critic ---
             with torch.no_grad():
                 next_w, next_lp, _ = self.actor.sample(batch["next_state"])
                 q1t, q2t = self.critic_target(batch["next_state"], next_w)
@@ -221,7 +208,6 @@ class SACAgent:
             nn.utils.clip_grad_norm_(self.critic.parameters(), 1.0)
             self.critic_optimizer.step()
 
-            # --- Actor ---
             new_w, log_prob, _ = self.actor.sample(batch["state"])
             q1n, q2n = self.critic(batch["state"], new_w)
             actor_loss = (self.alpha.detach() * log_prob - torch.min(q1n, q2n)).mean()
@@ -230,12 +216,11 @@ class SACAgent:
             nn.utils.clip_grad_norm_(self.actor.parameters(), 1.0)
             self.actor_optimizer.step()
 
-            # --- Alpha (entropy-based tuning) ---
             if self.auto_alpha:
                 if c["hierarchical"]:
-                    target_ent = np.log(n_t) * 0.3
+                    target_ent = np.log(n_t) * 0.8 + 0.5
                 else:
-                    target_ent = np.log(K) * 0.3
+                    target_ent = np.log(K) * 0.8
 
                 with torch.no_grad():
                     actual_entropy = self.actor.entropy(batch["state"])
@@ -245,7 +230,7 @@ class SACAgent:
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
                 with torch.no_grad():
-                    self.log_alpha.clamp_(-7.0, 0.0)
+                    self.log_alpha.clamp_(-7.0, 1.0)
                 total_alpha_loss += alpha_loss.item() * B
 
             total_critic_loss += critic_loss.item() * B
