@@ -39,14 +39,12 @@ class AssetTemporalEncoder(nn.Module):
     """
 
     def __init__(self, n_features: int = 7, hidden_dim: int = 64,
-                 embed_dim: int = 64, n_layers: int = 1, dropout: float = 0.0):
+                 embed_dim: int = 64, n_layers: int = 1):
         super().__init__()
         self.lstm = nn.LSTM(
             input_size=n_features, hidden_size=hidden_dim,
             num_layers=n_layers, batch_first=True,
-            dropout=dropout if n_layers > 1 else 0.0,
         )
-        self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
         self.proj = nn.Linear(hidden_dim, embed_dim) if hidden_dim != embed_dim else nn.Identity()
         self.norm = nn.LayerNorm(embed_dim)
 
@@ -55,7 +53,6 @@ class AssetTemporalEncoder(nn.Module):
         x_flat = x.reshape(batch * n_assets, W, F)
         _, (h_n, _) = self.lstm(x_flat)
         h_last = h_n[-1]  # (batch*n_assets, hidden)
-        h_last = self.dropout(h_last)
         embeds = self.proj(h_last).reshape(batch, n_assets, -1)
         return self.norm(embeds)
 
@@ -115,11 +112,11 @@ class StateProcessorV2(nn.Module):
     """Parses structured state dict → (global_repr, per-asset embeds)."""
 
     def __init__(self, n_asset_features=7, n_global_features=5,
-                 lstm_hidden=64, embed_dim=64, n_attn_heads=4, dropout=0.0):
+                 lstm_hidden=64, embed_dim=64, n_attn_heads=4):
         super().__init__()
         self.temporal_encoder = AssetTemporalEncoder(
             n_features=n_asset_features, hidden_dim=lstm_hidden,
-            embed_dim=embed_dim, dropout=dropout,
+            embed_dim=embed_dim,
         )
         self.attention = CrossSectionalAttention(
             embed_dim=embed_dim, n_heads=n_attn_heads,
@@ -250,11 +247,11 @@ class DirichletActor(nn.Module):
                  lstm_hidden=64, embed_dim=64, n_attn_heads=4,
                  scorer_hidden=128, min_concentration=0.01,
                  hierarchical=True, cash_head_hidden=64,
-                 min_equity=0.1, max_equity=1.0, dropout=0.0):
+                 min_equity=0.1, max_equity=1.0):
         super().__init__()
         self.state_processor = StateProcessorV2(
             n_asset_features, n_global_features,
-            lstm_hidden, embed_dim, n_attn_heads, dropout=dropout,
+            lstm_hidden, embed_dim, n_attn_heads,
         )
         self.embed_dim = embed_dim
         self.min_concentration = min_concentration
@@ -409,11 +406,11 @@ class Critic(nn.Module):
 
     def __init__(self, n_asset_features=7, n_global_features=5,
                  lstm_hidden=64, embed_dim=64, n_attn_heads=4,
-                 critic_hidden=256, action_stats_dim=7, dropout=0.0):
+                 critic_hidden=256, action_stats_dim=7):
         super().__init__()
         self.state_processor = StateProcessorV2(
             n_asset_features, n_global_features,
-            lstm_hidden, embed_dim, n_attn_heads, dropout=dropout,
+            lstm_hidden, embed_dim, n_attn_heads,
         )
         self.action_stats_dim = action_stats_dim
         input_dim = self.state_processor.output_dim + action_stats_dim

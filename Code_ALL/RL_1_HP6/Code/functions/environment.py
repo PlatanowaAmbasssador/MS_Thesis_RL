@@ -1,11 +1,11 @@
 """
 environment.py — RL Environment for Portfolio Allocation (v3.0 — Top-K)
 ========================================================================
-Changes from v2.1:
-    - top_k: select top-K stocks by 60d momentum per step
-    - reward_type="excess_return": (port_ret - rf) × 100 / max(eq_frac, 0.3)
-    - DifferentialSharpe (not Sortino) for sharpe reward mode
-    - Close array precomputed for fast momentum
+Key changes from v2.1:
+    - top_k parameter: select top-K stocks by 60d momentum at each step
+    - reward_type="excess_return": pure (port_ret - rf) × 100
+    - Precomputed close array for fast momentum calculation
+    - _current_selected tracks which K stocks are active per step
 """
 
 import numpy as np
@@ -46,6 +46,11 @@ class PortfolioEnv:
                  reward_type="sharpe", sharpe_eta=0.005,
                  lookback_window=60, variance_penalty=0.0,
                  tc_curriculum_frac=0.0, top_k=0):
+        """
+        Parameters:
+            top_k: int — if > 0, select top-K stocks by 60d momentum per step.
+                   Reduces action space from ~144 to K. 0 = use all tradable.
+        """
         self.all_tickers = dataset["tickers"]
         self.n_tickers = len(self.all_tickers)
         self.per_asset_features = dataset["per_asset_features"]
@@ -55,6 +60,7 @@ class PortfolioEnv:
         self.qqq = dataset["qqq"]
         self.top_k = top_k
 
+        # Risk-free rate for cash returns
         rf_data = dataset.get("rf_rate")
         if rf_data is not None and "rf_daily" in rf_data.columns:
             self.rf_rate = rf_data["rf_daily"]
@@ -84,11 +90,13 @@ class PortfolioEnv:
         self.all_trading_dates = dataset["trading_dates"]
         self.diff_sharpe = DifferentialSharpe(eta=sharpe_eta)
 
+        # === PRECOMPUTE ===
         self._precompute_feature_arrays()
 
+        # Current step state
         self.current_step = 0
         self.weights = None
-        self._current_selected = None
+        self._current_selected = None  # boolean mask of top-K selected stocks
         self.portfolio_value = 1.0
         self.done = False
         self.history = {k: [] for k in [
@@ -98,6 +106,7 @@ class PortfolioEnv:
         ]}
 
     def _precompute_feature_arrays(self):
+        """Precompute arrays for fast state construction and momentum."""
         pa = self.per_asset_features
         all_dates = self.all_trading_dates
         tickers = self.all_tickers
@@ -107,6 +116,7 @@ class PortfolioEnv:
         n_tickers = len(tickers)
         n_feats = len(feat_names)
 
+        # (n_dates, n_tickers, n_features)
         self._feature_array = np.zeros((n_dates, n_tickers, n_feats), dtype=np.float32)
         for f_i, feat in enumerate(feat_names):
             for t_i, ticker in enumerate(tickers):
@@ -119,9 +129,12 @@ class PortfolioEnv:
             self.global_features.reindex(all_dates).values.astype(np.float32), 0.0
         )
         self._mask_array = self.daily_mask.reindex(all_dates).values.astype(bool)
+
+        # Close price array for momentum (n_dates, n_tickers)
         self._close_array = np.nan_to_num(
             self.daily_close.reindex(all_dates).values.astype(np.float64), 0.0
         )
+
         self._date_to_idx = {d: i for i, d in enumerate(all_dates)}
 
     def _get_tradable_mask(self, date):
@@ -131,34 +144,54 @@ class PortfolioEnv:
         return self.daily_mask.loc[date].values.astype(bool)
 
     def _select_top_k(self, date_idx, tradable):
+        """
+        Select top-K stocks by 60-day momentum from the tradable set.
+        Returns a boolean mask over all n_tickers.
+        """
         if self.top_k <= 0 or tradable.sum() <= self.top_k:
             return tradable.copy()
+
         mom_lookback = 120  # 60 days × 2 sessions/day
         if date_idx < mom_lookback:
+            # Not enough history — use all tradable
             return tradable.copy()
+
         current = self._close_array[date_idx]
         past = self._close_array[date_idx - mom_lookback]
+
+        # Compute momentum only for tradable stocks with valid prices
         momentum = np.full(self.n_tickers, -np.inf)
         valid = tradable & (current > 0) & (past > 0)
         if valid.sum() <= self.top_k:
             return tradable.copy()
+
         momentum[valid] = current[valid] / past[valid] - 1.0
+
+        # Select top-K indices
         top_indices = np.argsort(momentum)[-self.top_k:]
+
         selected = np.zeros(self.n_tickers, dtype=bool)
         selected[top_indices] = True
-        selected &= tradable
+        selected &= tradable  # safety: must be tradable
+
         return selected
 
     def _get_state(self):
+        """Vectorized state construction with optional top-K filtering."""
         date = self.dates[self.current_step]
         date_idx = self._date_to_idx[date]
         tradable = self._mask_array[date_idx]
+
+        # Apply top-K selection
         selected = self._select_top_k(date_idx, tradable)
         self._current_selected = selected
         n_selected = selected.sum()
 
+        # Lookback window
         start_idx = max(0, date_idx - self.lookback_window + 1)
         W_actual = date_idx - start_idx + 1
+
+        # Extract features only for selected stocks
         raw_window = self._feature_array[start_idx:date_idx + 1, selected, :]
         asset_window = np.zeros((n_selected, self.lookback_window, self.n_asset_features), dtype=np.float32)
         offset = self.lookback_window - W_actual
@@ -177,6 +210,7 @@ class PortfolioEnv:
                 "weights": w, "n_tradable": n_selected}
 
     def _action_to_weights(self, action, selected):
+        """Map action (for selected stocks) to full portfolio weights."""
         n_selected = selected.sum()
         stock_w = np.clip(action[:n_selected], 0, 1)
         cash_w = np.clip(action[n_selected], 0, 1)
@@ -196,6 +230,8 @@ class PortfolioEnv:
         for k in self.history:
             self.history[k] = []
         self.tc_rate = 0.0 if self.tc_curriculum_frac > 0 else self.tc_rate_target
+
+        # Initial state with top-K
         state = self._get_state()
         n_sel = self._current_selected.sum()
         self.weights = np.zeros(self.n_tickers + 1, dtype=np.float64)
@@ -209,6 +245,8 @@ class PortfolioEnv:
             raise RuntimeError("Episode done.")
         date_t = self.dates[self.current_step]
         date_t1 = self.dates[self.current_step + 1]
+
+        # Use the selected stocks from _get_state (set before step is called)
         selected_t = self._current_selected
 
         if self.tc_curriculum_frac > 0 and self.n_steps > 0:
@@ -222,6 +260,7 @@ class PortfolioEnv:
         tc = turnover * self.tc_rate
 
         returns_t1 = np.nan_to_num(self.daily_returns.loc[date_t1].values.copy(), nan=0.0)
+        # Cash earns risk-free rate
         rf_daily = 0.0
         if self.rf_rate is not None and date_t1 in self.rf_rate.index:
             rf_daily = float(self.rf_rate.loc[date_t1])
@@ -231,6 +270,7 @@ class PortfolioEnv:
         port_ret_net = port_ret_gross - tc
         self.portfolio_value *= (1 + port_ret_net)
 
+        # Drift weights
         new_stock = stock_w * (1 + returns_t1)
         new_cash = cash_w * (1 + rf_daily)
         total = new_stock.sum() + new_cash
@@ -244,6 +284,7 @@ class PortfolioEnv:
         self.weights[:self.n_tickers] = drifted_stock
         self.weights[-1] = drifted_cash
 
+        # Handle delisted stocks (sell to remaining)
         tradable_t1 = self._get_tradable_mask(date_t1)
         exiting = (~tradable_t1) & (self.weights[:self.n_tickers] > 0)
         if exiting.any():
@@ -255,17 +296,13 @@ class PortfolioEnv:
 
         qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
 
-        # Equity fraction for reward scaling
-        equity_frac = 1.0 - cash_w
-
         # === REWARD ===
         if self.reward_type == "excess_return":
-            # Excess return over rf, SCALED by equity fraction to penalize cash-hiding
-            raw_reward = (port_ret_net - rf_daily) * 100.0
-            eq_scale = max(equity_frac, 0.3)
-            reward = raw_reward / eq_scale
+            # Simple: excess return over risk-free × 100
+            reward = (port_ret_net - rf_daily) * 100.0
             reward -= self.turnover_penalty * turnover * 100.0
         elif self.reward_type == "sharpe":
+            # Excess over EW of selected stocks
             ew_ret = np.mean(returns_t1[selected_t]) if selected_t.any() else 0.0
             excess_ret = port_ret_net - ew_ret
             reward = self.diff_sharpe.compute(excess_ret)
@@ -291,7 +328,7 @@ class PortfolioEnv:
         self.history["weights"].append(stock_w.copy())
         self.history["qqq_return"].append(qqq_ret)
         self.history["cash_weight"].append(cash_w)
-        self.history["equity_fraction"].append(equity_frac)
+        self.history["equity_fraction"].append(1.0 - cash_w)
         self.history["rf_earned"].append(cash_w * rf_daily)
 
         self.current_step += 1
@@ -354,3 +391,18 @@ def compute_metrics(results, annualization=252, risk_free_rate=0.0):
     m["avg_cash_weight"] = results["cash_weight"].mean() if "cash_weight" in results else 0.0
     m["n_days"] = n
     return m
+
+
+def print_metrics(metrics):
+    print("\n" + "=" * 55)
+    print(f"{'METRIC':<30} {'PORTFOLIO':>10} {'QQQ':>10}")
+    print("=" * 55)
+    for label, key, fmt in [("Total Return", "total_return", "{:.2%}"), ("Ann Return", "ann_return", "{:.2%}"),
+                             ("Ann Vol", "ann_vol", "{:.2%}"), ("Sharpe", "sharpe", "{:.3f}"),
+                             ("Max DD", "max_drawdown", "{:.2%}"), ("Calmar", "calmar", "{:.3f}")]:
+        print(f"  {label:<28} {fmt.format(metrics[f'portfolio_{key}']):>10} {fmt.format(metrics[f'qqq_{key}']):>10}")
+    print("-" * 55)
+    print(f"  {'Avg Turnover':<28} {metrics['avg_daily_turnover']:>10.2%}")
+    print(f"  {'Avg Cash':<28} {metrics.get('avg_cash_weight', 0):>10.2%}")
+    print(f"  {'Days':<28} {metrics['n_days']:>10d}")
+    print("=" * 55)

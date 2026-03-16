@@ -1,11 +1,12 @@
-# 03 — Train HRA-SAC: Run 8 — 14-CONFIG HP GRID
-# ================================================
-# 7 investment styles × 2 RL variants (v1=exploratory, v2=exploitative)
-# Per-config: top_k ∈ {10,20,30}, min_equity ∈ {0.50,0.70,0.85}
-# RL tuning: lr_critic, batch_size, ent_multiplier, gamma, dropout
-# Reward = (port_ret - rf) × 100 / max(equity_frac, 0.3)
-# turnover_penalty = 0.003 (up from 0.001)
-# Annualization = 504 (correct for 2x/day)
+# 03 — Train HRA-SAC Agent: TOP-20 MOMENTUM + EXCESS RETURN REWARD
+# ================================================================
+# Run 7: The game-changer
+# - Top-20 stocks by 60-day momentum (dynamic, per-step selection)
+# - Reward = (portfolio_return - risk_free) × 100
+# - Dirichlet-20 (same architecture, much easier problem)
+# - Annualization = 504 (correct for 2x/day)
+# - 4 HP configs, 2-month folds, no embargo
+# - Buffer = 50k (only ~1 GB with 20 stocks)
 
 import os, time
 import numpy as np
@@ -13,9 +14,9 @@ import pandas as pd
 import torch
 
 RUN_BASELINES = True
+TOP_K = 20
 ANNUALIZATION = 504
 REWARD_TYPE = "excess_return"
-TURNOVER_PENALTY = 0.003
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
@@ -47,8 +48,7 @@ if wfo_info['n_folds'] > 0:
     print(f'Last test:  {wfo_info["last_fold"]["test_start"]} → {wfo_info["last_fold"]["test_end"]}')
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
-print(f'\nRun 8: 14 HP configs | Reward: {REWARD_TYPE} (equity-scaled)')
-print(f'       turnover_penalty={TURNOVER_PENALTY} | annualization={ANNUALIZATION}')
+print(f'\nRun config: Top-{TOP_K} momentum | Reward: {REWARD_TYPE} | Annualization: {ANNUALIZATION}')
 
 ## 2. Train
 
@@ -65,12 +65,13 @@ rl_results = train_walk_forward(
     patience=5,
     min_epochs=10,
     transaction_cost_bps=5.0,
-    turnover_penalty=TURNOVER_PENALTY,
+    turnover_penalty=0.001,
     variance_penalty=0.0,
     tc_curriculum_frac=0.0,
     lookback_window=40,
     results_dir='../Results_Intraday',
     verbose=True,
+    top_k=TOP_K,
     annualization=ANNUALIZATION,
     reward_type=REWARD_TYPE,
 )
@@ -80,7 +81,7 @@ print(f'\n\nTotal time: {(time.time()-t0)/60:.1f} minutes')
 ## 3. Results
 
 print('=' * 60)
-print('OUT-OF-SAMPLE PERFORMANCE (Run 8: 14-config grid)')
+print(f'OUT-OF-SAMPLE PERFORMANCE (Top-{TOP_K}, {REWARD_TYPE})')
 print('=' * 60)
 rl_m = pd.read_csv('../Results_Intraday/rl_performance_metrics.csv', index_col=0)
 print(rl_m.to_string())
@@ -110,13 +111,15 @@ if RUN_BASELINES:
     bl_metrics = pd.read_csv('../Results_Intraday/performance_metrics_oos.csv', index_col=0)
     rl_row = rl_m.loc[['RL Agent']]
     combined = pd.concat([bl_metrics, rl_row]).sort_values('IR2', ascending=False)
-    metric_cols = [c for c in [
+    metric_cols = [
         'Absolute Return (%)', 'ARC (%)', 'ASD (%)', 'Max Drawdown (%)',
         'MLD (years)', 'IR1', 'IR2', 'Sharpe', 'Sortino', 'Calmar', 'N Days',
-        'Avg Daily Turnover (%)',
-    ] if c in combined.columns]
+    ]
+    metric_cols = [c for c in metric_cols if c in combined.columns]
+    if 'Avg Daily Turnover (%)' in combined.columns:
+        metric_cols.append('Avg Daily Turnover (%)')
     print('\n' + '=' * 80)
-    print('COMBINED COMPARISON — Run 8 (14 configs, equity-scaled reward)')
+    print(f'COMBINED COMPARISON — Top-{TOP_K} {REWARD_TYPE} (same OOS period)')
     print('=' * 80)
     print(combined[metric_cols].to_string())
 

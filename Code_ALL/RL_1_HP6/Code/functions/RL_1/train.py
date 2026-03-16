@@ -185,7 +185,8 @@ def evaluate_agent(agent, dataset, start_date, end_date,
         dataset, start_date=start_date, end_date=end_date,
         transaction_cost_bps=transaction_cost_bps,
         turnover_penalty=0.0, reward_type="return",
-        lookback_window=lookback_window, top_k=top_k,
+        lookback_window=lookback_window,
+        top_k=top_k,
     )
     state = env.reset()
     while not env.done:
@@ -214,7 +215,7 @@ def evaluate_agent(agent, dataset, start_date, end_date,
 
 def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
                 n_epochs=30, patience=5, min_epochs=10,
-                transaction_cost_bps=5.0, turnover_penalty=0.003,
+                transaction_cost_bps=5.0, turnover_penalty=0.001,
                 variance_penalty=0.0, tc_curriculum_frac=0.0,
                 lookback_window=40, verbose=True,
                 top_k=0, annualization=504, reward_type="excess_return"):
@@ -303,82 +304,26 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 
 
 # =============================================================================
-# HP CONFIGS — 14 configs: 7 investment styles × 2 RL variants
+# HP CONFIGS (10 configs)
 # =============================================================================
 
 DEFAULT_HP_CONFIGS = [
-    # --- v1: exploratory RL (lr_c=3e-4, batch=64, ent=0.8, gamma=0.95, dropout=0.0) ---
-    {"name": "top10_aggr_v1",
+    {"name": "standard",
      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
      "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top20_aggr_v1",
-     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "min_equity": 0.3, "max_equity": 0.95, "variance_penalty": 0.0},
+    {"name": "conservative_lr",
+     "lr_actor": 1e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
      "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 20, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top30_aggr_v1",
-     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 30, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top10_bal_v1",
-     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top20_bal_v1",
-     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 20, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top30_bal_v1",
-     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 30, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    {"name": "top10_large_v1",
+     "min_equity": 0.3, "max_equity": 0.95, "variance_penalty": 0.0},
+    {"name": "large_capacity",
      "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8,
      "scorer_hidden": 128, "cash_head_hidden": 128, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
-    # --- v2: exploitative RL (lr_c=1e-3, batch=128, ent=0.5, gamma=0.99, dropout=0.1) ---
-    {"name": "top10_aggr_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top20_aggr_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 20, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top30_aggr_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 30, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top10_bal_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top20_bal_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 20, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top30_bal_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
-     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
-     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
-     "top_k": 30, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
-    {"name": "top10_large_v2",
-     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 128, "n_attn_heads": 8,
+     "min_equity": 0.3, "max_equity": 0.95, "variance_penalty": 0.0},
+    {"name": "aggressive_timing",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
      "scorer_hidden": 128, "cash_head_hidden": 128, "hierarchical": True,
-     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
-     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+     "min_equity": 0.3, "max_equity": 0.95, "variance_penalty": 0.0},
 ]
 
 
@@ -407,14 +352,19 @@ def _compute_monthly_sharpes(returns_series, annualization=252):
 
 def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
                            patience=5, min_epochs=10, transaction_cost_bps=5.0,
-                           turnover_penalty=0.003, lookback_window=40,
+                           turnover_penalty=0.001, lookback_window=40,
                            variance_penalty=0.0, tc_curriculum_frac=0.0,
-                           verbose=True, annualization=504,
+                           verbose=True, top_k=0, annualization=504,
                            reward_type="excess_return"):
     """
     Run all HP configs on a fold, select best using monthly-Sharpe consistency.
-    Per-config top_k, batch_size, gamma, ent_multiplier, dropout are extracted
-    from each HP config dict and passed to SACAgent and environment.
+
+    Selection (3-tier):
+      Tier 1: median(train monthly Sharpes) > 2 AND max(val monthly Sharpes) > 2
+              → pick config with smallest |median_train - max_val| (consistency)
+      Tier 2: both median_train > 0 and max_val > 0
+              → pick config with highest max_val
+      Tier 3: fallback → pick config with highest max_val
     """
     fold_id = fold.get("fold_id", "?")
     print(f"\n  HP Selection on fold {fold_id}:")
@@ -429,9 +379,6 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
         hp_name = hp_copy["name"]
         print(f"\n    --- Config: {hp_name} ---")
         vp = hp_copy.pop("variance_penalty", variance_penalty)
-        # Extract per-config top_k (used by environment, not SACAgent)
-        config_top_k = hp_copy.pop("top_k", 20)
-        # All remaining keys (except name) go to SACAgent config
         config = {
             "n_asset_features": dataset["metadata"]["n_per_asset_features"],
             "n_global_features": dataset["metadata"]["n_global_features"],
@@ -447,18 +394,18 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
             turnover_penalty=turnover_penalty,
             variance_penalty=vp, tc_curriculum_frac=tc_curriculum_frac,
             lookback_window=lookback_window, verbose=verbose,
-            top_k=config_top_k, annualization=annualization,
+            top_k=top_k, annualization=annualization,
             reward_type=reward_type,
         )
 
-        # Evaluate on full train and val windows
+        # Evaluate trained agent on full train and val windows
         train_r = evaluate_agent(agent, dataset, fold["train_start"],
                                  fold["train_end"], transaction_cost_bps,
-                                 lookback_window, top_k=config_top_k,
+                                 lookback_window, top_k=top_k,
                                  annualization=annualization)
         val_r = evaluate_agent(agent, dataset, fold["val_start"],
                                fold["val_end"], transaction_cost_bps,
-                               lookback_window, top_k=config_top_k,
+                               lookback_window, top_k=top_k,
                                annualization=annualization)
 
         train_monthly = _compute_monthly_sharpes(train_r["results"]["portfolio_return_net"], annualization)
@@ -558,12 +505,13 @@ def train_walk_forward(
     patience: int = 5,
     min_epochs: int = 10,
     transaction_cost_bps: float = 5.0,
-    turnover_penalty: float = 0.003,
+    turnover_penalty: float = 0.001,
     variance_penalty: float = 0.0,
     tc_curriculum_frac: float = 0.0,
     lookback_window: int = 40,
     results_dir: str = "../Results",
     verbose: bool = True,
+    top_k: int = 20,
     annualization: int = 504,
     reward_type: str = "excess_return",
 ) -> Dict:
@@ -573,6 +521,7 @@ def train_walk_forward(
     out_dir = Path(results_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # Generate folds
     folds = generate_wfo_folds(
         dataset["trading_dates"], train_months, val_months,
         test_months, step_months, embargo_days,
@@ -587,8 +536,12 @@ def train_walk_forward(
     if folds:
         print(f"  OOS test: {folds[0]['test_start']} → {folds[-1]['test_end']}")
     print(f"  HP configs: {len(hp_configs)}")
-    print(f"  Lookback: {lookback_window} | Annualization: {annualization}")
-    print(f"  Reward: {reward_type} | Turnover penalty: {turnover_penalty}")
+    print(f"  Lookback window: {lookback_window} sessions")
+    print(f"  Top-K universe: {top_k if top_k > 0 else 'ALL'}")
+    print(f"  Reward type: {reward_type}")
+    print(f"  Annualization: {annualization}")
+    print(f"  Variance penalty: {variance_penalty}")
+    print(f"  TC curriculum: {tc_curriculum_frac*100:.0f}% of episode")
     print(f"  Policy mode: {'Hierarchical (HRA-SAC)' if hp_configs[0].get('hierarchical', True) else 'Flat Dirichlet'}")
     print("=" * 70)
 
@@ -660,11 +613,9 @@ def train_walk_forward(
             need_retrain = True
             reason = "initial"
         else:
-            # Use top_k from the currently selected config for val evaluation
-            carry_top_k = selected_config.get("top_k", 20) if selected_config else 20
             val_r = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
                                    transaction_cost_bps, lookback_window,
-                                   top_k=carry_top_k, annualization=annualization)
+                                   top_k=top_k, annualization=annualization)
             current_val_ir2 = val_r["metrics"]["IR2"]
             val_rets = val_r["results"]["portfolio_return_net"]
             val_std = val_rets.std()
@@ -705,16 +656,15 @@ def train_walk_forward(
                 variance_penalty=variance_penalty,
                 tc_curriculum_frac=tc_curriculum_frac,
                 verbose=verbose,
-                annualization=annualization,
+                top_k=top_k, annualization=annualization,
                 reward_type=reward_type,
             )
             selected_config = best_hp["config"]
             current_val_ir2 = best_hp["val_ir2"]
 
-            sel_top_k = selected_config.get("top_k", 20)
             val_r_post = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
                                         transaction_cost_bps, lookback_window,
-                                        top_k=sel_top_k, annualization=annualization)
+                                        top_k=top_k, annualization=annualization)
             post_rets = val_r_post["results"]["portfolio_return_net"]
             post_std = post_rets.std()
             current_val_sharpe = float(np.clip(post_rets.mean() / post_std * np.sqrt(annualization), -10.0, 10.0)) if post_std > 1e-4 else 0.0
@@ -725,11 +675,10 @@ def train_walk_forward(
 
         val_sharpe_history.append(current_val_sharpe)
 
-        # Test — use top_k from selected config
-        test_top_k = selected_config.get("top_k", 20) if selected_config else 20
+        # Test
         test_r = evaluate_agent(agent, dataset, fold["test_start"], fold["test_end"],
                                 transaction_cost_bps, lookback_window,
-                                top_k=test_top_k, annualization=annualization)
+                                top_k=top_k, annualization=annualization)
         test_ir2 = test_r["metrics"]["IR2"]
         test_arc = test_r["metrics"]["ARC (%)"]
 
@@ -847,8 +796,8 @@ def train_walk_forward(
                "hp_configs": len(hp_configs),
                "window_type": "SLIDING (non-anchored)",
                "hierarchical": hp_configs[0].get("hierarchical", True),
-               "annualization": annualization, "reward_type": reward_type,
-               "turnover_penalty": turnover_penalty}
+               "top_k": top_k, "annualization": annualization,
+               "reward_type": reward_type}
     with open(out_dir / "rl_wfo_config.json", "w") as f:
         json.dump(wfo_cfg, f, indent=2)
 
