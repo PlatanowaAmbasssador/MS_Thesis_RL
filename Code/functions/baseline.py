@@ -10,18 +10,9 @@ Five baselines:
     4. Momentum (top quintile by 20d returns, daily rebalance)
     5. Supervised Learning + Mean-Variance Optimization
 
-Outputs saved to Results/ folder:
-    - equity_curves_{tag}.csv
-    - daily_returns_{tag}.csv
-    - performance_metrics_{tag}.csv
-    - turnover_{tag}.csv
-
-Usage (from notebook):
-    from functions.data_pipeline import build_dataset
-    from functions.baseline import run_all_baselines
-
-    dataset = build_dataset("../Data/Outputs/Filtered/Data")
-    all_results = run_all_baselines(dataset, results_dir="../Results")
+Changes in this version:
+    - All metric functions accept `annualization` parameter (default 252)
+    - For 2x/day mode, pass annualization=504
 """
 
 import math
@@ -33,7 +24,7 @@ from .environment import PortfolioEnv
 
 
 # =============================================================================
-# PERFORMANCE METRICS (user's framework)
+# PERFORMANCE METRICS (with configurable annualization)
 # =============================================================================
 
 def equity_to_returns(tab):
@@ -50,8 +41,8 @@ def absolute_return(tab):
     return (np.prod(1 + ret) - 1.0) * 100
 
 
-def ARC(tab):
-    """Annualized Rate of Return (%), assuming 252 trading days/year."""
+def ARC(tab, annualization=252):
+    """Annualized Rate of Return (%)."""
     tab = np.array(tab, dtype=np.float64)
     ret = equity_to_returns(tab)
     length = len(tab)
@@ -60,7 +51,7 @@ def ARC(tab):
     a_rtn = np.prod(1 + ret[:-1])
     if a_rtn <= 0:
         return 0.0
-    return 100 * (math.pow(a_rtn, 252 / length) - 1)
+    return 100 * (math.pow(a_rtn, annualization / length) - 1)
 
 
 def MaximumDrawdown(tab):
@@ -74,12 +65,12 @@ def MaximumDrawdown(tab):
     return np.max(drawdowns) * 100
 
 
-def ASD(tab):
-    """Annualized Standard Deviation (%), assuming 252 trading days/year."""
+def ASD(tab, annualization=252):
+    """Annualized Standard Deviation (%)."""
     ret = equity_to_returns(tab)
     if len(ret) == 0:
         return 0.0
-    return (math.sqrt(252) * np.std(ret)) * 100
+    return (math.sqrt(annualization) * np.std(ret)) * 100
 
 
 def sgn(x):
@@ -88,14 +79,15 @@ def sgn(x):
     return int(abs(x) / x)
 
 
-def MLD(tab):
-    """Maximum Loss Duration in years (252.03 days/year)."""
+def MLD(tab, annualization=252):
+    """Maximum Loss Duration in years."""
     temp = np.array(tab, dtype=np.float64)
+    sessions_per_year = annualization
     if len(temp) == 0:
         return 1.0
     i = np.argmax(np.maximum.accumulate(temp) - temp)
     if i == 0:
-        return len(temp) / 252.03
+        return len(temp) / sessions_per_year
     j = np.argmax(temp[:i])
     MLD_end = -1
     for k in range(i, len(temp)):
@@ -104,25 +96,22 @@ def MLD(tab):
             break
     if MLD_end == -1:
         MLD_end = len(temp)
-    return abs(MLD_end - j) / 252.03
+    return abs(MLD_end - j) / sessions_per_year
 
 
-def IR1(tab):
-    """Information Ratio 1: ARC / ASD (≈ annualized Sharpe)."""
-    asd = ASD(tab)
-    arc = ARC(tab)
+def IR1(tab, annualization=252):
+    """Information Ratio 1: ARC / ASD."""
+    asd = ASD(tab, annualization)
+    arc = ARC(tab, annualization)
     if asd == 0:
         return 0.0
     return max(arc / asd, 0)
 
 
-def IR2(tab):
-    """
-    Information Ratio 2: (ARC^2 * sgn(ARC)) / (ASD * MDD).
-    PRIMARY OPTIMIZATION TARGET.
-    """
-    asd = ASD(tab)
-    arc = ARC(tab)
+def IR2(tab, annualization=252):
+    """Information Ratio 2: (ARC^2 * sgn(ARC)) / (ASD * MDD). PRIMARY TARGET."""
+    asd = ASD(tab, annualization)
+    arc = ARC(tab, annualization)
     mdd = MaximumDrawdown(tab)
     denom = asd * mdd
     if denom == 0:
@@ -131,41 +120,35 @@ def IR2(tab):
     return max(numer / denom, 0)
 
 
-def compute_all_metrics(equity_curve) -> dict:
+def compute_all_metrics(equity_curve, annualization=252) -> dict:
     """Compute all performance metrics from an equity curve (starting at 1.0)."""
     tab = np.array(equity_curve, dtype=np.float64)
     ret = equity_to_returns(tab)
 
-    # Annualized Sharpe (daily returns → annualized)
     if len(ret) > 1 and np.std(ret) > 0:
-        sharpe_ann = (np.mean(ret) / np.std(ret)) * np.sqrt(252)
+        sharpe_ann = (np.mean(ret) / np.std(ret)) * np.sqrt(annualization)
     else:
         sharpe_ann = 0.0
 
-    # Sortino (penalizes only downside vol)
     downside = np.array([r for r in ret if r < 0])
     if len(downside) > 1 and np.std(downside) > 0:
-        sortino = (np.mean(ret) / np.std(downside)) * np.sqrt(252)
+        sortino = (np.mean(ret) / np.std(downside)) * np.sqrt(annualization)
     else:
         sortino = 0.0
 
-    # Calmar (ARC / MaxDD)
-    arc_val = ARC(tab)
+    arc_val = ARC(tab, annualization)
     mdd_val = MaximumDrawdown(tab)
     calmar = arc_val / mdd_val if mdd_val > 0 else 0.0
-
-    # Number of trades (position changes in the equity curve)
-    # This counts sign changes in daily returns as a proxy when positions aren't available
     n_days = len(ret)
 
     return {
         "Absolute Return (%)": round(absolute_return(tab), 4),
         "ARC (%)": round(arc_val, 4),
-        "ASD (%)": round(ASD(tab), 4),
+        "ASD (%)": round(ASD(tab, annualization), 4),
         "Max Drawdown (%)": round(mdd_val, 4),
-        "MLD (years)": round(MLD(tab), 4),
-        "IR1": round(IR1(tab), 4),
-        "IR2": round(IR2(tab), 4),
+        "MLD (years)": round(MLD(tab, annualization), 4),
+        "IR1": round(IR1(tab, annualization), 4),
+        "IR2": round(IR2(tab, annualization), 4),
         "Sharpe": round(sharpe_ann, 4),
         "Sortino": round(sortino, 4),
         "Calmar": round(calmar, 4),
@@ -190,6 +173,7 @@ class BaselineStrategy:
         start_date: Optional[str] = None,
         end_date: Optional[str] = None,
         transaction_cost_bps: float = 5.0,
+        annualization: int = 252,
     ) -> dict:
         env = PortfolioEnv(
             dataset,
@@ -208,7 +192,7 @@ class BaselineStrategy:
 
         results = env.get_results()
         equity = np.array([1.0] + list(results["portfolio_value"].values))
-        metrics = compute_all_metrics(equity)
+        metrics = compute_all_metrics(equity, annualization=annualization)
         metrics["Avg Daily Turnover (%)"] = round(results["turnover"].mean() * 100, 4)
         metrics["Total TC (%)"] = round(results["transaction_cost"].sum() * 100, 4)
         return {"results": results, "metrics": metrics, "equity": equity, "name": self.name}
@@ -222,7 +206,8 @@ class QQQBuyHold:
     def __init__(self):
         self.name = "QQQ Buy-and-Hold"
 
-    def run(self, dataset, start_date=None, end_date=None, **kwargs):
+    def run(self, dataset, start_date=None, end_date=None,
+            transaction_cost_bps=5.0, annualization=252):
         dates = dataset["trading_dates"]
         if start_date:
             dates = dates[dates >= pd.Timestamp(start_date)]
@@ -233,7 +218,7 @@ class QQQBuyHold:
         qqq_ret = qqq.pct_change().dropna()
         cum = (1 + qqq_ret).cumprod()
         equity = np.array([1.0] + list(cum.values))
-        metrics = compute_all_metrics(equity)
+        metrics = compute_all_metrics(equity, annualization=annualization)
         metrics["Avg Daily Turnover (%)"] = 0.0
         metrics["Total TC (%)"] = 0.0
 
@@ -271,9 +256,11 @@ class EqualWeightMonthly(BaselineStrategy):
             current_cash = env.weights[-1]
             return np.concatenate([current_stocks, [current_cash]]).astype(np.float32)
 
-    def run(self, dataset, start_date=None, end_date=None, transaction_cost_bps=5.0):
+    def run(self, dataset, start_date=None, end_date=None,
+            transaction_cost_bps=5.0, annualization=252):
         self._last_rebalance_month = None
-        return super().run(dataset, start_date, end_date, transaction_cost_bps)
+        return super().run(dataset, start_date, end_date,
+                           transaction_cost_bps, annualization)
 
 
 # =============================================================================
@@ -385,9 +372,9 @@ class SupervisedMVO(BaselineStrategy):
             if date_idx + 1 >= len(dates):
                 continue
             next_date = dates[date_idx + 1]
-            tradable = mask.loc[date] == 1
+            tradable = mask.loc[date]
             for ticker in tickers:
-                if not tradable[ticker]:
+                if tradable.get(ticker, 0) != 1:
                     continue
                 feat_vals = []
                 for feat in feat_names:
@@ -454,11 +441,13 @@ class SupervisedMVO(BaselineStrategy):
         target_w = (target_w / target_w.sum()).astype(np.float32)
         return np.concatenate([target_w, [0.0]])
 
-    def run(self, dataset, start_date=None, end_date=None, transaction_cost_bps=5.0):
+    def run(self, dataset, start_date=None, end_date=None,
+            transaction_cost_bps=5.0, annualization=252):
         self._dataset = dataset
         self._step_count = 0
         self.model = None
-        return super().run(dataset, start_date, end_date, transaction_cost_bps)
+        return super().run(dataset, start_date, end_date,
+                           transaction_cost_bps, annualization)
 
 
 # =============================================================================
@@ -473,16 +462,8 @@ def run_all_baselines(
     results_dir: str = "../Results",
     tag: str = "full",
     verbose: bool = True,
+    annualization: int = 252,
 ) -> dict:
-    """
-    Run all 5 baselines, print comparison table, save CSVs.
-
-    Saves to results_dir/:
-        - equity_curves_{tag}.csv
-        - daily_returns_{tag}.csv
-        - performance_metrics_{tag}.csv
-        - turnover_{tag}.csv
-    """
     strategies = [
         QQQBuyHold(),
         EqualWeightMonthly(),
@@ -500,6 +481,7 @@ def run_all_baselines(
         print("RUNNING ALL BASELINES")
         print(f"  Period: {start_date or 'start'} → {end_date or 'end'}")
         print(f"  Transaction cost: {transaction_cost_bps} bps one-way")
+        print(f"  Annualization: {annualization}")
         print(f"  Results dir: {out_dir.resolve()}")
         print("=" * 70)
 
@@ -509,6 +491,7 @@ def run_all_baselines(
         result = strategy.run(
             dataset, start_date=start_date, end_date=end_date,
             transaction_cost_bps=transaction_cost_bps,
+            annualization=annualization,
         )
         all_results[strategy.name] = result
         if verbose:
@@ -516,7 +499,6 @@ def run_all_baselines(
             print(f"Done — IR2: {m['IR2']:.4f}, ARC: {m['ARC (%)']:.1f}%, "
                   f"MDD: {m['Max Drawdown (%)']:.1f}%")
 
-    # --- Save CSVs ---
     _save_results(all_results, out_dir, tag, verbose)
 
     if verbose:
@@ -526,9 +508,6 @@ def run_all_baselines(
 
 
 def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
-    """Save equity curves, returns, turnover, and metrics to CSV."""
-
-    # 1. Equity curves
     equity_df = pd.DataFrame()
     for name, res in all_results.items():
         equity_df[name] = res["results"]["portfolio_value"]
@@ -536,9 +515,8 @@ def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
     path = out_dir / f"equity_curves_{tag}.csv"
     equity_df.to_csv(path)
     if verbose:
-        print(f"\n  💾 Saved: {path}")
+        print(f"\n  Saved: {path}")
 
-    # 2. Daily returns
     returns_df = pd.DataFrame()
     for name, res in all_results.items():
         returns_df[name] = res["results"]["portfolio_return_net"]
@@ -546,9 +524,8 @@ def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
     path = out_dir / f"daily_returns_{tag}.csv"
     returns_df.to_csv(path)
     if verbose:
-        print(f"  💾 Saved: {path}")
+        print(f"  Saved: {path}")
 
-    # 3. Turnover
     turnover_df = pd.DataFrame()
     for name, res in all_results.items():
         turnover_df[name] = res["results"]["turnover"]
@@ -556,9 +533,8 @@ def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
     path = out_dir / f"turnover_{tag}.csv"
     turnover_df.to_csv(path)
     if verbose:
-        print(f"  💾 Saved: {path}")
+        print(f"  Saved: {path}")
 
-    # 4. Performance metrics
     metrics_rows = []
     for name, res in all_results.items():
         row = {"Strategy": name}
@@ -568,7 +544,7 @@ def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
     path = out_dir / f"performance_metrics_{tag}.csv"
     metrics_df.to_csv(path)
     if verbose:
-        print(f"  💾 Saved: {path}")
+        print(f"  Saved: {path}")
 
 
 # =============================================================================
@@ -576,7 +552,6 @@ def _save_results(all_results: dict, out_dir: Path, tag: str, verbose: bool):
 # =============================================================================
 
 def print_comparison_table(all_results: dict) -> None:
-    """Print formatted comparison table sorted by IR2."""
     sorted_results = sorted(
         all_results.items(),
         key=lambda x: x[1]["metrics"]["IR2"],

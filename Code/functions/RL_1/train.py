@@ -179,12 +179,14 @@ def plot_wfo_folds(folds: List[Dict]):
 # =============================================================================
 
 def evaluate_agent(agent, dataset, start_date, end_date,
-                   transaction_cost_bps=5.0, lookback_window=20):
+                   transaction_cost_bps=5.0, lookback_window=40,
+                   top_k=0, annualization=504):
     env = PortfolioEnv(
         dataset, start_date=start_date, end_date=end_date,
         transaction_cost_bps=transaction_cost_bps,
         turnover_penalty=0.0, reward_type="return",
         lookback_window=lookback_window,
+        top_k=top_k,
     )
     state = env.reset()
     while not env.done:
@@ -193,7 +195,7 @@ def evaluate_agent(agent, dataset, start_date, end_date,
 
     results = env.get_results()
     equity = np.array([1.0] + list(results["portfolio_value"].values))
-    metrics = compute_all_metrics(equity)
+    metrics = compute_all_metrics(equity, annualization=annualization)
     metrics["Avg Daily Turnover (%)"] = round(results["turnover"].mean() * 100, 4)
     metrics["Avg Cash (%)"] = round(results["cash_weight"].mean() * 100, 2) if "cash_weight" in results else 0
     # Trade counting: a trade = any day where weights change meaningfully
@@ -215,14 +217,16 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
                 n_epochs=30, patience=5, min_epochs=10,
                 transaction_cost_bps=5.0, turnover_penalty=0.001,
                 variance_penalty=0.0, tc_curriculum_frac=0.0,
-                lookback_window=40, verbose=True):
+                lookback_window=40, verbose=True,
+                top_k=0, annualization=504, reward_type="excess_return"):
     train_env = PortfolioEnv(
         dataset, start_date=train_start, end_date=train_end,
         transaction_cost_bps=transaction_cost_bps,
-        turnover_penalty=turnover_penalty, reward_type="sharpe",
+        turnover_penalty=turnover_penalty, reward_type=reward_type,
         lookback_window=lookback_window,
         variance_penalty=variance_penalty,
         tc_curriculum_frac=tc_curriculum_frac,
+        top_k=top_k,
     )
 
     best_val_score = -np.inf
@@ -251,16 +255,17 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
         # Train metrics
         train_results = train_env.get_results()
         train_eq = np.array([1.0] + list(train_results["portfolio_value"].values))
-        train_m = compute_all_metrics(train_eq)
+        train_m = compute_all_metrics(train_eq, annualization=annualization)
 
         # Validate
         val_r = evaluate_agent(agent, dataset, val_start, val_end,
-                               transaction_cost_bps, lookback_window)
+                               transaction_cost_bps, lookback_window,
+                               top_k=top_k, annualization=annualization)
         val_ir2 = val_r["metrics"]["IR2"]
         val_arc = val_r["metrics"]["ARC (%)"]
         val_rets = val_r["results"]["portfolio_return_net"]
         val_std = val_rets.std()
-        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
+        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(annualization), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
         elapsed = time.time() - t0
         if verbose:
@@ -349,7 +354,8 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
                            patience=5, min_epochs=10, transaction_cost_bps=5.0,
                            turnover_penalty=0.001, lookback_window=40,
                            variance_penalty=0.0, tc_curriculum_frac=0.0,
-                           verbose=True):
+                           verbose=True, top_k=0, annualization=504,
+                           reward_type="excess_return"):
     """
     Run all HP configs on a fold, select best using monthly-Sharpe consistency.
 
@@ -388,18 +394,22 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
             turnover_penalty=turnover_penalty,
             variance_penalty=vp, tc_curriculum_frac=tc_curriculum_frac,
             lookback_window=lookback_window, verbose=verbose,
+            top_k=top_k, annualization=annualization,
+            reward_type=reward_type,
         )
 
         # Evaluate trained agent on full train and val windows
         train_r = evaluate_agent(agent, dataset, fold["train_start"],
                                  fold["train_end"], transaction_cost_bps,
-                                 lookback_window)
+                                 lookback_window, top_k=top_k,
+                                 annualization=annualization)
         val_r = evaluate_agent(agent, dataset, fold["val_start"],
                                fold["val_end"], transaction_cost_bps,
-                               lookback_window)
+                               lookback_window, top_k=top_k,
+                               annualization=annualization)
 
-        train_monthly = _compute_monthly_sharpes(train_r["results"]["portfolio_return_net"])
-        val_monthly = _compute_monthly_sharpes(val_r["results"]["portfolio_return_net"])
+        train_monthly = _compute_monthly_sharpes(train_r["results"]["portfolio_return_net"], annualization)
+        val_monthly = _compute_monthly_sharpes(val_r["results"]["portfolio_return_net"], annualization)
 
         median_train = float(np.median(train_monthly)) if train_monthly else -np.inf
         max_val = float(np.max(val_monthly)) if val_monthly else -np.inf
@@ -407,7 +417,7 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
         val_ir2 = val_r["metrics"]["IR2"]
         val_rets = val_r["results"]["portfolio_return_net"]
         val_std = val_rets.std()
-        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
+        val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(annualization), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
         entry = {
             "name": hp_name, "config": hp, "val_ir2": val_ir2,
@@ -486,10 +496,10 @@ def _load_checkpoint(out_dir):
 def train_walk_forward(
     dataset: dict,
     train_months: int = 24,
-    val_months: int = 1,
-    test_months: int = 1,
-    step_months: int = 1,
-    embargo_days: int = 5,
+    val_months: int = 2,
+    test_months: int = 2,
+    step_months: int = 2,
+    embargo_days: int = 0,
     hp_configs: Optional[List[Dict]] = None,
     n_epochs: int = 30,
     patience: int = 5,
@@ -501,6 +511,9 @@ def train_walk_forward(
     lookback_window: int = 40,
     results_dir: str = "../Results",
     verbose: bool = True,
+    top_k: int = 20,
+    annualization: int = 504,
+    reward_type: str = "excess_return",
 ) -> Dict:
     if hp_configs is None:
         hp_configs = [c.copy() for c in DEFAULT_HP_CONFIGS]
@@ -523,7 +536,10 @@ def train_walk_forward(
     if folds:
         print(f"  OOS test: {folds[0]['test_start']} → {folds[-1]['test_end']}")
     print(f"  HP configs: {len(hp_configs)}")
-    print(f"  Lookback window: {lookback_window} days")
+    print(f"  Lookback window: {lookback_window} sessions")
+    print(f"  Top-K universe: {top_k if top_k > 0 else 'ALL'}")
+    print(f"  Reward type: {reward_type}")
+    print(f"  Annualization: {annualization}")
     print(f"  Variance penalty: {variance_penalty}")
     print(f"  TC curriculum: {tc_curriculum_frac*100:.0f}% of episode")
     print(f"  Policy mode: {'Hierarchical (HRA-SAC)' if hp_configs[0].get('hierarchical', True) else 'Flat Dirichlet'}")
@@ -598,11 +614,12 @@ def train_walk_forward(
             reason = "initial"
         else:
             val_r = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
-                                   transaction_cost_bps, lookback_window)
+                                   transaction_cost_bps, lookback_window,
+                                   top_k=top_k, annualization=annualization)
             current_val_ir2 = val_r["metrics"]["IR2"]
             val_rets = val_r["results"]["portfolio_return_net"]
             val_std = val_rets.std()
-            current_val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(252), -10.0, 10.0)) if val_std > 1e-4 else 0.0
+            current_val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(annualization), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
             # Mandatory retrain every 4 folds to prevent stale models
             folds_since_retrain = 0
@@ -639,15 +656,18 @@ def train_walk_forward(
                 variance_penalty=variance_penalty,
                 tc_curriculum_frac=tc_curriculum_frac,
                 verbose=verbose,
+                top_k=top_k, annualization=annualization,
+                reward_type=reward_type,
             )
             selected_config = best_hp["config"]
             current_val_ir2 = best_hp["val_ir2"]
 
             val_r_post = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
-                                        transaction_cost_bps, lookback_window)
+                                        transaction_cost_bps, lookback_window,
+                                        top_k=top_k, annualization=annualization)
             post_rets = val_r_post["results"]["portfolio_return_net"]
             post_std = post_rets.std()
-            current_val_sharpe = float(np.clip(post_rets.mean() / post_std * np.sqrt(252), -10.0, 10.0)) if post_std > 1e-4 else 0.0
+            current_val_sharpe = float(np.clip(post_rets.mean() / post_std * np.sqrt(annualization), -10.0, 10.0)) if post_std > 1e-4 else 0.0
             n_retrains += 1
         else:
             if verbose:
@@ -657,14 +677,15 @@ def train_walk_forward(
 
         # Test
         test_r = evaluate_agent(agent, dataset, fold["test_start"], fold["test_end"],
-                                transaction_cost_bps, lookback_window)
+                                transaction_cost_bps, lookback_window,
+                                top_k=top_k, annualization=annualization)
         test_ir2 = test_r["metrics"]["IR2"]
         test_arc = test_r["metrics"]["ARC (%)"]
 
         # QQQ buy & hold for this test window
         qqq_rets = test_r["results"]["qqq_return"]
         qqq_eq = np.array([1.0] + list((1 + qqq_rets).cumprod().values))
-        qqq_test_m = compute_all_metrics(qqq_eq)
+        qqq_test_m = compute_all_metrics(qqq_eq, annualization=annualization)
         qqq_test_arc = qqq_test_m["ARC (%)"]
 
         if verbose and not need_retrain:
@@ -731,8 +752,8 @@ def train_walk_forward(
 
     rl_eq_arr = np.array([1.0] + list(rl_equity.values))
     qqq_eq_arr = np.array([1.0] + list(qqq_equity.values))
-    rl_m = compute_all_metrics(rl_eq_arr)
-    qqq_m = compute_all_metrics(qqq_eq_arr)
+    rl_m = compute_all_metrics(rl_eq_arr, annualization=annualization)
+    qqq_m = compute_all_metrics(qqq_eq_arr, annualization=annualization)
     if all_test_turnover:
         stitched_to = pd.concat(all_test_turnover)
         rl_m["Avg Daily Turnover (%)"] = round(stitched_to.mean() * 100, 4)
@@ -774,7 +795,9 @@ def train_walk_forward(
                "tc_curriculum_frac": tc_curriculum_frac,
                "hp_configs": len(hp_configs),
                "window_type": "SLIDING (non-anchored)",
-               "hierarchical": hp_configs[0].get("hierarchical", True)}
+               "hierarchical": hp_configs[0].get("hierarchical", True),
+               "top_k": top_k, "annualization": annualization,
+               "reward_type": reward_type}
     with open(out_dir / "rl_wfo_config.json", "w") as f:
         json.dump(wfo_cfg, f, indent=2)
 

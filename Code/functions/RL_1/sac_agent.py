@@ -88,7 +88,7 @@ class SACAgent:
         "tau": 0.005,
         "alpha_init": 0.001,
         "auto_alpha": True,
-        "buffer_capacity": 10000,   # OOM-safe for 30GB RAM
+        "buffer_capacity": 50000,   # OOM-safe for 30GB RAM
         "batch_size": 64,
         "gradient_steps": 1,
         "warmup_steps": 64,

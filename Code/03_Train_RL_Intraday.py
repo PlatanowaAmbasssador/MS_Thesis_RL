@@ -1,7 +1,12 @@
-# 03 — Train HRA-SAC Agent with 2x/Day Rebalancing (Feature-Enriched)
-# 15 per-asset features (7 ranked + 8 raw), 9 global features
-# 4 HP configs → re-tuned at every retrain fold → sliding 24m window
-# No embargo, 2-month folds, buffer=10k (OOM-safe for 30GB)
+# 03 — Train HRA-SAC Agent: TOP-20 MOMENTUM + EXCESS RETURN REWARD
+# ================================================================
+# Run 7: The game-changer
+# - Top-20 stocks by 60-day momentum (dynamic, per-step selection)
+# - Reward = (portfolio_return - risk_free) × 100
+# - Dirichlet-20 (same architecture, much easier problem)
+# - Annualization = 504 (correct for 2x/day)
+# - 4 HP configs, 2-month folds, no embargo
+# - Buffer = 50k (only ~1 GB with 20 stocks)
 
 import os, time
 import numpy as np
@@ -9,6 +14,9 @@ import pandas as pd
 import torch
 
 RUN_BASELINES = True
+TOP_K = 20
+ANNUALIZATION = 504
+REWARD_TYPE = "excess_return"
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
@@ -40,6 +48,8 @@ if wfo_info['n_folds'] > 0:
     print(f'Last test:  {wfo_info["last_fold"]["test_start"]} → {wfo_info["last_fold"]["test_end"]}')
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
+print(f'\nRun config: Top-{TOP_K} momentum | Reward: {REWARD_TYPE} | Annualization: {ANNUALIZATION}')
+
 ## 2. Train
 
 t0 = time.time()
@@ -61,6 +71,9 @@ rl_results = train_walk_forward(
     lookback_window=40,
     results_dir='../Results_Intraday',
     verbose=True,
+    top_k=TOP_K,
+    annualization=ANNUALIZATION,
+    reward_type=REWARD_TYPE,
 )
 
 print(f'\n\nTotal time: {(time.time()-t0)/60:.1f} minutes')
@@ -68,7 +81,7 @@ print(f'\n\nTotal time: {(time.time()-t0)/60:.1f} minutes')
 ## 3. Results
 
 print('=' * 60)
-print('OUT-OF-SAMPLE PERFORMANCE (2x/DAY, Feature-Enriched)')
+print(f'OUT-OF-SAMPLE PERFORMANCE (Top-{TOP_K}, {REWARD_TYPE})')
 print('=' * 60)
 rl_m = pd.read_csv('../Results_Intraday/rl_performance_metrics.csv', index_col=0)
 print(rl_m.to_string())
@@ -92,6 +105,7 @@ if RUN_BASELINES:
         results_dir='../Results_Intraday',
         tag='oos',
         verbose=True,
+        annualization=ANNUALIZATION,
     )
 
     bl_metrics = pd.read_csv('../Results_Intraday/performance_metrics_oos.csv', index_col=0)
@@ -105,7 +119,7 @@ if RUN_BASELINES:
     if 'Avg Daily Turnover (%)' in combined.columns:
         metric_cols.append('Avg Daily Turnover (%)')
     print('\n' + '=' * 80)
-    print('COMBINED COMPARISON — 2x/DAY Feature-Enriched (same OOS period)')
+    print(f'COMBINED COMPARISON — Top-{TOP_K} {REWARD_TYPE} (same OOS period)')
     print('=' * 80)
     print(combined[metric_cols].to_string())
 

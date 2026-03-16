@@ -540,7 +540,7 @@ def build_dataset(data_dir: str) -> dict:
     global_feat = build_global_features(clean)
     print(f"  Global features: {list(global_feat.columns)}")
 
-    # Warmup: 80 sessions = 40 trading days (enough for 40-session rolling features)
+    # Warmup: 130 sessions = 65 trading days (needed for 120-session features)
     print("\n[5/5] Applying warmup period (80 sessions = 40 days)...")
     warmup = 80
     valid_dates = clean["trading_dates"][warmup:]
