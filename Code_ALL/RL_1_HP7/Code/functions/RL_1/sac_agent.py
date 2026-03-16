@@ -3,17 +3,11 @@ sac_agent.py — Soft Actor-Critic with Hierarchical Risk-Aware Policy (HRA-SAC)
 ================================================================================
 Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
 
-Run 9 CHANGES (literature-backed fixes):
-    1. alpha_init 0.001 → 0.2    (Spinning Up default, 200× increase)
-    2. target_entropy = -dim(A) × ent_mult  (SAC-v2 standard, WAS positive log(N))
-    3. log_alpha clamp [-5, 2]    (WAS [-7, 1] — allows real exploration)
-    4. warmup_steps = 300         (random Dirichlet actions to seed replay buffer)
-    5. weight_smooth_beta         (EMA smoothing for turnover control)
-
-Key insight: The old target_ent = log(N)*0.8 + 0.5 ≈ +2.3 was POSITIVE.
-The alpha optimizer then pushed alpha DOWN (toward 0.001) to match.
-SAC-v2 standard uses NEGATIVE target entropy ≈ -dim(action), which pushes
-alpha UP → more exploration → the agent actually learns.
+Key features:
+    - Hierarchical policy: cash timing head + Dirichlet stock selection
+    - Alpha tuning uses combined entropy (timing + selection)
+    - Backward compatible: hierarchical=False falls back to flat Dirichlet-(N+1)
+    - log_alpha clamped to [-7, 1] (alpha range: 0.001 to 2.7)
 """
 
 import torch
@@ -100,24 +94,23 @@ class SACAgent:
         "scorer_hidden": 128,
         "critic_hidden": 256,
         "lr_actor": 3e-4,
-        "lr_critic": 1e-3,               # ← faster critic (was 3e-4)
-        "lr_alpha": 3e-4,                 # ← faster alpha tuning (was 1e-4)
-        "gamma": 0.99,                    # ← longer horizon (was 0.95)
+        "lr_critic": 3e-4,
+        "lr_alpha": 1e-4,
+        "gamma": 0.95,
         "tau": 0.005,
-        "alpha_init": 0.2,                # ← FIX #1: 200× increase (was 0.001)
+        "alpha_init": 0.001,
         "auto_alpha": True,
         "buffer_capacity": 50000,
-        "batch_size": 128,                # ← smoother gradients (was 64)
+        "batch_size": 64,
         "gradient_steps": 1,
-        "warmup_steps": 300,              # ← FIX #4: random warmup (was 64)
+        "warmup_steps": 64,
         "device": "auto",
         "hierarchical": True,
         "cash_head_hidden": 64,
-        "min_equity": 0.70,               # ← less cash (was 0.3)
-        "max_equity": 0.98,
+        "min_equity": 0.3,
+        "max_equity": 0.95,
         "ent_multiplier": 0.8,
         "dropout": 0.0,
-        "weight_smooth_beta": 1.0,        # ← NEW: 1.0=no smoothing, 0.3=smooth
     }
 
     def __init__(self, config=None):
@@ -181,18 +174,6 @@ class SACAgent:
         return self.log_alpha.exp()
 
     def select_action(self, state_dict, deterministic=False):
-        n = state_dict["n_tradable"]
-        K = n + 1  # stocks + cash
-
-        # ============================================================
-        # FIX #4: Random warmup — seed replay buffer with diverse actions
-        # (Spinning Up default: start_steps=10000 random actions)
-        # We use 300 for our shorter episodes (~1000 steps)
-        # ============================================================
-        if not deterministic and self.total_steps < self.config["warmup_steps"]:
-            raw = np.random.dirichlet(np.ones(K))
-            return raw
-
         with torch.no_grad():
             torch_state = {
                 "asset_features": torch.FloatTensor(state_dict["asset_features"]).unsqueeze(0).to(self.device),
@@ -204,23 +185,7 @@ class SACAgent:
                 weights = self.actor.get_deterministic_action(torch_state)
             else:
                 weights, _, _ = self.actor.sample(torch_state)
-            weights = weights.cpu().numpy().flatten()
-
-        # ============================================================
-        # FIX #5: Weight smoothing (EMA) for turnover control
-        # β=0.3 means executed_w = 0.3*target + 0.7*previous
-        # ============================================================
-        beta = self.config.get("weight_smooth_beta", 1.0)
-        if beta < 1.0 and not deterministic:
-            prev_w = state_dict["weights"][:K]
-            weights = beta * weights + (1.0 - beta) * prev_w
-            w_sum = weights.sum()
-            if w_sum > 1e-8:
-                weights = weights / w_sum
-            else:
-                weights = np.ones(K) / K
-
-        return weights
+            return weights.cpu().numpy().flatten()
 
     def store_transition(self, state_dict, action_weights, reward, next_state_dict, done, n_tradable):
         self.buffer.push(state_dict, action_weights, reward, next_state_dict, done, n_tradable)
@@ -270,20 +235,12 @@ class SACAgent:
 
             # --- Alpha (entropy-based tuning) ---
             if self.auto_alpha:
-                # ==========================================================
-                # FIX #2: SAC-v2 standard target entropy = -dim(action)
-                # OLD (BROKEN): target_ent = log(N) * 0.8 + 0.5 ≈ +2.3
-                #   → positive target → alpha pushed DOWN → stays at 0.001
-                # NEW (CORRECT): target_ent = -K * ent_mult ≈ -8.0
-                #   → negative target → alpha pushed UP → 0.1-0.5 → learning!
-                # Ref: Haarnoja (2018) "SAC Algorithms and Applications" §5
-                #      Stable Baselines3: target_entropy = -dim(action_space)
-                # ==========================================================
-                ent_mult = c.get("ent_multiplier", 0.8)
                 if c["hierarchical"]:
-                    target_ent = -float(n_t + 1) * ent_mult
+                    ent_mult = c.get("ent_multiplier", 0.8)
+                    target_ent = np.log(n_t) * ent_mult + 0.5
                 else:
-                    target_ent = -float(K) * ent_mult
+                    ent_mult = c.get("ent_multiplier", 0.8)
+                    target_ent = np.log(K) * ent_mult
 
                 with torch.no_grad():
                     actual_entropy = self.actor.entropy(batch["state"])
@@ -293,10 +250,7 @@ class SACAgent:
                 alpha_loss.backward()
                 self.alpha_optimizer.step()
                 with torch.no_grad():
-                    # FIX #3: Wider clamp for real exploration
-                    # OLD: clamp(-7.0, 1.0) → alpha ∈ [0.0009, 2.7]
-                    # NEW: clamp(-5.0, 2.0) → alpha ∈ [0.007, 7.4]
-                    self.log_alpha.clamp_(-5.0, 2.0)
+                    self.log_alpha.clamp_(-7.0, 1.0)
                 total_alpha_loss += alpha_loss.item() * B
 
             total_critic_loss += critic_loss.item() * B
@@ -346,7 +300,6 @@ class SACAgent:
         return {"actor": c(self.actor), "critic": c(self.critic), "total": c(self.actor) + c(self.critic)}
 
     def reset_for_fine_tune(self):
-        """Reset buffer and alpha for new WFO fold (keep network weights)."""
         self.buffer.clear()
         self.total_steps = 0
         if self.auto_alpha:

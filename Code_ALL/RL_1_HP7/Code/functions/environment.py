@@ -1,12 +1,11 @@
 """
-environment.py — RL Environment for Portfolio Allocation (v4.0 — Run 9)
+environment.py — RL Environment for Portfolio Allocation (v3.0 — Top-K)
 ========================================================================
-Run 9 CHANGES:
-    - NEW reward_type="log_return": log(1+r)*1000 - TC - concentration
-      (Jiang et al. 2017, Xue & Ye 2025 — standard in portfolio RL)
-    - TC default 5.0 → 2.0 bps (IB tiered pricing for NASDAQ-100)
-    - variance_penalty → concentration penalty (penalizes HHI of weights)
-    - Kept: top_k momentum, excess_return & sharpe modes (backward compat)
+Changes from v2.1:
+    - top_k: select top-K stocks by 60d momentum per step
+    - reward_type="excess_return": (port_ret - rf) × 100 / max(eq_frac, 0.3)
+    - DifferentialSharpe (not Sortino) for sharpe reward mode
+    - Close array precomputed for fast momentum
 """
 
 import numpy as np
@@ -43,9 +42,9 @@ class DifferentialSharpe:
 
 class PortfolioEnv:
     def __init__(self, dataset, start_date=None, end_date=None,
-                 transaction_cost_bps=2.0, turnover_penalty=0.003,
-                 reward_type="log_return", sharpe_eta=0.005,
-                 lookback_window=60, variance_penalty=0.5,
+                 transaction_cost_bps=5.0, turnover_penalty=0.001,
+                 reward_type="sharpe", sharpe_eta=0.005,
+                 lookback_window=60, variance_penalty=0.0,
                  tc_curriculum_frac=0.0, top_k=0):
         self.all_tickers = dataset["tickers"]
         self.n_tickers = len(self.all_tickers)
@@ -256,61 +255,26 @@ class PortfolioEnv:
 
         qqq_ret = (self.qqq.loc[date_t1, "qqq_close"] / self.qqq.loc[date_t, "qqq_close"]) - 1
 
-        # Equity fraction for logging
+        # Equity fraction for reward scaling
         equity_frac = 1.0 - cash_w
 
-        # ============================================================
-        # REWARD COMPUTATION
-        # ============================================================
-        if self.reward_type == "log_return":
-            # ========================================================
-            # NEW: Log portfolio return (Jiang et al. 2017, Xue 2025)
-            # r = log(1 + port_ret_net) × 1000
-            #   - turnover_penalty × turnover × 100
-            #   - variance_penalty × HHI(stock_weights)
-            #
-            # Log return directly maximizes geometric growth rate.
-            # ×1000 scales to meaningful gradient magnitude.
-            # HHI = sum(w_i^2) penalizes concentration (Xue: w^T Σ w).
-            # We use HHI as a cheap proxy for the variance penalty.
-            # ========================================================
-            log_ret = np.log1p(max(port_ret_net, -0.999)) * 1000.0
-            to_penalty = self.turnover_penalty * turnover * 100.0
-
-            # Concentration penalty: HHI of stock weights
-            # HHI = 1/N means perfect diversification, HHI = 1 means all-in
-            conc_penalty = 0.0
-            if self.variance_penalty > 0:
-                active_w = stock_w[stock_w > 0.001]
-                if len(active_w) > 0:
-                    # Normalize to stock-only weights
-                    w_norm = active_w / (active_w.sum() + 1e-8)
-                    hhi = np.sum(w_norm ** 2)
-                    # Penalty is (HHI - 1/N) × lambda, so no penalty for EW
-                    min_hhi = 1.0 / max(len(active_w), 1)
-                    conc_penalty = self.variance_penalty * (hhi - min_hhi) * 100.0
-
-            reward = log_ret - to_penalty - conc_penalty
-
-        elif self.reward_type == "excess_return":
-            # Legacy: Excess return over rf, scaled by equity fraction
+        # === REWARD ===
+        if self.reward_type == "excess_return":
+            # Excess return over rf, SCALED by equity fraction to penalize cash-hiding
             raw_reward = (port_ret_net - rf_daily) * 100.0
             eq_scale = max(equity_frac, 0.3)
             reward = raw_reward / eq_scale
             reward -= self.turnover_penalty * turnover * 100.0
-
         elif self.reward_type == "sharpe":
             ew_ret = np.mean(returns_t1[selected_t]) if selected_t.any() else 0.0
             excess_ret = port_ret_net - ew_ret
             reward = self.diff_sharpe.compute(excess_ret)
             reward -= self.turnover_penalty * turnover
             reward *= 100.0
-
-        else:  # "return" mode
+        else:
             reward = (port_ret_net - self.turnover_penalty * turnover) * 100.0
 
-        # Legacy variance penalty (backward compat, used when reward_type != log_return)
-        if self.reward_type != "log_return" and self.variance_penalty > 0:
+        if self.variance_penalty > 0:
             recent = self.history["portfolio_return_net"][-20:]
             if len(recent) >= 5:
                 downside = [r for r in recent if r < 0]

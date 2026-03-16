@@ -1,13 +1,13 @@
 """
-train.py — Walk-Forward Optimization for HRA-SAC Portfolio Agent (v5 — Run 9)
+train.py — Walk-Forward Optimization for HRA-SAC Portfolio Agent (v4)
 ======================================================================
 Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
 
-Run 9 changes:
-    - 8 HP configs: flat/hier × k10/k20 × smooth/fast (was 14)
-    - All configs: alpha_init=0.2, lr_critic=1e-3, batch=128, gamma=0.99
-    - weight_smooth_beta support (EMA turnover control)
-    - Flat Dirichlet ablation (hierarchical=False)
+Key features:
+    - Full HP re-selection at EVERY retrain fold (4 configs)
+    - Sliding (non-anchored) WFO with Sharpe-based retrain trigger
+    - Hierarchical Risk-Aware SAC with cash timing + stock selection
+    - 4 HP configs covering LR, model capacity, and cash timing aggressiveness
 """
 
 import numpy as np
@@ -303,49 +303,82 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 
 
 # =============================================================================
-# HP CONFIGS — 8 configs: flat/hier × k10/k20 × smooth/fast (Run 9)
+# HP CONFIGS — 14 configs: 7 investment styles × 2 RL variants
 # =============================================================================
-# ALL configs share fixed SAC params (literature-backed):
-#   alpha_init=0.2, lr_critic=1e-3, lr_alpha=3e-4, batch=128, gamma=0.99
-# Varies: hierarchical, top_k, weight_smooth_beta
-# This gives a clean 2×2×2 factorial for thesis ablation table.
-
-# --- Shared SAC params applied to ALL configs ---
-_SHARED = {
-    "lr_actor": 3e-4, "lr_critic": 1e-3, "lr_alpha": 3e-4,
-    "lstm_hidden": 64, "n_attn_heads": 4,
-    "scorer_hidden": 128, "cash_head_hidden": 64, "critic_hidden": 256,
-    "batch_size": 128, "gamma": 0.99, "dropout": 0.0,
-    "ent_multiplier": 0.8, "alpha_init": 0.2, "warmup_steps": 300,
-    "variance_penalty": 0.5,
-}
 
 DEFAULT_HP_CONFIGS = [
-    # === FLAT DIRICHLET (Xue & Ye 2025 validated) ===
-    # Cash is (N+1)th asset — no separate timing head
-    {"name": "flat_k10_smooth", "hierarchical": False,
-     "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "flat_k10_fast",   "hierarchical": False,
-     "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
-    {"name": "flat_k20_smooth", "hierarchical": False,
-     "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "flat_k20_fast",   "hierarchical": False,
-     "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
-    # === HIERARCHICAL (HRA-SAC — thesis novel contribution) ===
-    # Cash timing head (Gaussian+sigmoid) + Dirichlet-N stock selection
-    # min_equity=0.70 (not 0.50 — avoids 50% cash trap from Run 8)
-    {"name": "hier_k10_smooth", "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98,
-     "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "hier_k10_fast",   "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98,
-     "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
-    {"name": "hier_k20_smooth", "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98,
-     "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "hier_k20_fast",   "hierarchical": True,
-     "min_equity": 0.70, "max_equity": 0.98,
-     "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
+    # --- v1: exploratory RL (lr_c=3e-4, batch=64, ent=0.8, gamma=0.95, dropout=0.0) ---
+    {"name": "top10_aggr_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top20_aggr_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 20, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top30_aggr_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 30, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top10_bal_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top20_bal_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 20, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top30_bal_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 30, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    {"name": "top10_large_v1",
+     "lr_actor": 3e-4, "lr_critic": 3e-4, "lstm_hidden": 128, "n_attn_heads": 8,
+     "scorer_hidden": 128, "cash_head_hidden": 128, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 64, "ent_multiplier": 0.8, "gamma": 0.95, "dropout": 0.0},
+    # --- v2: exploitative RL (lr_c=1e-3, batch=128, ent=0.5, gamma=0.99, dropout=0.1) ---
+    {"name": "top10_aggr_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top20_aggr_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 20, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top30_aggr_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 30, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top10_bal_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top20_bal_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 20, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top30_bal_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 64, "n_attn_heads": 4,
+     "scorer_hidden": 128, "cash_head_hidden": 64, "hierarchical": True,
+     "min_equity": 0.50, "max_equity": 0.95, "variance_penalty": 0.0,
+     "top_k": 30, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
+    {"name": "top10_large_v2",
+     "lr_actor": 3e-4, "lr_critic": 1e-3, "lstm_hidden": 128, "n_attn_heads": 8,
+     "scorer_hidden": 128, "cash_head_hidden": 128, "hierarchical": True,
+     "min_equity": 0.85, "max_equity": 0.98, "variance_penalty": 0.0,
+     "top_k": 10, "batch_size": 128, "ent_multiplier": 0.5, "gamma": 0.99, "dropout": 0.1},
 ]
 
 
