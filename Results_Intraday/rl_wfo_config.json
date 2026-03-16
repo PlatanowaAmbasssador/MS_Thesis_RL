@@ -1,0 +1,15 @@
+{
+  "train_months": 24,
+  "val_months": 2,
+  "test_months": 2,
+  "step_months": 2,
+  "embargo_days": 0,
+  "n_folds": 15,
+  "n_retrains": 6,
+  "lookback_window": 40,
+  "variance_penalty": 0.0,
+  "tc_curriculum_frac": 0.0,
+  "hp_configs": 4,
+  "window_type": "SLIDING (non-anchored)",
+  "hierarchical": true
+}
