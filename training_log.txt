@@ -708,4 +708,72 @@ RUNNING ALL BASELINES
 
   ▶ Momentum Top-20%... Done — IR2: 0.0000, ARC: -1.3%, MDD: 39.0%
 
-  ▶ Supervised + MVO... 
+  ▶ Supervised + MVO... Done — IR2: 0.0399, ARC: 3.5%, MDD: 21.2%
+
+  💾 Saved: ../Results_Intraday/equity_curves_oos.csv
+  💾 Saved: ../Results_Intraday/daily_returns_oos.csv
+  💾 Saved: ../Results_Intraday/turnover_oos.csv
+  💾 Saved: ../Results_Intraday/performance_metrics_oos.csv
+
+==================================================================================================================================
+STRATEGY                     ARC%    ASD%    MDD%    MLD     IR1     IR2  Sharpe  Sortino  Calmar     TO%
+==================================================================================================================================
+  QQQ Buy-and-Hold          11.9   14.3   22.8  0.68  0.833 0.4355  0.859   0.814  0.523   0.00
+  Inverse Volatility         7.2   12.6   21.0  0.68  0.572 0.1970  0.616   0.828  0.345   0.88
+  Equal-Weight Monthly       7.1   12.6   21.2  0.70  0.567 0.1905  0.612   0.820  0.336   0.18
+  Supervised + MVO           3.5   14.5   21.2  0.61  0.242 0.0399  0.310   0.418  0.165  47.27
+  Momentum Top-20%          -1.3   14.4   39.0  3.68  0.000 0.0000 -0.022  -0.030 -0.034  32.50
+==================================================================================================================================
+  (Sorted by IR2 — primary optimization target)
+
+================================================================================
+COMBINED COMPARISON — 2x/DAY Feature-Enriched (same OOS period)
+================================================================================
+                      Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+QQQ Buy-and-Hold                  73.5745  11.9094  14.3033           22.7683       0.6825  0.8326  0.4355  0.8586   0.8140  0.5231  1234.0                  0.0000
+Inverse Volatility                40.8331   7.2200  12.6327           20.9505       0.6825  0.5715  0.1970  0.6164   0.8281  0.3446  1234.0                  0.8759
+Equal-Weight Monthly              40.2521   7.1307  12.5865           21.2045       0.7023  0.5665  0.1905  0.6116   0.8204  0.3363  1234.0                  0.1769
+RL Agent                          13.6041   2.7319   7.9860           11.9439       1.4641  0.3421  0.0782  0.3784   0.4414  0.2287  1189.0                 11.8822
+Supervised + MVO                  18.4155   3.5025  14.4962           21.2078       0.6071  0.2416  0.0399  0.3103   0.4179  0.1652  1234.0                 47.2653
+Momentum Top-20%                  -6.4510  -1.3221  14.4212           39.0483       3.6821  0.0000  0.0000 -0.0222  -0.0296 -0.0339  1234.0                 32.5023
+
+RL files in ../Results_Intraday/:
+  agent_checkpoint.pt                             5396.9 KB
+  agent_final.pt                                  5395.2 KB
+  rl_daily_returns_oos.csv                          63.7 KB
+  rl_equity_oos.csv                                 66.8 KB
+  rl_fold_10_qqq_returns.csv                         2.5 KB
+  rl_fold_10_test_returns.csv                        3.2 KB
+  rl_fold_11_qqq_returns.csv                         2.5 KB
+  rl_fold_11_test_returns.csv                        3.2 KB
+  rl_fold_12_qqq_returns.csv                         2.5 KB
+  rl_fold_12_test_returns.csv                        3.3 KB
+  rl_fold_13_qqq_returns.csv                         2.6 KB
+  rl_fold_13_test_returns.csv                        3.4 KB
+  rl_fold_14_qqq_returns.csv                         2.6 KB
+  rl_fold_14_test_returns.csv                        3.4 KB
+  rl_fold_15_qqq_returns.csv                         2.4 KB
+  rl_fold_15_test_returns.csv                        3.1 KB
+  rl_fold_1_qqq_returns.csv                          2.5 KB
+  rl_fold_1_test_returns.csv                         3.3 KB
+  rl_fold_2_qqq_returns.csv                          2.7 KB
+  rl_fold_2_test_returns.csv                         3.4 KB
+  rl_fold_3_qqq_returns.csv                          2.5 KB
+  rl_fold_3_test_returns.csv                         3.3 KB
+  rl_fold_4_qqq_returns.csv                          2.5 KB
+  rl_fold_4_test_returns.csv                         3.3 KB
+  rl_fold_5_qqq_returns.csv                          2.5 KB
+  rl_fold_5_test_returns.csv                         3.3 KB
+  rl_fold_6_qqq_returns.csv                          2.7 KB
+  rl_fold_6_test_returns.csv                         3.4 KB
+  rl_fold_7_qqq_returns.csv                          2.5 KB
+  rl_fold_7_test_returns.csv                         3.3 KB
+  rl_fold_8_qqq_returns.csv                          2.6 KB
+  rl_fold_8_test_returns.csv                         3.3 KB
+  rl_fold_9_qqq_returns.csv                          2.5 KB
+  rl_fold_9_test_returns.csv                         3.2 KB
+  rl_fold_log.csv                                    2.6 KB
+  rl_performance_metrics.csv                         0.3 KB
+  rl_wfo_config.json                                 0.3 KB
+  wfo_checkpoint.json                               10.1 KB
+  wfo_folds_plot.html                             4760.1 KB
