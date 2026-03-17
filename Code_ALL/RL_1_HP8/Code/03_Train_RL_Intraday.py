@@ -1,8 +1,10 @@
-# 03 — Train: Run 10 — LONG-SHORT-CASH STRATEGY
+# 03 — Train HRA-SAC: Run 9 — LEARNING FIX + FLAT ABLATION
 # ============================================================
-# 8 configs: 4 long-short (Gaussian) + 4 long-only (Dirichlet)
-# Same SAC fixes as Run 9 (alpha=0.2, target_ent=-dim, etc.)
-# Agent can short stocks (negative weights) to profit from laggards
+# 8 configs: flat vs hier × top_k{10,20} × smooth/fast
+# FIXES: alpha 0.2 (was 0.001), target_entropy=-dim(A) (was +log(N))
+#        log_return reward (was excess_return), TC=2bps (was 5bps)
+#        weight smoothing β∈{0.3, 1.0}, concentration penalty
+# Annualization = 504 (correct for 2x/day)
 
 import os, time
 import numpy as np
@@ -11,10 +13,10 @@ import torch
 
 RUN_BASELINES = True
 ANNUALIZATION = 504
-REWARD_TYPE = "log_return"
+REWARD_TYPE = "log_return"          # ← NEW (was "excess_return")
 TURNOVER_PENALTY = 0.003
-TRANSACTION_COST_BPS = 2.0
-VARIANCE_PENALTY = 0.5
+TRANSACTION_COST_BPS = 2.0          # ← NEW (was 5.0, IB tiered pricing)
+VARIANCE_PENALTY = 0.5              # ← NEW (concentration/HHI penalty)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
@@ -46,9 +48,10 @@ if wfo_info['n_folds'] > 0:
     print(f'Last test:  {wfo_info["last_fold"]["test_start"]} → {wfo_info["last_fold"]["test_end"]}')
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
-print(f'\nRun 10: LONG-SHORT-CASH | 8 configs (4 L/S + 4 L/O)')
-print(f'        Reward: {REWARD_TYPE} | TC: {TRANSACTION_COST_BPS}bps')
-print(f'        turnover_penalty={TURNOVER_PENALTY} | variance_penalty={VARIANCE_PENALTY}')
+print(f'\nRun 9: 8 HP configs | Reward: {REWARD_TYPE} | TC: {TRANSACTION_COST_BPS}bps')
+print(f'       turnover_penalty={TURNOVER_PENALTY} | variance_penalty={VARIANCE_PENALTY}')
+print(f'       annualization={ANNUALIZATION}')
+print(f'       FIXES: alpha=0.2, target_entropy=-dim(A), warmup=300')
 
 ## 2. Train
 
@@ -80,7 +83,7 @@ print(f'\n\nTotal time: {(time.time()-t0)/60:.1f} minutes')
 ## 3. Results
 
 print('=' * 60)
-print(f'OUT-OF-SAMPLE PERFORMANCE (Run 10: Long-Short, {TRANSACTION_COST_BPS}bps)')
+print(f'OUT-OF-SAMPLE PERFORMANCE (Run 9: 8-config, log_return, {TRANSACTION_COST_BPS}bps)')
 print('=' * 60)
 rl_m = pd.read_csv('../Results_Intraday/rl_performance_metrics.csv', index_col=0)
 print(rl_m.to_string())
@@ -116,7 +119,7 @@ if RUN_BASELINES:
         'Avg Daily Turnover (%)',
     ] if c in combined.columns]
     print('\n' + '=' * 80)
-    print(f'COMBINED COMPARISON — Run 10 (Long-Short, {TRANSACTION_COST_BPS}bps)')
+    print(f'COMBINED COMPARISON — Run 9 (8 configs, log_return, {TRANSACTION_COST_BPS}bps)')
     print('=' * 80)
     print(combined[metric_cols].to_string())
 

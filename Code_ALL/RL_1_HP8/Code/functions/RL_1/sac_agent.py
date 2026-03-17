@@ -1,13 +1,19 @@
 """
-sac_agent.py — Soft Actor-Critic for Portfolio Allocation (Run 10 — Long-Short)
+sac_agent.py — Soft Actor-Critic with Hierarchical Risk-Aware Policy (HRA-SAC)
 ================================================================================
 Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
 
-Run 10: Adds long-short-cash strategy via GaussianActor.
-    - long_short=True  → GaussianActor (weights can be negative = short)
-    - long_short=False → DirichletActor (long-only, same as Run 9)
-    
-All Run 9 fixes preserved: alpha=0.2, target_entropy=-dim(A), warmup=300, etc.
+Run 9 CHANGES (literature-backed fixes):
+    1. alpha_init 0.001 → 0.2    (Spinning Up default, 200× increase)
+    2. target_entropy = -dim(A) × ent_mult  (SAC-v2 standard, WAS positive log(N))
+    3. log_alpha clamp [-5, 2]    (WAS [-7, 1] — allows real exploration)
+    4. warmup_steps = 300         (random Dirichlet actions to seed replay buffer)
+    5. weight_smooth_beta         (EMA smoothing for turnover control)
+
+Key insight: The old target_ent = log(N)*0.8 + 0.5 ≈ +2.3 was POSITIVE.
+The alpha optimizer then pushed alpha DOWN (toward 0.001) to match.
+SAC-v2 standard uses NEGATIVE target entropy ≈ -dim(action), which pushes
+alpha UP → more exploration → the agent actually learns.
 """
 
 import torch
@@ -19,7 +25,7 @@ import copy
 from collections import deque
 from typing import Optional
 
-from .networks import DirichletActor, GaussianActor, Critic
+from .networks import DirichletActor, Critic
 
 EPSILON = 1e-6
 
@@ -112,7 +118,6 @@ class SACAgent:
         "ent_multiplier": 0.8,
         "dropout": 0.0,
         "weight_smooth_beta": 1.0,        # ← NEW: 1.0=no smoothing, 0.3=smooth
-        "long_short": False,               # ← Run 10: use GaussianActor for L/S
     }
 
     def __init__(self, config=None):
@@ -129,28 +134,17 @@ class SACAgent:
         else:
             self.device = torch.device(c["device"])
         mode = "hierarchical" if c["hierarchical"] else "flat"
-        if c.get("long_short", False):
-            mode = "long-short"
         print(f"  SAC Agent using device: {self.device} (mode: {mode})")
 
-        # Select actor based on long_short flag
-        if c.get("long_short", False):
-            self.actor = GaussianActor(
-                n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
-                lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
-                n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
-                dropout=c.get("dropout", 0.0),
-            ).to(self.device)
-        else:
-            self.actor = DirichletActor(
-                n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
-                lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
-                n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
-                hierarchical=c["hierarchical"],
-                cash_head_hidden=c["cash_head_hidden"],
-                min_equity=c["min_equity"], max_equity=c["max_equity"],
-                dropout=c.get("dropout", 0.0),
-            ).to(self.device)
+        self.actor = DirichletActor(
+            n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
+            lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
+            n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
+            hierarchical=c["hierarchical"],
+            cash_head_hidden=c["cash_head_hidden"],
+            min_equity=c["min_equity"], max_equity=c["max_equity"],
+            dropout=c.get("dropout", 0.0),
+        ).to(self.device)
 
         self.critic = Critic(
             n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],

@@ -303,39 +303,48 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 
 
 # =============================================================================
-# HP CONFIGS — 8 configs: Long-Short + Long-Only comparison (Run 10)
+# HP CONFIGS — 8 configs: flat/hier × k10/k20 × smooth/fast (Run 9)
 # =============================================================================
-# 4 long-short (GaussianActor) + 4 long-only (flat Dirichlet) configs
-# Both use same SAC fixes from Run 9 (alpha=0.2, target_ent=-dim, etc.)
-# This gives a clean L/S vs L/O ablation for the thesis.
+# ALL configs share fixed SAC params (literature-backed):
+#   alpha_init=0.2, lr_critic=1e-3, lr_alpha=3e-4, batch=128, gamma=0.99
+# Varies: hierarchical, top_k, weight_smooth_beta
+# This gives a clean 2×2×2 factorial for thesis ablation table.
 
+# --- Shared SAC params applied to ALL configs ---
 _SHARED = {
     "lr_actor": 3e-4, "lr_critic": 1e-3, "lr_alpha": 3e-4,
     "lstm_hidden": 64, "n_attn_heads": 4,
     "scorer_hidden": 128, "cash_head_hidden": 64, "critic_hidden": 256,
     "batch_size": 128, "gamma": 0.99, "dropout": 0.0,
     "ent_multiplier": 0.8, "alpha_init": 0.2, "warmup_steps": 300,
-    "variance_penalty": 0.5, "hierarchical": False,
+    "variance_penalty": 0.5,
 }
 
 DEFAULT_HP_CONFIGS = [
-    # === LONG-SHORT (GaussianActor — Run 10 novel contribution) ===
-    {"name": "ls_k10_smooth", "long_short": True,
+    # === FLAT DIRICHLET (Xue & Ye 2025 validated) ===
+    # Cash is (N+1)th asset — no separate timing head
+    {"name": "flat_k10_smooth", "hierarchical": False,
      "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "ls_k10_fast",   "long_short": True,
+    {"name": "flat_k10_fast",   "hierarchical": False,
      "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
-    {"name": "ls_k20_smooth", "long_short": True,
+    {"name": "flat_k20_smooth", "hierarchical": False,
      "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "ls_k20_fast",   "long_short": True,
+    {"name": "flat_k20_fast",   "hierarchical": False,
      "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
-    # === LONG-ONLY (flat Dirichlet — same as Run 9 for comparison) ===
-    {"name": "lo_k10_smooth", "long_short": False,
+    # === HIERARCHICAL (HRA-SAC — thesis novel contribution) ===
+    # Cash timing head (Gaussian+sigmoid) + Dirichlet-N stock selection
+    # min_equity=0.70 (not 0.50 — avoids 50% cash trap from Run 8)
+    {"name": "hier_k10_smooth", "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98,
      "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "lo_k10_fast",   "long_short": False,
+    {"name": "hier_k10_fast",   "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98,
      "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
-    {"name": "lo_k20_smooth", "long_short": False,
+    {"name": "hier_k20_smooth", "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98,
      "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "lo_k20_fast",   "long_short": False,
+    {"name": "hier_k20_fast",   "hierarchical": True,
+     "min_equity": 0.70, "max_equity": 0.98,
      "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
 ]
 

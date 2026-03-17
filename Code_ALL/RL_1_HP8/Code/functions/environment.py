@@ -1,12 +1,12 @@
 """
-environment.py — RL Environment for Portfolio Allocation (v4.1 — Run 10 Long-Short)
+environment.py — RL Environment for Portfolio Allocation (v4.0 — Run 9)
 ========================================================================
-Run 10: Supports long-short-cash strategy.
-    - _action_to_weights() handles negative weights (shorts)
-    - Portfolio return: Σ(w_i * r_i) works for shorts naturally
-    - TC computed on |w_new - w_old| (same for longs and shorts)
-    - Concentration penalty uses |weights| for HHI
-    - All Run 9 features preserved (log_return reward, 2bps TC, etc.)
+Run 9 CHANGES:
+    - NEW reward_type="log_return": log(1+r)*1000 - TC - concentration
+      (Jiang et al. 2017, Xue & Ye 2025 — standard in portfolio RL)
+    - TC default 5.0 → 2.0 bps (IB tiered pricing for NASDAQ-100)
+    - variance_penalty → concentration penalty (penalizes HHI of weights)
+    - Kept: top_k momentum, excess_return & sharpe modes (backward compat)
 """
 
 import numpy as np
@@ -179,26 +179,14 @@ class PortfolioEnv:
 
     def _action_to_weights(self, action, selected):
         n_selected = selected.sum()
-        stock_raw = action[:n_selected]
-        cash_raw = action[n_selected]
-        
-        # Cash is always non-negative
-        cash_w = max(float(cash_raw), 0.0)
-        
-        # Normalize so |stocks| + cash = 1
-        gross_stock = np.abs(stock_raw).sum()
-        gross_total = gross_stock + cash_w
-        
-        if gross_total > 1e-8:
-            stock_w_selected = stock_raw / gross_total  # can be negative!
-            cash_w = cash_w / gross_total
-        else:
-            stock_w_selected = np.zeros(n_selected)
-            cash_w = 1.0
-        
-        # Map to full ticker array
+        stock_w = np.clip(action[:n_selected], 0, 1)
+        cash_w = np.clip(action[n_selected], 0, 1)
+        total = stock_w.sum() + cash_w
+        if total > 0:
+            stock_w /= total
+            cash_w /= total
         full_w = np.zeros(self.n_tickers, dtype=np.float64)
-        full_w[selected] = stock_w_selected
+        full_w[selected] = stock_w
         return full_w, float(cash_w)
 
     def reset(self):
@@ -289,11 +277,11 @@ class PortfolioEnv:
             log_ret = np.log1p(max(port_ret_net, -0.999)) * 1000.0
             to_penalty = self.turnover_penalty * turnover * 100.0
 
-            # Concentration penalty: HHI of |stock weights|
-            # Works for both long-only and long-short
+            # Concentration penalty: HHI of stock weights
+            # HHI = 1/N means perfect diversification, HHI = 1 means all-in
             conc_penalty = 0.0
             if self.variance_penalty > 0:
-                active_w = np.abs(stock_w[np.abs(stock_w) > 0.001])
+                active_w = stock_w[stock_w > 0.001]
                 if len(active_w) > 0:
                     # Normalize to stock-only weights
                     w_norm = active_w / (active_w.sum() + 1e-8)
