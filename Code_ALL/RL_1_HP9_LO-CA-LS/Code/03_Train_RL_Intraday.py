@@ -1,11 +1,8 @@
-# 03 — Train RL Agent: Run 11 — DEEP TRAINING + FORCE RETRAIN
+# 03 — Train: Run 10 — LONG-SHORT-CASH STRATEGY
 # ============================================================
-# 4 configs: flat Dirichlet × k10/k20 × smooth/fast
-# 80 epochs (was 30), min_epochs=25, patience=8
-# gradient_steps=2 (10x total updates vs Run 9)
-# Force retrain EVERY fold (no carry)
-# Non-learning detection: skip configs with Train IR2=0
-# Enhanced logging: abs return, Q-values, grad norms
+# 8 configs: 4 long-short (Gaussian) + 4 long-only (Dirichlet)
+# Same SAC fixes as Run 9 (alpha=0.2, target_ent=-dim, etc.)
+# Agent can short stocks (negative weights) to profit from laggards
 
 import os, time
 import numpy as np
@@ -18,11 +15,6 @@ REWARD_TYPE = "log_return"
 TURNOVER_PENALTY = 0.003
 TRANSACTION_COST_BPS = 2.0
 VARIANCE_PENALTY = 0.5
-
-# Run 11 training params — 10x more gradient updates than Run 9
-N_EPOCHS = 80           # was 30
-MIN_EPOCHS = 25         # was 10
-PATIENCE = 8            # was 5
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(SCRIPT_DIR)
@@ -54,10 +46,9 @@ if wfo_info['n_folds'] > 0:
     print(f'Last test:  {wfo_info["last_fold"]["test_start"]} → {wfo_info["last_fold"]["test_end"]}')
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
-print(f'\nRun 11: 4 flat configs | {N_EPOCHS} epochs | gradient_steps=2 | force retrain')
+print(f'\nRun 10: LONG-SHORT-CASH | 8 configs (4 L/S + 4 L/O)')
 print(f'        Reward: {REWARD_TYPE} | TC: {TRANSACTION_COST_BPS}bps')
-print(f'        min_epochs={MIN_EPOCHS} | patience={PATIENCE}')
-print(f'        Non-learning detection enabled')
+print(f'        turnover_penalty={TURNOVER_PENALTY} | variance_penalty={VARIANCE_PENALTY}')
 
 ## 2. Train
 
@@ -70,9 +61,9 @@ rl_results = train_walk_forward(
     test_months=2,
     step_months=2,
     embargo_days=0,
-    n_epochs=N_EPOCHS,
-    patience=PATIENCE,
-    min_epochs=MIN_EPOCHS,
+    n_epochs=30,
+    patience=5,
+    min_epochs=10,
     transaction_cost_bps=TRANSACTION_COST_BPS,
     turnover_penalty=TURNOVER_PENALTY,
     variance_penalty=VARIANCE_PENALTY,
@@ -84,13 +75,12 @@ rl_results = train_walk_forward(
     reward_type=REWARD_TYPE,
 )
 
-elapsed_min = (time.time()-t0)/60
-print(f'\n\nTotal time: {elapsed_min:.1f} minutes ({elapsed_min/60:.1f} hours)')
+print(f'\n\nTotal time: {(time.time()-t0)/60:.1f} minutes')
 
 ## 3. Results
 
 print('=' * 60)
-print(f'OUT-OF-SAMPLE PERFORMANCE (Run 11: deep training, {TRANSACTION_COST_BPS}bps)')
+print(f'OUT-OF-SAMPLE PERFORMANCE (Run 10: Long-Short, {TRANSACTION_COST_BPS}bps)')
 print('=' * 60)
 rl_m = pd.read_csv('../Results_Intraday/rl_performance_metrics.csv', index_col=0)
 print(rl_m.to_string())
@@ -126,7 +116,7 @@ if RUN_BASELINES:
         'Avg Daily Turnover (%)',
     ] if c in combined.columns]
     print('\n' + '=' * 80)
-    print(f'COMBINED COMPARISON — Run 11 (deep training, {TRANSACTION_COST_BPS}bps)')
+    print(f'COMBINED COMPARISON — Run 10 (Long-Short, {TRANSACTION_COST_BPS}bps)')
     print('=' * 80)
     print(combined[metric_cols].to_string())
 

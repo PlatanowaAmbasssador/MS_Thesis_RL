@@ -1,13 +1,13 @@
 """
-train.py — Walk-Forward Optimization for Portfolio Agent (Run 11)
+train.py — Walk-Forward Optimization for HRA-SAC Portfolio Agent (v5 — Run 9)
 ======================================================================
-Run 11 CHANGES over Run 9:
-    - 4 HP configs: flat Dirichlet only × k10/k20 × smooth/fast
-    - 80 epochs (was 30), min_epochs=25, patience=8
-    - gradient_steps=2 (10x total gradient updates vs Run 9)
-    - Force retrain EVERY fold (no carry — eliminates regime disasters)
-    - Non-learning detection: skip configs with Train IR2=0 after min_epochs
-    - Enhanced logging: abs return, Q-values, grad norms, weight entropy
+Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
+
+Run 9 changes:
+    - 8 HP configs: flat/hier × k10/k20 × smooth/fast (was 14)
+    - All configs: alpha_init=0.2, lr_critic=1e-3, batch=128, gamma=0.99
+    - weight_smooth_beta support (EMA turnover control)
+    - Flat Dirichlet ablation (hierarchical=False)
 """
 
 import numpy as np
@@ -234,14 +234,12 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
     best_epoch = 0
     best_state_bytes = None
     patience_counter = 0
-    max_train_ir2 = 0.0  # Track if agent ever learns
 
     update_every = 4
     for epoch in range(n_epochs):
         t0 = time.time()
         state = train_env.reset()
         step_count = 0
-        epoch_update_info = {}
         while not train_env.done:
             action = agent.select_action(state, deterministic=False)
             next_state, reward, done, info = train_env.step(action)
@@ -250,20 +248,13 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
             step_count += 1
             if step_count % update_every == 0:
                 for _ in range(agent.config["gradient_steps"]):
-                    epoch_update_info = agent.update()
+                    agent.update()
             state = next_state
 
         # Train metrics
         train_results = train_env.get_results()
         train_eq = np.array([1.0] + list(train_results["portfolio_value"].values))
         train_m = compute_all_metrics(train_eq, annualization=annualization)
-        train_ir2 = train_m["IR2"]
-        max_train_ir2 = max(max_train_ir2, train_ir2)
-
-        # Train absolute return and cash
-        train_abs_ret = train_m.get("Absolute Return (%)", 0)
-        train_cash = train_results["cash_weight"].mean() * 100 if "cash_weight" in train_results else 0
-        train_turnover = train_results["turnover"].mean() * 100 if "turnover" in train_results else 0
 
         # Validate
         val_r = evaluate_agent(agent, dataset, val_start, val_end,
@@ -271,25 +262,17 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
                                top_k=top_k, annualization=annualization)
         val_ir2 = val_r["metrics"]["IR2"]
         val_arc = val_r["metrics"]["ARC (%)"]
-        val_abs_ret = val_r["metrics"].get("Absolute Return (%)", 0)
         val_rets = val_r["results"]["portfolio_return_net"]
         val_std = val_rets.std()
         val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(annualization), -10.0, 10.0)) if val_std > 1e-4 else 0.0
 
         elapsed = time.time() - t0
         if verbose:
-            # Enhanced logging (Run 11)
-            grad_info = ""
-            if epoch_update_info:
-                ag = epoch_update_info.get("actor_grad_norm", 0)
-                cg = epoch_update_info.get("critic_grad_norm", 0)
-                grad_info = f" | ag={ag:.2f} cg={cg:.2f}"
-            print(f"    Ep {epoch:2d} | Train IR2: {train_m['IR2']:.4f} AbsR: {train_abs_ret:+.1f}% "
-                  f"Cash: {train_cash:.0f}% TO: {train_turnover:.1f}% | "
-                  f"Val Sh: {val_sharpe:.3f} ARC: {val_arc:+.1f}% AbsR: {val_abs_ret:+.1f}% | "
-                  f"α: {agent.alpha.item():.3f}{grad_info} | {elapsed:.1f}s")
+            print(f"    Ep {epoch:2d} | Train IR2: {train_m['IR2']:.4f} "
+                  f"Val Sharpe: {val_sharpe:.3f} | Val ARC: {val_arc:+.1f}% | "
+                  f"α: {agent.alpha.item():.3f} | {elapsed:.1f}s")
 
-        # Early stopping on Val Sharpe
+        # Early stopping on Val Sharpe (more stable than IR2 on 1-month windows)
         score = val_sharpe
         if score > best_val_score:
             best_val_score = score
@@ -316,18 +299,15 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
         agent.critic.load_state_dict(ckpt["critic"])
         agent.critic_target.load_state_dict(ckpt["critic_target"])
 
-    return {
-        "best_val_ir2": best_val_ir2, "best_val_sharpe": best_val_sharpe,
-        "best_epoch": best_epoch, "max_train_ir2": max_train_ir2,
-        "learned": max_train_ir2 > 0.01,  # Flag for non-learning detection
-    }
+    return {"best_val_ir2": best_val_ir2, "best_val_sharpe": best_val_sharpe, "best_epoch": best_epoch}
 
 
 # =============================================================================
-# HP CONFIGS — 4 configs: flat Dirichlet × k10/k20 × smooth/fast (Run 11)
+# HP CONFIGS — 8 configs: Long-Short + Long-Only comparison (Run 10)
 # =============================================================================
-# Flat only — Run 9 already has hier results for thesis comparison.
-# gradient_steps=2 is set in sac_agent.py DEFAULT_CONFIG.
+# 4 long-short (GaussianActor) + 4 long-only (flat Dirichlet) configs
+# Both use same SAC fixes from Run 9 (alpha=0.2, target_ent=-dim, etc.)
+# This gives a clean L/S vs L/O ablation for the thesis.
 
 _SHARED = {
     "lr_actor": 3e-4, "lr_critic": 1e-3, "lr_alpha": 3e-4,
@@ -339,10 +319,24 @@ _SHARED = {
 }
 
 DEFAULT_HP_CONFIGS = [
-    {"name": "flat_k10_smooth", "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "flat_k10_fast",   "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
-    {"name": "flat_k20_smooth", "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
-    {"name": "flat_k20_fast",   "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
+    # === LONG-SHORT (GaussianActor — Run 10 novel contribution) ===
+    {"name": "ls_k10_smooth", "long_short": True,
+     "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
+    {"name": "ls_k10_fast",   "long_short": True,
+     "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
+    {"name": "ls_k20_smooth", "long_short": True,
+     "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
+    {"name": "ls_k20_fast",   "long_short": True,
+     "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
+    # === LONG-ONLY (flat Dirichlet — same as Run 9 for comparison) ===
+    {"name": "lo_k10_smooth", "long_short": False,
+     "top_k": 10, "weight_smooth_beta": 0.3, **_SHARED},
+    {"name": "lo_k10_fast",   "long_short": False,
+     "top_k": 10, "weight_smooth_beta": 1.0, **_SHARED},
+    {"name": "lo_k20_smooth", "long_short": False,
+     "top_k": 20, "weight_smooth_beta": 0.3, **_SHARED},
+    {"name": "lo_k20_fast",   "long_short": False,
+     "top_k": 20, "weight_smooth_beta": 1.0, **_SHARED},
 ]
 
 
@@ -441,14 +435,10 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
             "val_sharpe": val_sharpe, "variance_penalty": vp,
             "median_train_sharpe": median_train, "max_val_sharpe": max_val,
             "n_train_months": len(train_monthly), "n_val_months": len(val_monthly),
-            "learned": result.get("learned", False),
-            "max_train_ir2": result.get("max_train_ir2", 0),
         }
         candidates.append(entry)
         trained_agents[hp_name] = agent
 
-        learned_tag = "✓ LEARNED" if result.get("learned", False) else "✗ NO LEARNING"
-        print(f"    → {learned_tag} | max Train IR2: {result.get('max_train_ir2', 0):.4f}")
         print(f"    → Med-Train Sharpe: {median_train:.3f} ({len(train_monthly)} months) | "
               f"Max-Val Sharpe: {max_val:.3f} ({len(val_monthly)} months)")
 
@@ -456,34 +446,20 @@ def select_hyperparameters(dataset, fold, hp_configs, n_epochs=25,
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-    # === NON-LEARNING FILTER (Run 11) ===
-    # Only consider configs where the agent actually learned (Train IR2 > 0.01)
-    learned_candidates = [c for c in candidates if c["learned"]]
-    if learned_candidates:
-        active = learned_candidates
-        n_learned = len(learned_candidates)
-        n_failed = len(candidates) - n_learned
-        if n_failed > 0:
-            print(f"\n  ⚠ {n_failed}/{len(candidates)} configs failed to learn (Train IR2=0), excluded")
-    else:
-        # ALL configs failed to learn → fall back to all candidates with warning
-        active = candidates
-        print(f"\n  ⚠⚠ ALL {len(candidates)} configs failed to learn! Using best-of-bad.")
-
-    # === 3-tier selection (on active candidates only) ===
-    tier1 = [c for c in active
+    # === 3-tier selection ===
+    tier1 = [c for c in candidates
              if c["median_train_sharpe"] > 2.0 and c["max_val_sharpe"] > 2.0]
     if tier1:
         best = min(tier1, key=lambda c: abs(c["median_train_sharpe"] - c["max_val_sharpe"]))
         tier_label = "Tier-1 (both > 2, closest gap)"
     else:
-        tier2 = [c for c in active
+        tier2 = [c for c in candidates
                  if c["median_train_sharpe"] > 0 and c["max_val_sharpe"] > 0]
         if tier2:
             best = max(tier2, key=lambda c: c["max_val_sharpe"])
             tier_label = "Tier-2 (both positive, best max-val)"
         else:
-            best = max(active, key=lambda c: c["max_val_sharpe"])
+            best = max(candidates, key=lambda c: c["max_val_sharpe"])
             tier_label = "Tier-3 (fallback, best max-val)"
 
     best_agent = trained_agents[best["name"]]
@@ -642,11 +618,36 @@ def train_walk_forward(
             need_retrain = True
             reason = "initial"
         else:
-            # Run 11: FORCE RETRAIN EVERY FOLD
-            # No more carry logic — every fold gets a fresh model
-            # trained on the most recent 24-month window.
-            need_retrain = True
-            reason = "forced (every fold)"
+            # Use top_k from the currently selected config for val evaluation
+            carry_top_k = selected_config.get("top_k", 20) if selected_config else 20
+            val_r = evaluate_agent(agent, dataset, fold["val_start"], fold["val_end"],
+                                   transaction_cost_bps, lookback_window,
+                                   top_k=carry_top_k, annualization=annualization)
+            current_val_ir2 = val_r["metrics"]["IR2"]
+            val_rets = val_r["results"]["portfolio_return_net"]
+            val_std = val_rets.std()
+            current_val_sharpe = float(np.clip(val_rets.mean() / val_std * np.sqrt(annualization), -10.0, 10.0)) if val_std > 1e-4 else 0.0
+
+            # Mandatory retrain every 4 folds to prevent stale models
+            folds_since_retrain = 0
+            for fl in reversed(fold_log):
+                if fl.get("retrained", False):
+                    break
+                folds_since_retrain += 1
+            if folds_since_retrain >= 3:
+                need_retrain = True
+                reason = f"mandatory (>{folds_since_retrain} folds since retrain)"
+            elif current_val_sharpe < 0:
+                need_retrain = True
+                reason = f"Sharpe {current_val_sharpe:.3f} < 0"
+            elif len(val_sharpe_history) >= 3:
+                recent = val_sharpe_history[-5:]
+                med = np.median(recent)
+                std = np.std(recent) if len(recent) > 1 else 0.0
+                threshold = med - 0.5 * std
+                if current_val_sharpe < threshold:
+                    need_retrain = True
+                    reason = f"Sharpe {current_val_sharpe:.3f} < {threshold:.3f} (med={med:.3f} - 0.5*std={std:.3f})"
 
         if need_retrain:
             if verbose:
@@ -654,8 +655,8 @@ def train_walk_forward(
 
             best_hp, _, agent = select_hyperparameters(
                 dataset, fold, hp_configs,
-                n_epochs=n_epochs, patience=patience,
-                min_epochs=min_epochs,
+                n_epochs=min(n_epochs, 25), patience=patience,
+                min_epochs=min(min_epochs, 10),
                 transaction_cost_bps=transaction_cost_bps,
                 turnover_penalty=turnover_penalty,
                 lookback_window=lookback_window,
@@ -676,6 +677,9 @@ def train_walk_forward(
             post_std = post_rets.std()
             current_val_sharpe = float(np.clip(post_rets.mean() / post_std * np.sqrt(annualization), -10.0, 10.0)) if post_std > 1e-4 else 0.0
             n_retrains += 1
+        else:
+            if verbose:
+                print(f"  Fold {fid:2d}/{len(folds)} | CARRY (Sharpe: {current_val_sharpe:.3f})", end="")
 
         val_sharpe_history.append(current_val_sharpe)
 
@@ -686,7 +690,6 @@ def train_walk_forward(
                                 top_k=test_top_k, annualization=annualization)
         test_ir2 = test_r["metrics"]["IR2"]
         test_arc = test_r["metrics"]["ARC (%)"]
-        test_abs_ret = test_r["metrics"].get("Absolute Return (%)", 0)
 
         # QQQ buy & hold for this test window
         qqq_rets = test_r["results"]["qqq_return"]
@@ -694,10 +697,11 @@ def train_walk_forward(
         qqq_test_m = compute_all_metrics(qqq_eq, annualization=annualization)
         qqq_test_arc = qqq_test_m["ARC (%)"]
 
-        if verbose:
+        if verbose and not need_retrain:
+            print(f" → RL ARC: {test_arc:+.1f}% | QQQ ARC: {qqq_test_arc:+.1f}%")
+        elif verbose:
             print(f"    Test: {fold['test_start']}→{fold['test_end']} → "
-                  f"RL ARC: {test_arc:+.1f}% AbsR: {test_abs_ret:+.1f}% | "
-                  f"QQQ ARC: {qqq_test_arc:+.1f}%")
+                  f"RL ARC: {test_arc:+.1f}% | QQQ ARC: {qqq_test_arc:+.1f}%")
 
         # Collect test returns
         all_test_returns.append(test_r["results"]["portfolio_return_net"])

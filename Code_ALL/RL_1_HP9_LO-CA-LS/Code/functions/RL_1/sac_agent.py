@@ -1,10 +1,13 @@
 """
-sac_agent.py — Soft Actor-Critic for Portfolio Allocation (Run 11)
+sac_agent.py — Soft Actor-Critic for Portfolio Allocation (Run 10 — Long-Short)
 ================================================================================
-Run 11 CHANGES over Run 9:
-    - gradient_steps: 1 → 2 (double learning per step, 10x total updates)
-    - Enhanced update() returns: Q-values, actor grad norm, entropy
-    - All Run 9 fixes preserved (alpha=0.2, target_entropy=-dim(A), etc.)
+Master's Thesis: RL Portfolio Allocation for Dynamic NASDAQ-100
+
+Run 10: Adds long-short-cash strategy via GaussianActor.
+    - long_short=True  → GaussianActor (weights can be negative = short)
+    - long_short=False → DirichletActor (long-only, same as Run 9)
+    
+All Run 9 fixes preserved: alpha=0.2, target_entropy=-dim(A), warmup=300, etc.
 """
 
 import torch
@@ -16,7 +19,7 @@ import copy
 from collections import deque
 from typing import Optional
 
-from .networks import DirichletActor, Critic
+from .networks import DirichletActor, GaussianActor, Critic
 
 EPSILON = 1e-6
 
@@ -99,7 +102,7 @@ class SACAgent:
         "auto_alpha": True,
         "buffer_capacity": 50000,
         "batch_size": 128,                # ← smoother gradients (was 64)
-        "gradient_steps": 2,              # ← Run 11: 2x learning (was 1)
+        "gradient_steps": 1,
         "warmup_steps": 300,              # ← FIX #4: random warmup (was 64)
         "device": "auto",
         "hierarchical": True,
@@ -109,6 +112,7 @@ class SACAgent:
         "ent_multiplier": 0.8,
         "dropout": 0.0,
         "weight_smooth_beta": 1.0,        # ← NEW: 1.0=no smoothing, 0.3=smooth
+        "long_short": False,               # ← Run 10: use GaussianActor for L/S
     }
 
     def __init__(self, config=None):
@@ -125,17 +129,28 @@ class SACAgent:
         else:
             self.device = torch.device(c["device"])
         mode = "hierarchical" if c["hierarchical"] else "flat"
+        if c.get("long_short", False):
+            mode = "long-short"
         print(f"  SAC Agent using device: {self.device} (mode: {mode})")
 
-        self.actor = DirichletActor(
-            n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
-            lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
-            n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
-            hierarchical=c["hierarchical"],
-            cash_head_hidden=c["cash_head_hidden"],
-            min_equity=c["min_equity"], max_equity=c["max_equity"],
-            dropout=c.get("dropout", 0.0),
-        ).to(self.device)
+        # Select actor based on long_short flag
+        if c.get("long_short", False):
+            self.actor = GaussianActor(
+                n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
+                lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
+                n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
+                dropout=c.get("dropout", 0.0),
+            ).to(self.device)
+        else:
+            self.actor = DirichletActor(
+                n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
+                lstm_hidden=c["lstm_hidden"], embed_dim=c["embed_dim"],
+                n_attn_heads=c["n_attn_heads"], scorer_hidden=c["scorer_hidden"],
+                hierarchical=c["hierarchical"],
+                cash_head_hidden=c["cash_head_hidden"],
+                min_equity=c["min_equity"], max_equity=c["max_equity"],
+                dropout=c.get("dropout", 0.0),
+            ).to(self.device)
 
         self.critic = Critic(
             n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
@@ -298,25 +313,12 @@ class SACAgent:
         self.update_count += 1
         if total_count == 0:
             return {}
-
-        # Enhanced debug info (Run 11)
-        actor_grad_norm = sum(
-            p.grad.norm().item() ** 2 for p in self.actor.parameters()
-            if p.grad is not None
-        ) ** 0.5
-        critic_grad_norm = sum(
-            p.grad.norm().item() ** 2 for p in self.critic.parameters()
-            if p.grad is not None
-        ) ** 0.5
-
         return {
             "critic_loss": total_critic_loss / total_count,
             "actor_loss": total_actor_loss / total_count,
             "alpha_loss": total_alpha_loss / total_count if self.auto_alpha else 0,
             "alpha": self.alpha.item(),
             "buffer_size": len(self.buffer),
-            "actor_grad_norm": actor_grad_norm,
-            "critic_grad_norm": critic_grad_norm,
         }
 
     def _soft_update(self):
