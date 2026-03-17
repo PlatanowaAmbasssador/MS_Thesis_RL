@@ -1,0 +1,1851 @@
+PyTorch: 2.7.1+cu128
+CUDA: NVIDIA L4
+============================================================
+DATA PIPELINE — RL Portfolio (2x/DAY REBALANCING)
+============================================================
+
+[1/5] Loading raw data...
+  Risk-free rate loaded from: ../Data/Outputs/Filtered/risk_free_data.csv
+  Prices: (18692, 144)
+  Mask:   (27240, 152)
+  QQQ:    (1249, 1)
+  VIX:    (1249, 1)
+
+[2/5] Cleaning & splitting into AM/PM sessions...
+  Tickers:          144
+  Trading sessions: 2478
+  Sessions/day:     2
+  Date range:       2021-03-01 16:00:00 → 2026-02-18 19:00:00
+  Hourly bars:      7434
+  Close coverage:   98.9% mean, 97.0% min
+
+[3/5] Building per-asset features (ranked + z-scored)...
+  Features per asset:  15
+  Feature names:       ['bb_pctb', 'beta_qqq', 'dist_high_20', 'intraday_ret', 'intraday_rvol', 'macd_hist', 'mean_rev_20', 'raw_ret_20d', 'ret_1d', 'ret_20d', 'ret_5d', 'ret_60d', 'rsi_14', 'rvol_20d', 'rvol_5d']
+  Total columns:       2160
+
+[4/5] Building global features...
+  Global features: ['vix_level', 'vix_change_5d', 'market_ret_1d', 'market_rvol_5d', 'dow', 'market_breadth', 'qqq_ret_5d', 'qqq_ret_20d', 'cross_disp']
+
+[5/5] Applying warmup period (80 sessions = 40 days)...
+  Valid range:       2021-04-27 16:00:00 → 2026-02-18 19:00:00
+  Valid sessions:    2398 (1199 days)
+  Per-asset NaN:     26.989%
+  Global NaN:        0.000%
+  Avg risk-free:     3.42% annualized
+
+============================================================
+PIPELINE COMPLETE (2x/DAY MODE)
+============================================================
+Total folds: 15
+First test: 2023-06-29 → 2023-08-28
+Last test:  2025-10-29 → 2025-12-26
+OOS: 2023-06-29 → 2025-12-26
+
+Run 9: 8 HP configs | Reward: log_return | TC: 2.0bps
+       turnover_penalty=0.003 | variance_penalty=0.5
+       annualization=504
+       FIXES: alpha=0.2, target_entropy=-dim(A), warmup=300
+
+======================================================================
+WALK-FORWARD RL TRAINING (SLIDING WINDOW)
+======================================================================
+  WFO: train=24m (sliding), val=2m, test=2m, step=2m, embargo=0d
+  Folds: 15
+  OOS test: 2023-06-29 → 2025-12-26
+  HP configs: 8
+  Lookback: 40 | Annualization: 504
+  Reward: log_return | Turnover penalty: 0.003
+  Policy mode: Flat Dirichlet
+======================================================================
+  Fold plot saved to ../Results_Intraday/wfo_folds_plot.html
+
+======================================================================
+WALKING FORWARD — 15 folds
+======================================================================
+
+  Fold  1/15 | RETRAIN (initial)
+
+  HP Selection on fold 1:
+    Train: 2021-04-27 → 2023-04-26 (1004d)
+    Val:   2023-05-01 → 2023-06-28 (82d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 2.354 | Val ARC: +55.5% | α: 0.218 | 19.0s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 2.340 | Val ARC: +55.9% | α: 0.246 | 23.9s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 2.353 | Val ARC: +55.7% | α: 0.277 | 23.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 2.335 | Val ARC: +55.8% | α: 0.311 | 23.1s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 2.335 | Val ARC: +54.4% | α: 0.350 | 23.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 2.352 | Val ARC: +54.6% | α: 0.395 | 23.3s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 2.356 | Val ARC: +55.0% | α: 0.444 | 23.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 2.368 | Val ARC: +54.5% | α: 0.502 | 23.6s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 2.354 | Val ARC: +54.5% | α: 0.566 | 23.4s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 2.355 | Val ARC: +54.8% | α: 0.636 | 23.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 2.352 | Val ARC: +54.9% | α: 0.717 | 23.4s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 2.367 | Val ARC: +55.1% | α: 0.808 | 23.2s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 2.360 | Val ARC: +54.8% | α: 0.911 | 23.5s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 2.361 | Val ARC: +54.7% | α: 1.027 | 23.4s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 2.362 | Val ARC: +54.6% | α: 1.154 | 23.2s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: -0.966 (25 months) | Max-Val Sharpe: 2.708 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 2.355 | Val ARC: +55.6% | α: 0.218 | 17.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 2.370 | Val ARC: +57.7% | α: 0.245 | 23.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 2.369 | Val ARC: +57.1% | α: 0.276 | 23.5s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 2.341 | Val ARC: +57.1% | α: 0.312 | 23.6s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 2.352 | Val ARC: +57.4% | α: 0.351 | 23.5s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 2.362 | Val ARC: +57.9% | α: 0.396 | 23.5s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 2.336 | Val ARC: +56.2% | α: 0.446 | 23.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 2.343 | Val ARC: +55.0% | α: 0.502 | 23.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 2.334 | Val ARC: +53.4% | α: 0.566 | 23.5s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 2.336 | Val ARC: +53.4% | α: 0.638 | 23.4s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 2.305 | Val ARC: +52.1% | α: 0.717 | 23.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 2.309 | Val ARC: +52.9% | α: 0.808 | 23.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 2.335 | Val ARC: +55.7% | α: 0.911 | 23.5s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 2.339 | Val ARC: +55.4% | α: 1.025 | 23.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 2.327 | Val ARC: +54.6% | α: 1.154 | 23.2s
+    Early stop at epoch 14 (best: 1)
+    → Med-Train Sharpe: -0.979 (25 months) | Max-Val Sharpe: 2.703 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 3.569 | Val ARC: +75.4% | α: 0.219 | 18.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +75.5% | α: 0.249 | 24.4s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 3.573 | Val ARC: +75.6% | α: 0.282 | 24.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 3.576 | Val ARC: +76.0% | α: 0.321 | 24.5s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 3.574 | Val ARC: +75.9% | α: 0.362 | 24.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 3.569 | Val ARC: +75.8% | α: 0.410 | 24.0s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 3.578 | Val ARC: +75.8% | α: 0.464 | 24.3s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 3.576 | Val ARC: +76.0% | α: 0.525 | 24.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 3.572 | Val ARC: +76.0% | α: 0.594 | 23.9s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 3.573 | Val ARC: +76.1% | α: 0.671 | 23.8s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 3.576 | Val ARC: +75.8% | α: 0.759 | 24.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +75.8% | α: 0.861 | 24.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 3.574 | Val ARC: +76.0% | α: 0.976 | 24.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +75.8% | α: 1.104 | 24.1s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 3.574 | Val ARC: +75.5% | α: 1.253 | 24.3s
+    Early stop at epoch 14 (best: 6)
+    → Med-Train Sharpe: 0.054 (25 months) | Max-Val Sharpe: 3.800 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +75.8% | α: 0.219 | 18.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 3.558 | Val ARC: +72.9% | α: 0.248 | 24.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 3.551 | Val ARC: +74.1% | α: 0.280 | 24.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 3.569 | Val ARC: +75.1% | α: 0.319 | 24.5s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 3.573 | Val ARC: +75.2% | α: 0.362 | 24.5s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 3.573 | Val ARC: +75.9% | α: 0.410 | 24.4s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 3.571 | Val ARC: +75.5% | α: 0.464 | 24.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 3.570 | Val ARC: +75.9% | α: 0.524 | 24.0s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 3.572 | Val ARC: +75.7% | α: 0.593 | 24.2s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 3.576 | Val ARC: +75.9% | α: 0.672 | 24.1s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 3.571 | Val ARC: +75.9% | α: 0.762 | 24.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +76.4% | α: 0.864 | 24.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 3.560 | Val ARC: +75.7% | α: 0.978 | 24.1s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 3.571 | Val ARC: +75.6% | α: 1.111 | 24.4s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 3.567 | Val ARC: +75.7% | α: 1.255 | 23.9s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.053 (25 months) | Max-Val Sharpe: 3.791 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 2.372 | Val ARC: +49.9% | α: 0.218 | 20.0s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 2.386 | Val ARC: +45.7% | α: 0.246 | 26.7s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 2.396 | Val ARC: +44.8% | α: 0.277 | 26.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 2.411 | Val ARC: +44.8% | α: 0.311 | 26.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 2.414 | Val ARC: +45.0% | α: 0.350 | 26.4s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 2.413 | Val ARC: +45.2% | α: 0.394 | 26.5s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 2.421 | Val ARC: +45.8% | α: 0.443 | 26.3s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 2.407 | Val ARC: +45.5% | α: 0.498 | 26.3s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 2.406 | Val ARC: +46.1% | α: 0.562 | 26.4s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 2.394 | Val ARC: +46.5% | α: 0.630 | 26.2s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 2.410 | Val ARC: +47.1% | α: 0.707 | 26.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 2.402 | Val ARC: +46.9% | α: 0.794 | 26.2s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 2.395 | Val ARC: +47.6% | α: 0.892 | 26.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 2.375 | Val ARC: +47.3% | α: 1.003 | 26.4s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 2.391 | Val ARC: +47.4% | α: 1.123 | 26.0s
+    Early stop at epoch 14 (best: 6)
+    → Med-Train Sharpe: -0.971 (25 months) | Max-Val Sharpe: 2.776 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 2.376 | Val ARC: +49.5% | α: 0.218 | 20.0s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 2.335 | Val ARC: +49.5% | α: 0.245 | 26.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 2.302 | Val ARC: +47.0% | α: 0.275 | 26.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 2.297 | Val ARC: +45.7% | α: 0.309 | 26.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 2.306 | Val ARC: +45.2% | α: 0.347 | 26.3s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 2.315 | Val ARC: +44.0% | α: 0.389 | 26.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 2.357 | Val ARC: +45.4% | α: 0.438 | 26.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 2.373 | Val ARC: +46.4% | α: 0.495 | 26.5s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 2.364 | Val ARC: +46.4% | α: 0.556 | 26.1s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 2.341 | Val ARC: +46.4% | α: 0.623 | 25.9s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 2.393 | Val ARC: +47.9% | α: 0.701 | 25.9s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 2.383 | Val ARC: +48.0% | α: 0.787 | 25.9s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 2.360 | Val ARC: +47.5% | α: 0.884 | 26.1s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 2.358 | Val ARC: +47.4% | α: 0.992 | 25.9s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 2.357 | Val ARC: +48.2% | α: 1.119 | 26.4s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: 2.369 | Val ARC: +48.8% | α: 1.254 | 25.9s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: -0.833 (25 months) | Max-Val Sharpe: 2.685 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 3.613 | Val ARC: +65.0% | α: 0.219 | 20.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 3.629 | Val ARC: +61.5% | α: 0.249 | 27.7s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 3.633 | Val ARC: +59.8% | α: 0.282 | 27.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 3.649 | Val ARC: +59.6% | α: 0.318 | 26.8s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 3.644 | Val ARC: +60.2% | α: 0.360 | 27.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 3.642 | Val ARC: +60.7% | α: 0.407 | 27.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 3.641 | Val ARC: +60.5% | α: 0.462 | 27.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 3.626 | Val ARC: +61.3% | α: 0.523 | 27.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 3.630 | Val ARC: +61.4% | α: 0.591 | 26.9s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 3.642 | Val ARC: +62.5% | α: 0.668 | 27.0s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 3.627 | Val ARC: +62.6% | α: 0.755 | 26.9s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 3.628 | Val ARC: +63.3% | α: 0.858 | 27.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 3.630 | Val ARC: +63.8% | α: 0.969 | 27.0s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 3.640 | Val ARC: +63.2% | α: 1.099 | 28.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 3.631 | Val ARC: +64.0% | α: 1.244 | 28.3s
+    Early stop at epoch 14 (best: 3)
+    → Med-Train Sharpe: 0.045 (25 months) | Max-Val Sharpe: 3.864 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 3.625 | Val ARC: +63.9% | α: 0.218 | 20.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 3.597 | Val ARC: +60.7% | α: 0.246 | 28.1s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: 3.495 | Val ARC: +60.2% | α: 0.279 | 27.9s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: 3.547 | Val ARC: +64.0% | α: 0.317 | 28.1s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: 3.578 | Val ARC: +61.7% | α: 0.358 | 27.6s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: 3.589 | Val ARC: +61.7% | α: 0.406 | 28.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: 3.598 | Val ARC: +62.0% | α: 0.458 | 27.3s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: 3.575 | Val ARC: +62.3% | α: 0.518 | 27.9s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: 3.587 | Val ARC: +63.1% | α: 0.585 | 27.9s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: 3.597 | Val ARC: +62.6% | α: 0.662 | 27.8s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: 3.612 | Val ARC: +62.0% | α: 0.747 | 27.4s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: 3.621 | Val ARC: +63.3% | α: 0.846 | 27.7s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: 3.611 | Val ARC: +63.7% | α: 0.959 | 27.9s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: 3.621 | Val ARC: +64.9% | α: 1.084 | 27.7s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: 3.605 | Val ARC: +63.8% | α: 1.225 | 27.5s
+    Early stop at epoch 14 (best: 0)
+    → Med-Train Sharpe: 0.064 (25 months) | Max-Val Sharpe: 3.846 (2 months)
+
+  ★ Selected: 'hier_k20_smooth' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.045 | Max-Val: 3.864 | Val Sharpe: 3.6488 | IR2: 87.4020
+    Test: 2023-06-29→2023-08-28 → RL ARC: -18.9% | QQQ ARC: +0.4%
+
+  Fold  2/15 | RETRAIN (Sharpe -0.874 < 0)
+
+  HP Selection on fold 2:
+    Train: 2021-06-28 → 2023-06-26 (1000d)
+    Val:   2023-06-29 → 2023-08-28 (82d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.726 | Val ARC: -21.8% | α: 0.218 | 17.5s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.689 | Val ARC: -22.0% | α: 0.246 | 23.9s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.692 | Val ARC: -22.1% | α: 0.276 | 23.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.678 | Val ARC: -21.7% | α: 0.311 | 23.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.708 | Val ARC: -21.9% | α: 0.350 | 23.3s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.680 | Val ARC: -21.5% | α: 0.395 | 23.4s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.690 | Val ARC: -21.6% | α: 0.445 | 23.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.651 | Val ARC: -20.6% | α: 0.501 | 23.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.684 | Val ARC: -21.3% | α: 0.560 | 22.5s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.680 | Val ARC: -21.0% | α: 0.632 | 23.6s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.699 | Val ARC: -21.4% | α: 0.710 | 23.1s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.707 | Val ARC: -21.6% | α: 0.799 | 23.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.703 | Val ARC: -21.4% | α: 0.896 | 23.1s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.699 | Val ARC: -21.2% | α: 1.009 | 23.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.687 | Val ARC: -21.1% | α: 1.135 | 23.2s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: 0.657 (25 months) | Max-Val Sharpe: 3.084 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.662 | Val ARC: -17.7% | α: 0.218 | 17.1s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.788 | Val ARC: -16.3% | α: 0.245 | 23.0s
+    Ep  2 | Train IR2: 0.0001 Val Sharpe: -0.276 | Val ARC: -11.2% | α: 0.277 | 23.3s
+    Ep  3 | Train IR2: 0.0804 Val Sharpe: -0.182 | Val ARC: -9.1% | α: 0.313 | 23.3s
+    Ep  4 | Train IR2: 0.1230 Val Sharpe: -0.269 | Val ARC: -11.8% | α: 0.351 | 22.9s
+    Ep  5 | Train IR2: 0.0949 Val Sharpe: -0.389 | Val ARC: -14.7% | α: 0.396 | 23.1s
+    Ep  6 | Train IR2: 0.0093 Val Sharpe: -0.577 | Val ARC: -19.1% | α: 0.446 | 22.9s
+    Ep  7 | Train IR2: 0.0897 Val Sharpe: -0.676 | Val ARC: -21.3% | α: 0.501 | 22.9s
+    Ep  8 | Train IR2: 0.0259 Val Sharpe: -0.655 | Val ARC: -20.4% | α: 0.566 | 23.2s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.685 | Val ARC: -21.5% | α: 0.635 | 22.7s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.639 | Val ARC: -20.3% | α: 0.717 | 23.1s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.716 | Val ARC: -21.9% | α: 0.807 | 22.6s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.683 | Val ARC: -21.1% | α: 0.905 | 22.4s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.702 | Val ARC: -21.6% | α: 1.017 | 22.6s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.677 | Val ARC: -20.9% | α: 1.140 | 22.3s
+    Early stop at epoch 14 (best: 3)
+    → Med-Train Sharpe: 0.910 (25 months) | Max-Val Sharpe: 4.062 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.931 | Val ARC: -24.0% | α: 0.219 | 17.4s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.927 | Val ARC: -24.0% | α: 0.248 | 23.7s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.929 | Val ARC: -24.2% | α: 0.281 | 23.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.925 | Val ARC: -24.0% | α: 0.317 | 23.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.929 | Val ARC: -24.2% | α: 0.359 | 23.5s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.931 | Val ARC: -24.1% | α: 0.407 | 23.6s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.929 | Val ARC: -24.1% | α: 0.460 | 23.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.924 | Val ARC: -24.1% | α: 0.520 | 23.3s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.930 | Val ARC: -24.1% | α: 0.589 | 23.9s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.931 | Val ARC: -24.1% | α: 0.666 | 23.4s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.928 | Val ARC: -24.1% | α: 0.752 | 23.4s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.927 | Val ARC: -24.0% | α: 0.849 | 23.4s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.927 | Val ARC: -23.9% | α: 0.957 | 23.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.928 | Val ARC: -24.1% | α: 1.080 | 23.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.928 | Val ARC: -24.0% | α: 1.222 | 23.4s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: 1.110 (25 months) | Max-Val Sharpe: 3.000 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.924 | Val ARC: -23.9% | α: 0.218 | 16.9s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.954 | Val ARC: -23.7% | α: 0.247 | 23.6s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.927 | Val ARC: -23.7% | α: 0.280 | 23.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.919 | Val ARC: -23.6% | α: 0.317 | 23.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.920 | Val ARC: -23.8% | α: 0.359 | 23.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.910 | Val ARC: -23.8% | α: 0.406 | 22.9s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.916 | Val ARC: -23.9% | α: 0.459 | 22.9s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.918 | Val ARC: -23.8% | α: 0.522 | 23.7s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.917 | Val ARC: -23.9% | α: 0.589 | 23.0s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.921 | Val ARC: -24.0% | α: 0.667 | 23.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.919 | Val ARC: -24.0% | α: 0.755 | 23.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.912 | Val ARC: -23.8% | α: 0.852 | 23.0s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.919 | Val ARC: -23.9% | α: 0.965 | 23.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.918 | Val ARC: -23.9% | α: 1.093 | 23.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.918 | Val ARC: -23.9% | α: 1.232 | 22.8s
+    Early stop at epoch 14 (best: 5)
+    → Med-Train Sharpe: 1.135 (25 months) | Max-Val Sharpe: 2.993 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.655 | Val ARC: -16.6% | α: 0.218 | 18.3s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.687 | Val ARC: -16.6% | α: 0.245 | 25.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.654 | Val ARC: -16.1% | α: 0.275 | 25.1s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.631 | Val ARC: -15.8% | α: 0.309 | 25.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.625 | Val ARC: -15.8% | α: 0.347 | 25.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.614 | Val ARC: -15.9% | α: 0.390 | 25.3s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.606 | Val ARC: -15.7% | α: 0.438 | 25.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.614 | Val ARC: -15.9% | α: 0.493 | 25.5s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.603 | Val ARC: -16.1% | α: 0.554 | 25.2s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.611 | Val ARC: -16.1% | α: 0.622 | 25.0s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.607 | Val ARC: -16.6% | α: 0.703 | 25.6s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.582 | Val ARC: -15.9% | α: 0.786 | 24.9s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.637 | Val ARC: -17.0% | α: 0.885 | 25.5s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.622 | Val ARC: -16.9% | α: 0.995 | 25.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.611 | Val ARC: -16.5% | α: 1.114 | 24.8s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -0.637 | Val ARC: -17.4% | α: 1.252 | 25.3s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -0.615 | Val ARC: -16.9% | α: 1.406 | 25.1s
+    Early stop at epoch 16 (best: 11)
+    → Med-Train Sharpe: 0.555 (25 months) | Max-Val Sharpe: 3.075 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.694 | Val ARC: -19.3% | α: 0.218 | 19.0s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.666 | Val ARC: -18.6% | α: 0.245 | 25.3s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.600 | Val ARC: -17.7% | α: 0.276 | 25.5s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.595 | Val ARC: -17.2% | α: 0.310 | 25.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.590 | Val ARC: -17.4% | α: 0.346 | 24.8s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.639 | Val ARC: -17.9% | α: 0.391 | 25.4s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.577 | Val ARC: -16.5% | α: 0.440 | 25.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.589 | Val ARC: -16.9% | α: 0.495 | 25.4s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.613 | Val ARC: -17.0% | α: 0.553 | 24.6s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.594 | Val ARC: -16.8% | α: 0.621 | 25.2s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.561 | Val ARC: -16.1% | α: 0.698 | 25.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.617 | Val ARC: -17.5% | α: 0.783 | 25.1s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.591 | Val ARC: -16.8% | α: 0.877 | 25.0s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.553 | Val ARC: -16.1% | α: 0.987 | 25.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.582 | Val ARC: -16.9% | α: 1.109 | 25.3s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -0.578 | Val ARC: -16.7% | α: 1.246 | 25.4s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -0.569 | Val ARC: -16.7% | α: 1.400 | 25.4s
+    Ep 17 | Train IR2: 0.0000 Val Sharpe: -0.600 | Val ARC: -17.3% | α: 1.577 | 25.6s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -0.594 | Val ARC: -16.9% | α: 1.764 | 24.9s
+    Early stop at epoch 18 (best: 13)
+    → Med-Train Sharpe: 0.731 (25 months) | Max-Val Sharpe: 3.089 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.885 | Val ARC: -20.1% | α: 0.218 | 18.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.882 | Val ARC: -18.8% | α: 0.248 | 26.3s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.911 | Val ARC: -18.7% | α: 0.280 | 26.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.899 | Val ARC: -18.9% | α: 0.316 | 25.9s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.881 | Val ARC: -18.7% | α: 0.357 | 26.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.831 | Val ARC: -18.0% | α: 0.403 | 26.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.843 | Val ARC: -18.5% | α: 0.455 | 26.3s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.795 | Val ARC: -18.2% | α: 0.514 | 26.1s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.791 | Val ARC: -17.9% | α: 0.582 | 26.5s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.802 | Val ARC: -18.1% | α: 0.658 | 26.4s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.777 | Val ARC: -17.8% | α: 0.744 | 26.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.794 | Val ARC: -18.3% | α: 0.841 | 26.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.792 | Val ARC: -18.2% | α: 0.947 | 25.8s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.820 | Val ARC: -18.9% | α: 1.068 | 26.0s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.821 | Val ARC: -18.8% | α: 1.208 | 26.3s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -0.813 | Val ARC: -18.8% | α: 1.368 | 26.5s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: 1.159 (25 months) | Max-Val Sharpe: 3.105 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.893 | Val ARC: -20.7% | α: 0.218 | 19.1s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.899 | Val ARC: -20.7% | α: 0.247 | 26.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.900 | Val ARC: -20.6% | α: 0.278 | 26.0s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.905 | Val ARC: -20.4% | α: 0.315 | 26.7s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -0.917 | Val ARC: -20.6% | α: 0.358 | 26.7s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.938 | Val ARC: -21.3% | α: 0.405 | 26.5s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -0.881 | Val ARC: -19.8% | α: 0.460 | 26.8s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -0.836 | Val ARC: -19.7% | α: 0.518 | 26.0s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.831 | Val ARC: -19.4% | α: 0.586 | 26.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -0.829 | Val ARC: -19.3% | α: 0.661 | 26.2s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.853 | Val ARC: -19.8% | α: 0.747 | 26.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -0.881 | Val ARC: -20.0% | α: 0.844 | 26.2s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.849 | Val ARC: -20.2% | α: 0.956 | 26.4s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.861 | Val ARC: -19.8% | α: 1.079 | 26.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -0.856 | Val ARC: -19.8% | α: 1.217 | 25.9s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 1.239 (25 months) | Max-Val Sharpe: 3.126 (2 months)
+
+  ★ Selected: 'flat_k10_fast' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.910 | Max-Val: 4.062 | Val Sharpe: -0.0425 | IR2: 0.0000
+    Test: 2023-08-29→2023-10-27 → RL ARC: -22.2% | QQQ ARC: -40.0%
+
+  Fold  3/15 | RETRAIN (Sharpe -1.616 < 0)
+
+  HP Selection on fold 3:
+    Train: 2021-08-27 → 2023-08-25 (998d)
+    Val:   2023-08-29 → 2023-10-27 (86d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.416 | Val ARC: -20.8% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.437 | Val ARC: -21.2% | α: 0.227 | 13.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.461 | Val ARC: -21.9% | α: 0.246 | 13.5s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.457 | Val ARC: -21.7% | α: 0.266 | 13.5s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.435 | Val ARC: -21.6% | α: 0.289 | 13.5s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.393 | Val ARC: -21.2% | α: 0.313 | 13.5s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.357 | Val ARC: -20.7% | α: 0.339 | 13.5s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.410 | Val ARC: -21.2% | α: 0.366 | 13.5s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.375 | Val ARC: -20.7% | α: 0.395 | 13.4s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.387 | Val ARC: -20.9% | α: 0.425 | 13.6s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.403 | Val ARC: -21.0% | α: 0.458 | 13.6s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.347 | Val ARC: -20.1% | α: 0.492 | 13.6s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.395 | Val ARC: -20.7% | α: 0.529 | 13.7s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.354 | Val ARC: -20.2% | α: 0.568 | 13.7s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.352 | Val ARC: -20.2% | α: 0.609 | 13.5s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.365 | Val ARC: -20.3% | α: 0.654 | 13.5s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -1.376 | Val ARC: -20.4% | α: 0.702 | 13.4s
+    Early stop at epoch 16 (best: 11)
+    → Med-Train Sharpe: -0.929 (25 months) | Max-Val Sharpe: 9.775 (3 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.398 | Val ARC: -20.6% | α: 0.211 | 9.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.424 | Val ARC: -21.6% | α: 0.228 | 13.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.451 | Val ARC: -22.1% | α: 0.248 | 13.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.441 | Val ARC: -22.0% | α: 0.272 | 13.4s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.422 | Val ARC: -21.7% | α: 0.296 | 13.4s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.451 | Val ARC: -22.1% | α: 0.321 | 13.4s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.454 | Val ARC: -22.0% | α: 0.346 | 13.5s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.458 | Val ARC: -22.2% | α: 0.373 | 13.5s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.496 | Val ARC: -22.5% | α: 0.402 | 13.5s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.463 | Val ARC: -21.9% | α: 0.432 | 13.5s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.433 | Val ARC: -21.4% | α: 0.464 | 13.5s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.430 | Val ARC: -21.5% | α: 0.497 | 13.5s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.440 | Val ARC: -21.6% | α: 0.533 | 13.5s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.425 | Val ARC: -21.3% | α: 0.571 | 13.5s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.454 | Val ARC: -21.7% | α: 0.612 | 13.5s
+    Early stop at epoch 14 (best: 0)
+    → Med-Train Sharpe: -0.954 (25 months) | Max-Val Sharpe: 9.735 (3 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -3.157 | Val ARC: -37.1% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -3.153 | Val ARC: -37.0% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -3.157 | Val ARC: -36.8% | α: 0.245 | 14.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -3.157 | Val ARC: -36.8% | α: 0.264 | 14.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -3.157 | Val ARC: -37.1% | α: 0.284 | 14.3s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -3.145 | Val ARC: -36.9% | α: 0.306 | 14.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -3.146 | Val ARC: -37.1% | α: 0.330 | 14.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -3.153 | Val ARC: -37.1% | α: 0.355 | 14.3s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -3.164 | Val ARC: -37.2% | α: 0.383 | 14.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -3.147 | Val ARC: -37.1% | α: 0.412 | 14.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -3.164 | Val ARC: -37.2% | α: 0.444 | 14.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -3.160 | Val ARC: -37.3% | α: 0.478 | 14.4s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -3.163 | Val ARC: -37.3% | α: 0.515 | 14.4s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -3.156 | Val ARC: -37.2% | α: 0.555 | 14.4s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -3.150 | Val ARC: -37.2% | α: 0.598 | 14.3s
+    Early stop at epoch 14 (best: 5)
+    → Med-Train Sharpe: 0.028 (25 months) | Max-Val Sharpe: 9.669 (3 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -3.136 | Val ARC: -37.2% | α: 0.211 | 10.4s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -3.169 | Val ARC: -37.7% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -3.179 | Val ARC: -38.1% | α: 0.245 | 14.4s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -3.166 | Val ARC: -38.0% | α: 0.264 | 14.4s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -3.190 | Val ARC: -38.1% | α: 0.284 | 14.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -3.187 | Val ARC: -38.1% | α: 0.307 | 14.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -3.182 | Val ARC: -38.0% | α: 0.331 | 14.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -3.175 | Val ARC: -37.9% | α: 0.356 | 14.3s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -3.159 | Val ARC: -37.6% | α: 0.383 | 14.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -3.158 | Val ARC: -37.7% | α: 0.413 | 14.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -3.141 | Val ARC: -37.4% | α: 0.445 | 14.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -3.155 | Val ARC: -37.6% | α: 0.479 | 14.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -3.177 | Val ARC: -37.7% | α: 0.516 | 14.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -3.167 | Val ARC: -37.6% | α: 0.555 | 14.4s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -3.133 | Val ARC: -37.3% | α: 0.598 | 14.3s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -3.152 | Val ARC: -37.3% | α: 0.644 | 14.4s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -3.143 | Val ARC: -37.3% | α: 0.693 | 14.4s
+    Ep 17 | Train IR2: 0.0000 Val Sharpe: -3.150 | Val ARC: -37.3% | α: 0.746 | 14.4s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -3.153 | Val ARC: -37.3% | α: 0.804 | 14.4s
+    Ep 19 | Train IR2: 0.0000 Val Sharpe: -3.150 | Val ARC: -37.3% | α: 0.866 | 14.4s
+    Early stop at epoch 19 (best: 14)
+    → Med-Train Sharpe: 0.041 (25 months) | Max-Val Sharpe: 9.598 (3 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.374 | Val ARC: -18.8% | α: 0.209 | 11.0s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.350 | Val ARC: -18.1% | α: 0.226 | 15.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.360 | Val ARC: -17.6% | α: 0.246 | 15.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.393 | Val ARC: -17.9% | α: 0.270 | 15.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.406 | Val ARC: -17.9% | α: 0.296 | 15.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.426 | Val ARC: -18.0% | α: 0.322 | 15.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.359 | Val ARC: -17.3% | α: 0.349 | 15.1s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.395 | Val ARC: -17.7% | α: 0.377 | 15.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.384 | Val ARC: -17.6% | α: 0.406 | 15.2s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.370 | Val ARC: -17.4% | α: 0.435 | 15.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.435 | Val ARC: -18.3% | α: 0.467 | 15.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.357 | Val ARC: -17.6% | α: 0.500 | 15.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.388 | Val ARC: -17.9% | α: 0.534 | 15.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.382 | Val ARC: -17.9% | α: 0.571 | 15.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.372 | Val ARC: -17.8% | α: 0.609 | 15.2s
+    Early stop at epoch 14 (best: 1)
+    → Med-Train Sharpe: -0.926 (25 months) | Max-Val Sharpe: 9.875 (3 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.381 | Val ARC: -19.0% | α: 0.209 | 10.9s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.389 | Val ARC: -20.0% | α: 0.226 | 15.1s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.508 | Val ARC: -22.2% | α: 0.249 | 15.1s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.434 | Val ARC: -21.5% | α: 0.276 | 15.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.417 | Val ARC: -21.0% | α: 0.302 | 15.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.484 | Val ARC: -21.5% | α: 0.329 | 15.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.434 | Val ARC: -20.6% | α: 0.356 | 15.1s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.472 | Val ARC: -21.0% | α: 0.384 | 15.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.430 | Val ARC: -20.2% | α: 0.413 | 15.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.450 | Val ARC: -20.5% | α: 0.444 | 15.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.445 | Val ARC: -20.3% | α: 0.475 | 15.4s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.427 | Val ARC: -20.4% | α: 0.508 | 15.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.361 | Val ARC: -19.4% | α: 0.543 | 15.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.319 | Val ARC: -18.9% | α: 0.580 | 15.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.415 | Val ARC: -19.8% | α: 0.618 | 15.1s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.417 | Val ARC: -19.6% | α: 0.658 | 15.1s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -1.390 | Val ARC: -19.5% | α: 0.701 | 15.2s
+    Ep 17 | Train IR2: 0.0000 Val Sharpe: -1.428 | Val ARC: -19.8% | α: 0.746 | 15.2s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -1.456 | Val ARC: -20.3% | α: 0.795 | 15.3s
+    Early stop at epoch 18 (best: 13)
+    → Med-Train Sharpe: -0.858 (25 months) | Max-Val Sharpe: 9.823 (3 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -3.102 | Val ARC: -32.4% | α: 0.211 | 11.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -3.069 | Val ARC: -30.3% | α: 0.227 | 16.1s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -3.078 | Val ARC: -30.2% | α: 0.244 | 16.1s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -3.063 | Val ARC: -30.5% | α: 0.263 | 16.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -3.059 | Val ARC: -30.7% | α: 0.283 | 16.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -3.083 | Val ARC: -31.1% | α: 0.305 | 16.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -3.074 | Val ARC: -30.9% | α: 0.329 | 16.2s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -3.078 | Val ARC: -31.4% | α: 0.354 | 16.1s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -3.074 | Val ARC: -31.4% | α: 0.382 | 16.1s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -3.084 | Val ARC: -31.7% | α: 0.411 | 16.2s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -3.079 | Val ARC: -32.0% | α: 0.443 | 16.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -3.061 | Val ARC: -32.5% | α: 0.477 | 16.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -3.078 | Val ARC: -32.0% | α: 0.514 | 16.2s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -3.093 | Val ARC: -31.7% | α: 0.553 | 16.2s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -3.089 | Val ARC: -32.0% | α: 0.596 | 16.2s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: -0.004 (25 months) | Max-Val Sharpe: 9.706 (3 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -3.109 | Val ARC: -33.8% | α: 0.211 | 11.6s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -3.144 | Val ARC: -36.4% | α: 0.227 | 16.1s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -3.150 | Val ARC: -37.0% | α: 0.244 | 16.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -3.147 | Val ARC: -37.0% | α: 0.263 | 16.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -3.114 | Val ARC: -36.4% | α: 0.284 | 16.2s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -3.065 | Val ARC: -35.4% | α: 0.306 | 16.1s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -3.019 | Val ARC: -34.8% | α: 0.330 | 16.3s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -3.027 | Val ARC: -34.5% | α: 0.355 | 16.3s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -3.001 | Val ARC: -33.7% | α: 0.383 | 16.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -2.972 | Val ARC: -33.6% | α: 0.412 | 16.3s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -2.994 | Val ARC: -33.6% | α: 0.444 | 16.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -3.014 | Val ARC: -33.5% | α: 0.478 | 16.2s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -3.012 | Val ARC: -33.1% | α: 0.515 | 16.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -2.983 | Val ARC: -32.8% | α: 0.554 | 16.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -3.025 | Val ARC: -33.4% | α: 0.597 | 16.3s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.175 (25 months) | Max-Val Sharpe: 9.742 (3 months)
+
+  ★ Selected: 'hier_k20_fast' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.175 | Max-Val: 9.742 | Val Sharpe: -2.9564 | IR2: 0.0000
+    Test: 2023-10-30→2023-12-28 → RL ARC: +211.0% | QQQ ARC: +185.8%
+  Fold  4/15 | CARRY (Sharpe: 9.028) → RL ARC: +21.7% | QQQ ARC: +51.9%
+  Fold  5/15 | CARRY (Sharpe: 1.013) → RL ARC: -25.0% | QQQ ARC: -18.5%
+
+  Fold  6/15 | RETRAIN (Sharpe -1.192 < 0)
+
+  HP Selection on fold 6:
+    Train: 2022-02-28 → 2024-02-26 (996d)
+    Val:   2024-02-29 → 2024-04-26 (82d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.961 | Val ARC: -26.0% | α: 0.211 | 9.9s
+    Ep  1 | Train IR2: 0.0451 Val Sharpe: -1.034 | Val ARC: -24.8% | α: 0.228 | 13.7s
+    Ep  2 | Train IR2: 0.1608 Val Sharpe: -0.861 | Val ARC: -22.5% | α: 0.248 | 13.7s
+    Ep  3 | Train IR2: 0.1640 Val Sharpe: -0.909 | Val ARC: -24.8% | α: 0.269 | 13.6s
+    Ep  4 | Train IR2: 0.0842 Val Sharpe: -0.973 | Val ARC: -26.9% | α: 0.292 | 13.6s
+    Ep  5 | Train IR2: 0.0664 Val Sharpe: -0.968 | Val ARC: -26.6% | α: 0.316 | 13.6s
+    Ep  6 | Train IR2: 0.0385 Val Sharpe: -0.936 | Val ARC: -26.3% | α: 0.341 | 13.6s
+    Ep  7 | Train IR2: 0.0878 Val Sharpe: -0.899 | Val ARC: -25.5% | α: 0.367 | 13.6s
+    Ep  8 | Train IR2: 0.1938 Val Sharpe: -0.935 | Val ARC: -26.0% | α: 0.395 | 13.5s
+    Ep  9 | Train IR2: 0.1047 Val Sharpe: -0.924 | Val ARC: -25.3% | α: 0.424 | 13.5s
+    Ep 10 | Train IR2: 0.3993 Val Sharpe: -0.886 | Val ARC: -24.7% | α: 0.455 | 13.6s
+    Ep 11 | Train IR2: 0.2192 Val Sharpe: -0.927 | Val ARC: -25.7% | α: 0.489 | 13.6s
+    Ep 12 | Train IR2: 0.1526 Val Sharpe: -0.903 | Val ARC: -24.8% | α: 0.524 | 13.6s
+    Ep 13 | Train IR2: 0.2159 Val Sharpe: -0.940 | Val ARC: -25.8% | α: 0.563 | 13.5s
+    Ep 14 | Train IR2: 0.2460 Val Sharpe: -0.916 | Val ARC: -25.2% | α: 0.604 | 13.6s
+    Early stop at epoch 14 (best: 2)
+    → Med-Train Sharpe: 0.331 (24 months) | Max-Val Sharpe: 0.486 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.953 | Val ARC: -26.2% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.942 | Val ARC: -26.6% | α: 0.227 | 13.5s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.955 | Val ARC: -27.5% | α: 0.247 | 13.4s
+    Ep  3 | Train IR2: 0.0832 Val Sharpe: -0.970 | Val ARC: -28.1% | α: 0.271 | 13.5s
+    Ep  4 | Train IR2: 0.0585 Val Sharpe: -0.992 | Val ARC: -28.5% | α: 0.296 | 13.5s
+    Ep  5 | Train IR2: 0.0288 Val Sharpe: -0.994 | Val ARC: -28.3% | α: 0.322 | 13.5s
+    Ep  6 | Train IR2: 0.0001 Val Sharpe: -0.982 | Val ARC: -28.0% | α: 0.348 | 13.4s
+    Ep  7 | Train IR2: 0.0014 Val Sharpe: -0.996 | Val ARC: -28.3% | α: 0.375 | 13.4s
+    Ep  8 | Train IR2: 0.0092 Val Sharpe: -0.981 | Val ARC: -28.1% | α: 0.404 | 13.5s
+    Ep  9 | Train IR2: 0.0111 Val Sharpe: -0.985 | Val ARC: -27.9% | α: 0.433 | 13.5s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.950 | Val ARC: -27.1% | α: 0.465 | 13.5s
+    Ep 11 | Train IR2: 0.0214 Val Sharpe: -0.979 | Val ARC: -27.6% | α: 0.498 | 13.5s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.986 | Val ARC: -27.6% | α: 0.534 | 13.5s
+    Ep 13 | Train IR2: 0.0434 Val Sharpe: -0.980 | Val ARC: -27.6% | α: 0.572 | 13.5s
+    Ep 14 | Train IR2: 0.2463 Val Sharpe: -0.957 | Val ARC: -27.0% | α: 0.612 | 13.5s
+    Early stop at epoch 14 (best: 1)
+    → Med-Train Sharpe: 0.189 (24 months) | Max-Val Sharpe: 0.428 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.1147 Val Sharpe: -1.217 | Val ARC: -27.4% | α: 0.211 | 10.4s
+    Ep  1 | Train IR2: 0.0028 Val Sharpe: -1.213 | Val ARC: -27.4% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.0086 Val Sharpe: -1.210 | Val ARC: -27.3% | α: 0.245 | 14.3s
+    Ep  3 | Train IR2: 0.0048 Val Sharpe: -1.210 | Val ARC: -27.4% | α: 0.263 | 14.4s
+    Ep  4 | Train IR2: 0.0044 Val Sharpe: -1.205 | Val ARC: -27.4% | α: 0.284 | 14.4s
+    Ep  5 | Train IR2: 0.0074 Val Sharpe: -1.209 | Val ARC: -27.4% | α: 0.306 | 14.4s
+    Ep  6 | Train IR2: 0.0020 Val Sharpe: -1.209 | Val ARC: -27.4% | α: 0.330 | 14.4s
+    Ep  7 | Train IR2: 0.0210 Val Sharpe: -1.207 | Val ARC: -27.4% | α: 0.355 | 14.4s
+    Ep  8 | Train IR2: 0.0010 Val Sharpe: -1.208 | Val ARC: -27.3% | α: 0.382 | 14.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.205 | Val ARC: -27.2% | α: 0.412 | 14.4s
+    Ep 10 | Train IR2: 0.0104 Val Sharpe: -1.209 | Val ARC: -27.4% | α: 0.444 | 14.4s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.209 | Val ARC: -27.3% | α: 0.478 | 14.4s
+    Ep 12 | Train IR2: 0.0063 Val Sharpe: -1.208 | Val ARC: -27.3% | α: 0.515 | 14.4s
+    Ep 13 | Train IR2: 0.0013 Val Sharpe: -1.208 | Val ARC: -27.3% | α: 0.555 | 14.3s
+    Ep 14 | Train IR2: 0.0022 Val Sharpe: -1.210 | Val ARC: -27.3% | α: 0.597 | 14.4s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.766 (24 months) | Max-Val Sharpe: 0.774 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.214 | Val ARC: -27.2% | α: 0.211 | 10.4s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.213 | Val ARC: -27.2% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.212 | Val ARC: -27.4% | α: 0.245 | 14.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.210 | Val ARC: -27.6% | α: 0.263 | 14.3s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.202 | Val ARC: -27.5% | α: 0.284 | 14.3s
+    Ep  5 | Train IR2: 0.0002 Val Sharpe: -1.209 | Val ARC: -27.5% | α: 0.306 | 14.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.197 | Val ARC: -27.3% | α: 0.330 | 14.4s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.197 | Val ARC: -27.3% | α: 0.356 | 14.4s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.192 | Val ARC: -27.2% | α: 0.383 | 14.5s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.190 | Val ARC: -27.2% | α: 0.413 | 14.4s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.188 | Val ARC: -27.1% | α: 0.445 | 14.5s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.193 | Val ARC: -27.1% | α: 0.479 | 14.5s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.208 | Val ARC: -27.4% | α: 0.516 | 14.5s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.210 | Val ARC: -27.5% | α: 0.556 | 14.5s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.215 | Val ARC: -27.5% | α: 0.598 | 14.4s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.216 | Val ARC: -27.5% | α: 0.644 | 14.4s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: 0.806 (24 months) | Max-Val Sharpe: 0.802 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.946 | Val ARC: -24.4% | α: 0.210 | 11.0s
+    Ep  1 | Train IR2: 0.0837 Val Sharpe: -0.924 | Val ARC: -24.0% | α: 0.226 | 15.3s
+    Ep  2 | Train IR2: 0.0401 Val Sharpe: -0.924 | Val ARC: -24.3% | α: 0.246 | 15.2s
+    Ep  3 | Train IR2: 0.1448 Val Sharpe: -0.896 | Val ARC: -24.0% | α: 0.270 | 15.2s
+    Ep  4 | Train IR2: 0.1002 Val Sharpe: -0.935 | Val ARC: -24.9% | α: 0.295 | 15.2s
+    Ep  5 | Train IR2: 0.0906 Val Sharpe: -0.929 | Val ARC: -24.6% | α: 0.321 | 15.2s
+    Ep  6 | Train IR2: 0.0317 Val Sharpe: -0.872 | Val ARC: -23.2% | α: 0.348 | 15.2s
+    Ep  7 | Train IR2: 0.0935 Val Sharpe: -0.835 | Val ARC: -22.1% | α: 0.375 | 15.1s
+    Ep  8 | Train IR2: 0.0714 Val Sharpe: -0.864 | Val ARC: -22.9% | α: 0.403 | 15.3s
+    Ep  9 | Train IR2: 0.0942 Val Sharpe: -0.852 | Val ARC: -22.5% | α: 0.432 | 15.3s
+    Ep 10 | Train IR2: 0.0644 Val Sharpe: -0.835 | Val ARC: -22.0% | α: 0.462 | 15.4s
+    Ep 11 | Train IR2: 0.0943 Val Sharpe: -0.880 | Val ARC: -22.5% | α: 0.494 | 15.3s
+    Ep 12 | Train IR2: 0.0119 Val Sharpe: -0.891 | Val ARC: -22.4% | α: 0.528 | 15.3s
+    Ep 13 | Train IR2: 0.0269 Val Sharpe: -0.876 | Val ARC: -22.0% | α: 0.565 | 15.2s
+    Ep 14 | Train IR2: 0.0248 Val Sharpe: -0.876 | Val ARC: -22.1% | α: 0.604 | 15.1s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: 0.249 (24 months) | Max-Val Sharpe: 0.455 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0358 Val Sharpe: -0.938 | Val ARC: -23.9% | α: 0.210 | 10.9s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -0.974 | Val ARC: -26.0% | α: 0.227 | 15.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.973 | Val ARC: -27.1% | α: 0.255 | 15.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.996 | Val ARC: -27.5% | α: 0.284 | 15.2s
+    Ep  4 | Train IR2: 0.0061 Val Sharpe: -0.966 | Val ARC: -26.5% | α: 0.311 | 15.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.032 | Val ARC: -26.8% | α: 0.337 | 15.2s
+    Ep  6 | Train IR2: 0.0167 Val Sharpe: -1.008 | Val ARC: -26.8% | α: 0.362 | 15.1s
+    Ep  7 | Train IR2: 0.4091 Val Sharpe: -0.992 | Val ARC: -25.7% | α: 0.388 | 15.2s
+    Ep  8 | Train IR2: 0.0405 Val Sharpe: -0.972 | Val ARC: -25.0% | α: 0.414 | 15.2s
+    Ep  9 | Train IR2: 0.2038 Val Sharpe: -0.885 | Val ARC: -23.8% | α: 0.442 | 15.3s
+    Ep 10 | Train IR2: 0.0848 Val Sharpe: -0.885 | Val ARC: -24.0% | α: 0.471 | 15.2s
+    Ep 11 | Train IR2: 0.0276 Val Sharpe: -0.853 | Val ARC: -23.0% | α: 0.501 | 15.3s
+    Ep 12 | Train IR2: 0.0311 Val Sharpe: -0.841 | Val ARC: -22.6% | α: 0.534 | 15.2s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -0.790 | Val ARC: -21.7% | α: 0.569 | 15.2s
+    Ep 14 | Train IR2: 0.0249 Val Sharpe: -0.818 | Val ARC: -21.9% | α: 0.605 | 15.2s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -0.850 | Val ARC: -22.7% | α: 0.643 | 15.3s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -0.879 | Val ARC: -23.3% | α: 0.686 | 15.2s
+    Ep 17 | Train IR2: 0.0386 Val Sharpe: -0.868 | Val ARC: -23.2% | α: 0.730 | 15.3s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -0.845 | Val ARC: -22.7% | α: 0.779 | 15.2s
+    Early stop at epoch 18 (best: 13)
+    → Med-Train Sharpe: 0.359 (24 months) | Max-Val Sharpe: 0.640 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0008 Val Sharpe: -1.184 | Val ARC: -24.0% | α: 0.211 | 11.5s
+    Ep  1 | Train IR2: 0.0219 Val Sharpe: -1.180 | Val ARC: -23.5% | α: 0.227 | 16.0s
+    Ep  2 | Train IR2: 0.0694 Val Sharpe: -1.177 | Val ARC: -23.6% | α: 0.244 | 16.1s
+    Ep  3 | Train IR2: 0.0727 Val Sharpe: -1.170 | Val ARC: -23.5% | α: 0.263 | 16.2s
+    Ep  4 | Train IR2: 0.0024 Val Sharpe: -1.171 | Val ARC: -24.1% | α: 0.283 | 16.1s
+    Ep  5 | Train IR2: 0.0071 Val Sharpe: -1.163 | Val ARC: -24.1% | α: 0.305 | 16.1s
+    Ep  6 | Train IR2: 0.0110 Val Sharpe: -1.141 | Val ARC: -23.4% | α: 0.329 | 16.1s
+    Ep  7 | Train IR2: 0.0305 Val Sharpe: -1.155 | Val ARC: -23.5% | α: 0.354 | 16.1s
+    Ep  8 | Train IR2: 0.0186 Val Sharpe: -1.145 | Val ARC: -23.4% | α: 0.382 | 16.1s
+    Ep  9 | Train IR2: 0.0157 Val Sharpe: -1.122 | Val ARC: -23.2% | α: 0.411 | 16.0s
+    Ep 10 | Train IR2: 0.0674 Val Sharpe: -1.077 | Val ARC: -22.2% | α: 0.443 | 16.1s
+    Ep 11 | Train IR2: 0.0181 Val Sharpe: -1.143 | Val ARC: -23.1% | α: 0.477 | 16.1s
+    Ep 12 | Train IR2: 0.0297 Val Sharpe: -1.127 | Val ARC: -22.7% | α: 0.514 | 16.1s
+    Ep 13 | Train IR2: 0.0042 Val Sharpe: -1.137 | Val ARC: -22.8% | α: 0.554 | 16.1s
+    Ep 14 | Train IR2: 0.0471 Val Sharpe: -1.133 | Val ARC: -22.8% | α: 0.596 | 16.0s
+    Ep 15 | Train IR2: 0.0207 Val Sharpe: -1.144 | Val ARC: -23.0% | α: 0.642 | 16.0s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: 0.980 (24 months) | Max-Val Sharpe: 0.928 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.184 | Val ARC: -24.2% | α: 0.211 | 11.5s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.195 | Val ARC: -26.4% | α: 0.227 | 16.0s
+    Ep  2 | Train IR2: 0.0083 Val Sharpe: -1.132 | Val ARC: -25.6% | α: 0.244 | 16.0s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.114 | Val ARC: -25.3% | α: 0.264 | 16.0s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.138 | Val ARC: -25.5% | α: 0.284 | 15.9s
+    Ep  5 | Train IR2: 0.0093 Val Sharpe: -1.156 | Val ARC: -25.7% | α: 0.306 | 15.9s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.149 | Val ARC: -24.9% | α: 0.330 | 15.9s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.149 | Val ARC: -25.1% | α: 0.355 | 16.0s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.164 | Val ARC: -25.1% | α: 0.383 | 16.1s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.116 | Val ARC: -24.2% | α: 0.412 | 16.1s
+    Ep 10 | Train IR2: 0.0060 Val Sharpe: -1.129 | Val ARC: -24.3% | α: 0.444 | 16.1s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.135 | Val ARC: -24.4% | α: 0.478 | 16.0s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.136 | Val ARC: -24.1% | α: 0.514 | 16.1s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.116 | Val ARC: -23.8% | α: 0.554 | 16.1s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.129 | Val ARC: -24.0% | α: 0.596 | 16.0s
+    Early stop at epoch 14 (best: 3)
+    → Med-Train Sharpe: 0.976 (24 months) | Max-Val Sharpe: 0.833 (2 months)
+
+  ★ Selected: 'hier_k20_smooth' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.980 | Max-Val: 0.928 | Val Sharpe: -1.0817 | IR2: 0.0000
+    Test: 2024-04-29→2024-06-28 → RL ARC: +23.4% | QQQ ARC: +91.8%
+  Fold  7/15 | CARRY (Sharpe: 1.623) → RL ARC: -23.2% | QQQ ARC: -6.6%
+
+  Fold  8/15 | RETRAIN (Sharpe -1.146 < 0)
+
+  HP Selection on fold 8:
+    Train: 2022-06-27 → 2024-06-26 (1000d)
+    Val:   2024-07-01 → 2024-08-28 (82d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 1.2453 Val Sharpe: -1.817 | Val ARC: -42.9% | α: 0.211 | 9.9s
+    Ep  1 | Train IR2: 0.2236 Val Sharpe: -1.838 | Val ARC: -43.9% | α: 0.227 | 13.6s
+    Ep  2 | Train IR2: 0.4100 Val Sharpe: -1.839 | Val ARC: -44.4% | α: 0.246 | 13.5s
+    Ep  3 | Train IR2: 0.9984 Val Sharpe: -1.833 | Val ARC: -44.5% | α: 0.267 | 13.6s
+    Ep  4 | Train IR2: 1.0102 Val Sharpe: -1.832 | Val ARC: -44.8% | α: 0.290 | 13.6s
+    Ep  5 | Train IR2: 0.4825 Val Sharpe: -1.829 | Val ARC: -44.6% | α: 0.314 | 13.6s
+    Ep  6 | Train IR2: 0.4663 Val Sharpe: -1.880 | Val ARC: -45.0% | α: 0.340 | 13.6s
+    Ep  7 | Train IR2: 0.5601 Val Sharpe: -1.888 | Val ARC: -45.1% | α: 0.367 | 13.6s
+    Ep  8 | Train IR2: 0.4297 Val Sharpe: -1.806 | Val ARC: -43.7% | α: 0.396 | 13.6s
+    Ep  9 | Train IR2: 0.5574 Val Sharpe: -1.845 | Val ARC: -44.4% | α: 0.426 | 13.6s
+    Ep 10 | Train IR2: 0.5371 Val Sharpe: -1.835 | Val ARC: -44.3% | α: 0.458 | 13.5s
+    Ep 11 | Train IR2: 0.9256 Val Sharpe: -1.844 | Val ARC: -44.3% | α: 0.492 | 13.6s
+    Ep 12 | Train IR2: 0.7390 Val Sharpe: -1.867 | Val ARC: -44.6% | α: 0.529 | 13.6s
+    Ep 13 | Train IR2: 0.6804 Val Sharpe: -1.838 | Val ARC: -44.2% | α: 0.568 | 13.6s
+    Ep 14 | Train IR2: 0.6939 Val Sharpe: -1.853 | Val ARC: -44.1% | α: 0.610 | 13.6s
+    Early stop at epoch 14 (best: 8)
+    → Med-Train Sharpe: 0.724 (25 months) | Max-Val Sharpe: -1.516 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.8891 Val Sharpe: -1.828 | Val ARC: -43.5% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.2356 Val Sharpe: -1.835 | Val ARC: -43.8% | α: 0.227 | 13.5s
+    Ep  2 | Train IR2: 0.2184 Val Sharpe: -1.762 | Val ARC: -43.5% | α: 0.246 | 13.5s
+    Ep  3 | Train IR2: 0.9655 Val Sharpe: -1.834 | Val ARC: -45.1% | α: 0.268 | 13.6s
+    Ep  4 | Train IR2: 0.0922 Val Sharpe: -1.775 | Val ARC: -44.3% | α: 0.293 | 13.5s
+    Ep  5 | Train IR2: 0.2924 Val Sharpe: -1.780 | Val ARC: -44.2% | α: 0.320 | 13.5s
+    Ep  6 | Train IR2: 0.1785 Val Sharpe: -1.785 | Val ARC: -44.2% | α: 0.348 | 13.5s
+    Ep  7 | Train IR2: 0.1085 Val Sharpe: -1.829 | Val ARC: -44.9% | α: 0.376 | 13.5s
+    Ep  8 | Train IR2: 0.4455 Val Sharpe: -1.769 | Val ARC: -43.3% | α: 0.406 | 13.6s
+    Ep  9 | Train IR2: 0.6556 Val Sharpe: -1.759 | Val ARC: -43.3% | α: 0.437 | 13.5s
+    Ep 10 | Train IR2: 0.2550 Val Sharpe: -1.749 | Val ARC: -42.8% | α: 0.469 | 13.5s
+    Ep 11 | Train IR2: 0.1656 Val Sharpe: -1.773 | Val ARC: -43.5% | α: 0.504 | 13.5s
+    Ep 12 | Train IR2: 0.7056 Val Sharpe: -1.793 | Val ARC: -43.6% | α: 0.541 | 13.5s
+    Ep 13 | Train IR2: 0.2266 Val Sharpe: -1.828 | Val ARC: -44.3% | α: 0.581 | 13.5s
+    Ep 14 | Train IR2: 0.2735 Val Sharpe: -1.795 | Val ARC: -43.5% | α: 0.623 | 13.5s
+    Ep 15 | Train IR2: 0.3099 Val Sharpe: -1.815 | Val ARC: -43.6% | α: 0.668 | 13.5s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: 0.794 (25 months) | Max-Val Sharpe: -1.351 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.4268 Val Sharpe: -1.230 | Val ARC: -27.5% | α: 0.211 | 10.4s
+    Ep  1 | Train IR2: 0.4320 Val Sharpe: -1.230 | Val ARC: -27.5% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.1865 Val Sharpe: -1.222 | Val ARC: -27.4% | α: 0.245 | 14.4s
+    Ep  3 | Train IR2: 0.2535 Val Sharpe: -1.220 | Val ARC: -27.4% | α: 0.264 | 14.4s
+    Ep  4 | Train IR2: 0.3841 Val Sharpe: -1.209 | Val ARC: -27.2% | α: 0.284 | 14.4s
+    Ep  5 | Train IR2: 0.4774 Val Sharpe: -1.222 | Val ARC: -27.5% | α: 0.306 | 14.4s
+    Ep  6 | Train IR2: 0.2981 Val Sharpe: -1.225 | Val ARC: -27.5% | α: 0.330 | 14.4s
+    Ep  7 | Train IR2: 0.4597 Val Sharpe: -1.216 | Val ARC: -27.3% | α: 0.356 | 14.5s
+    Ep  8 | Train IR2: 0.3389 Val Sharpe: -1.229 | Val ARC: -27.5% | α: 0.383 | 14.5s
+    Ep  9 | Train IR2: 0.3535 Val Sharpe: -1.228 | Val ARC: -27.5% | α: 0.413 | 14.4s
+    Ep 10 | Train IR2: 0.2994 Val Sharpe: -1.233 | Val ARC: -27.6% | α: 0.445 | 14.4s
+    Ep 11 | Train IR2: 0.3507 Val Sharpe: -1.229 | Val ARC: -27.5% | α: 0.480 | 14.4s
+    Ep 12 | Train IR2: 0.5280 Val Sharpe: -1.223 | Val ARC: -27.3% | α: 0.517 | 14.4s
+    Ep 13 | Train IR2: 0.3891 Val Sharpe: -1.222 | Val ARC: -27.3% | α: 0.557 | 14.4s
+    Ep 14 | Train IR2: 0.4970 Val Sharpe: -1.229 | Val ARC: -27.4% | α: 0.600 | 14.4s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: 1.392 (25 months) | Max-Val Sharpe: -1.171 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0272 Val Sharpe: -1.235 | Val ARC: -27.5% | α: 0.211 | 10.4s
+    Ep  1 | Train IR2: 0.1854 Val Sharpe: -1.229 | Val ARC: -27.5% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.0959 Val Sharpe: -1.236 | Val ARC: -27.8% | α: 0.245 | 14.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.234 | Val ARC: -27.8% | α: 0.264 | 14.2s
+    Ep  4 | Train IR2: 0.0164 Val Sharpe: -1.252 | Val ARC: -28.3% | α: 0.284 | 14.3s
+    Ep  5 | Train IR2: 0.0047 Val Sharpe: -1.254 | Val ARC: -28.3% | α: 0.307 | 14.3s
+    Ep  6 | Train IR2: 0.0630 Val Sharpe: -1.233 | Val ARC: -27.8% | α: 0.331 | 14.3s
+    Ep  7 | Train IR2: 0.1759 Val Sharpe: -1.230 | Val ARC: -27.6% | α: 0.356 | 14.2s
+    Ep  8 | Train IR2: 0.0195 Val Sharpe: -1.246 | Val ARC: -28.0% | α: 0.384 | 14.2s
+    Ep  9 | Train IR2: 0.0585 Val Sharpe: -1.252 | Val ARC: -28.0% | α: 0.414 | 14.3s
+    Ep 10 | Train IR2: 0.0009 Val Sharpe: -1.228 | Val ARC: -27.6% | α: 0.446 | 14.3s
+    Ep 11 | Train IR2: 0.0853 Val Sharpe: -1.230 | Val ARC: -27.6% | α: 0.481 | 14.3s
+    Ep 12 | Train IR2: 0.0114 Val Sharpe: -1.225 | Val ARC: -27.5% | α: 0.518 | 14.2s
+    Ep 13 | Train IR2: 0.0048 Val Sharpe: -1.234 | Val ARC: -27.6% | α: 0.558 | 14.2s
+    Ep 14 | Train IR2: 0.0437 Val Sharpe: -1.244 | Val ARC: -27.8% | α: 0.601 | 14.3s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.230 | Val ARC: -27.5% | α: 0.647 | 14.3s
+    Ep 16 | Train IR2: 0.2935 Val Sharpe: -1.229 | Val ARC: -27.5% | α: 0.697 | 14.2s
+    Ep 17 | Train IR2: 0.0000 Val Sharpe: -1.238 | Val ARC: -27.6% | α: 0.751 | 14.2s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 1.410 (25 months) | Max-Val Sharpe: -1.184 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.2321 Val Sharpe: -1.811 | Val ARC: -40.1% | α: 0.209 | 11.0s
+    Ep  1 | Train IR2: 1.1620 Val Sharpe: -1.779 | Val ARC: -38.1% | α: 0.224 | 15.1s
+    Ep  2 | Train IR2: 0.4025 Val Sharpe: -1.790 | Val ARC: -37.9% | α: 0.242 | 15.1s
+    Ep  3 | Train IR2: 1.2528 Val Sharpe: -1.861 | Val ARC: -40.2% | α: 0.263 | 15.3s
+    Ep  4 | Train IR2: 0.8919 Val Sharpe: -1.828 | Val ARC: -40.5% | α: 0.287 | 15.3s
+    Ep  5 | Train IR2: 0.3808 Val Sharpe: -1.842 | Val ARC: -40.9% | α: 0.312 | 15.4s
+    Ep  6 | Train IR2: 0.7577 Val Sharpe: -1.835 | Val ARC: -39.8% | α: 0.339 | 15.3s
+    Ep  7 | Train IR2: 1.1071 Val Sharpe: -1.837 | Val ARC: -40.0% | α: 0.367 | 15.4s
+    Ep  8 | Train IR2: 0.8452 Val Sharpe: -1.764 | Val ARC: -38.4% | α: 0.397 | 15.3s
+    Ep  9 | Train IR2: 1.0604 Val Sharpe: -1.768 | Val ARC: -38.2% | α: 0.428 | 15.3s
+    Ep 10 | Train IR2: 0.9547 Val Sharpe: -1.760 | Val ARC: -38.0% | α: 0.461 | 15.1s
+    Ep 11 | Train IR2: 0.7110 Val Sharpe: -1.713 | Val ARC: -37.3% | α: 0.496 | 15.3s
+    Ep 12 | Train IR2: 1.2216 Val Sharpe: -1.749 | Val ARC: -38.4% | α: 0.533 | 15.3s
+    Ep 13 | Train IR2: 0.6612 Val Sharpe: -1.767 | Val ARC: -38.7% | α: 0.572 | 15.3s
+    Ep 14 | Train IR2: 0.8940 Val Sharpe: -1.785 | Val ARC: -39.1% | α: 0.613 | 15.2s
+    Ep 15 | Train IR2: 0.9652 Val Sharpe: -1.812 | Val ARC: -39.3% | α: 0.657 | 15.3s
+    Ep 16 | Train IR2: 0.8967 Val Sharpe: -1.814 | Val ARC: -39.2% | α: 0.704 | 15.3s
+    Early stop at epoch 16 (best: 11)
+    → Med-Train Sharpe: 0.857 (25 months) | Max-Val Sharpe: -1.355 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 1.3064 Val Sharpe: -1.806 | Val ARC: -40.5% | α: 0.210 | 11.1s
+    Ep  1 | Train IR2: 0.2314 Val Sharpe: -1.815 | Val ARC: -41.0% | α: 0.225 | 15.2s
+    Ep  2 | Train IR2: 0.4173 Val Sharpe: -1.849 | Val ARC: -43.3% | α: 0.244 | 15.2s
+    Ep  3 | Train IR2: 0.3167 Val Sharpe: -1.844 | Val ARC: -44.1% | α: 0.275 | 15.2s
+    Ep  4 | Train IR2: 0.2333 Val Sharpe: -1.782 | Val ARC: -42.9% | α: 0.308 | 15.1s
+    Ep  5 | Train IR2: 0.2526 Val Sharpe: -1.853 | Val ARC: -43.9% | α: 0.339 | 15.2s
+    Ep  6 | Train IR2: 0.4394 Val Sharpe: -1.891 | Val ARC: -44.5% | α: 0.368 | 15.2s
+    Ep  7 | Train IR2: 0.2627 Val Sharpe: -1.888 | Val ARC: -44.5% | α: 0.395 | 15.3s
+    Ep  8 | Train IR2: 0.4694 Val Sharpe: -1.941 | Val ARC: -45.4% | α: 0.422 | 15.2s
+    Ep  9 | Train IR2: 1.1563 Val Sharpe: -1.918 | Val ARC: -44.5% | α: 0.451 | 15.1s
+    Ep 10 | Train IR2: 0.4897 Val Sharpe: -1.942 | Val ARC: -44.4% | α: 0.481 | 15.1s
+    Ep 11 | Train IR2: 0.3968 Val Sharpe: -1.892 | Val ARC: -43.4% | α: 0.513 | 15.2s
+    Ep 12 | Train IR2: 0.1009 Val Sharpe: -1.873 | Val ARC: -42.7% | α: 0.547 | 15.2s
+    Ep 13 | Train IR2: 0.5467 Val Sharpe: -1.853 | Val ARC: -42.3% | α: 0.583 | 15.3s
+    Ep 14 | Train IR2: 1.1071 Val Sharpe: -1.814 | Val ARC: -41.5% | α: 0.621 | 15.3s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: 0.757 (25 months) | Max-Val Sharpe: -1.433 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1236 Val Sharpe: -1.203 | Val ARC: -23.8% | α: 0.211 | 11.7s
+    Ep  1 | Train IR2: 0.2565 Val Sharpe: -1.206 | Val ARC: -23.3% | α: 0.227 | 16.2s
+    Ep  2 | Train IR2: 0.3785 Val Sharpe: -1.217 | Val ARC: -23.2% | α: 0.244 | 16.0s
+    Ep  3 | Train IR2: 0.2649 Val Sharpe: -1.219 | Val ARC: -23.2% | α: 0.263 | 15.9s
+    Ep  4 | Train IR2: 0.4116 Val Sharpe: -1.229 | Val ARC: -23.5% | α: 0.284 | 16.1s
+    Ep  5 | Train IR2: 0.4002 Val Sharpe: -1.213 | Val ARC: -23.1% | α: 0.306 | 16.2s
+    Ep  6 | Train IR2: 0.4327 Val Sharpe: -1.230 | Val ARC: -23.3% | α: 0.329 | 16.1s
+    Ep  7 | Train IR2: 0.4512 Val Sharpe: -1.205 | Val ARC: -22.7% | α: 0.355 | 16.1s
+    Ep  8 | Train IR2: 0.3637 Val Sharpe: -1.193 | Val ARC: -22.6% | α: 0.382 | 16.0s
+    Ep  9 | Train IR2: 0.8403 Val Sharpe: -1.184 | Val ARC: -22.5% | α: 0.412 | 16.0s
+    Ep 10 | Train IR2: 0.5388 Val Sharpe: -1.183 | Val ARC: -22.5% | α: 0.444 | 15.9s
+    Ep 11 | Train IR2: 0.4895 Val Sharpe: -1.188 | Val ARC: -22.7% | α: 0.478 | 16.0s
+    Ep 12 | Train IR2: 0.4715 Val Sharpe: -1.191 | Val ARC: -22.6% | α: 0.516 | 16.0s
+    Ep 13 | Train IR2: 0.7721 Val Sharpe: -1.183 | Val ARC: -22.6% | α: 0.555 | 16.2s
+    Ep 14 | Train IR2: 0.4312 Val Sharpe: -1.191 | Val ARC: -22.9% | α: 0.599 | 16.2s
+    Ep 15 | Train IR2: 0.2588 Val Sharpe: -1.169 | Val ARC: -22.5% | α: 0.645 | 16.2s
+    Ep 16 | Train IR2: 0.7633 Val Sharpe: -1.180 | Val ARC: -22.8% | α: 0.695 | 16.2s
+    Ep 17 | Train IR2: 0.4318 Val Sharpe: -1.185 | Val ARC: -22.8% | α: 0.749 | 16.2s
+    Ep 18 | Train IR2: 0.5208 Val Sharpe: -1.178 | Val ARC: -22.8% | α: 0.807 | 16.2s
+    Ep 19 | Train IR2: 0.7037 Val Sharpe: -1.177 | Val ARC: -22.8% | α: 0.869 | 16.2s
+    Ep 20 | Train IR2: 0.8867 Val Sharpe: -1.186 | Val ARC: -22.9% | α: 0.937 | 16.3s
+    Early stop at epoch 20 (best: 15)
+    → Med-Train Sharpe: 1.423 (25 months) | Max-Val Sharpe: -1.143 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0749 Val Sharpe: -1.203 | Val ARC: -24.2% | α: 0.211 | 11.7s
+    Ep  1 | Train IR2: 0.0853 Val Sharpe: -1.215 | Val ARC: -24.9% | α: 0.227 | 16.1s
+    Ep  2 | Train IR2: 0.0126 Val Sharpe: -1.201 | Val ARC: -25.9% | α: 0.244 | 16.2s
+    Ep  3 | Train IR2: 0.1282 Val Sharpe: -1.194 | Val ARC: -26.0% | α: 0.263 | 16.0s
+    Ep  4 | Train IR2: 0.0132 Val Sharpe: -1.199 | Val ARC: -26.1% | α: 0.284 | 15.9s
+    Ep  5 | Train IR2: 0.4175 Val Sharpe: -1.221 | Val ARC: -26.8% | α: 0.306 | 16.0s
+    Ep  6 | Train IR2: 0.1990 Val Sharpe: -1.240 | Val ARC: -26.8% | α: 0.330 | 16.1s
+    Ep  7 | Train IR2: 0.3704 Val Sharpe: -1.223 | Val ARC: -25.7% | α: 0.356 | 16.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.219 | Val ARC: -25.5% | α: 0.383 | 16.1s
+    Ep  9 | Train IR2: 0.3410 Val Sharpe: -1.212 | Val ARC: -25.0% | α: 0.413 | 16.1s
+    Ep 10 | Train IR2: 0.6544 Val Sharpe: -1.190 | Val ARC: -24.5% | α: 0.445 | 16.0s
+    Ep 11 | Train IR2: 0.1821 Val Sharpe: -1.202 | Val ARC: -24.9% | α: 0.480 | 16.0s
+    Ep 12 | Train IR2: 0.2171 Val Sharpe: -1.176 | Val ARC: -24.3% | α: 0.517 | 16.0s
+    Ep 13 | Train IR2: 0.3110 Val Sharpe: -1.205 | Val ARC: -24.6% | α: 0.557 | 16.1s
+    Ep 14 | Train IR2: 0.0389 Val Sharpe: -1.230 | Val ARC: -25.1% | α: 0.600 | 16.1s
+    Ep 15 | Train IR2: 0.0206 Val Sharpe: -1.186 | Val ARC: -24.5% | α: 0.646 | 16.2s
+    Ep 16 | Train IR2: 0.0060 Val Sharpe: -1.200 | Val ARC: -24.3% | α: 0.696 | 16.2s
+    Ep 17 | Train IR2: 0.1118 Val Sharpe: -1.214 | Val ARC: -24.5% | α: 0.750 | 16.3s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 1.442 (25 months) | Max-Val Sharpe: -1.090 (2 months)
+
+  ★ Selected: 'hier_k20_fast' [Tier-3 (fallback, best max-val)]
+    Med-Train: 1.442 | Max-Val: -1.090 | Val Sharpe: -1.1801 | IR2: 0.0000
+    Test: 2024-08-29→2024-10-28 → RL ARC: +0.9% | QQQ ARC: +38.1%
+
+  Fold  9/15 | RETRAIN (Sharpe -0.233 < 0)
+
+  HP Selection on fold 9:
+    Train: 2022-08-29 → 2024-08-26 (994d)
+    Val:   2024-08-29 → 2024-10-28 (84d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0084 Val Sharpe: 0.290 | Val ARC: +7.8% | α: 0.211 | 9.9s
+    Ep  1 | Train IR2: 0.4826 Val Sharpe: 0.302 | Val ARC: +8.0% | α: 0.227 | 13.6s
+    Ep  2 | Train IR2: 0.1992 Val Sharpe: 0.300 | Val ARC: +8.1% | α: 0.245 | 13.6s
+    Ep  3 | Train IR2: 0.2920 Val Sharpe: 0.308 | Val ARC: +8.4% | α: 0.266 | 13.6s
+    Ep  4 | Train IR2: 0.5076 Val Sharpe: 0.308 | Val ARC: +8.4% | α: 0.290 | 13.6s
+    Ep  5 | Train IR2: 0.3270 Val Sharpe: 0.258 | Val ARC: +7.7% | α: 0.315 | 13.6s
+    Ep  6 | Train IR2: 0.6148 Val Sharpe: 0.275 | Val ARC: +8.1% | α: 0.341 | 13.5s
+    Ep  7 | Train IR2: 0.5026 Val Sharpe: 0.299 | Val ARC: +8.3% | α: 0.369 | 13.5s
+    Ep  8 | Train IR2: 0.4633 Val Sharpe: 0.274 | Val ARC: +7.8% | α: 0.398 | 13.5s
+    Ep  9 | Train IR2: 0.5320 Val Sharpe: 0.313 | Val ARC: +8.3% | α: 0.428 | 13.5s
+    Ep 10 | Train IR2: 0.4789 Val Sharpe: 0.270 | Val ARC: +7.8% | α: 0.461 | 13.5s
+    Ep 11 | Train IR2: 0.6126 Val Sharpe: 0.280 | Val ARC: +7.9% | α: 0.495 | 13.5s
+    Ep 12 | Train IR2: 0.7304 Val Sharpe: 0.308 | Val ARC: +8.2% | α: 0.531 | 13.5s
+    Ep 13 | Train IR2: 0.4286 Val Sharpe: 0.273 | Val ARC: +7.8% | α: 0.569 | 13.5s
+    Ep 14 | Train IR2: 0.4926 Val Sharpe: 0.271 | Val ARC: +7.7% | α: 0.610 | 13.5s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.579 (25 months) | Max-Val Sharpe: 1.553 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0613 Val Sharpe: 0.298 | Val ARC: +7.9% | α: 0.211 | 9.7s
+    Ep  1 | Train IR2: 0.2529 Val Sharpe: 0.301 | Val ARC: +8.1% | α: 0.227 | 13.4s
+    Ep  2 | Train IR2: 0.0197 Val Sharpe: 0.276 | Val ARC: +8.0% | α: 0.246 | 13.4s
+    Ep  3 | Train IR2: 0.3252 Val Sharpe: 0.276 | Val ARC: +8.0% | α: 0.268 | 13.5s
+    Ep  4 | Train IR2: 0.0843 Val Sharpe: 0.275 | Val ARC: +8.2% | α: 0.293 | 13.4s
+    Ep  5 | Train IR2: 0.4587 Val Sharpe: 0.238 | Val ARC: +7.8% | α: 0.319 | 13.5s
+    Ep  6 | Train IR2: 0.2143 Val Sharpe: 0.271 | Val ARC: +8.1% | α: 0.347 | 13.4s
+    Ep  7 | Train IR2: 0.3494 Val Sharpe: 0.290 | Val ARC: +8.2% | α: 0.375 | 13.4s
+    Ep  8 | Train IR2: 0.2760 Val Sharpe: 0.263 | Val ARC: +7.9% | α: 0.404 | 13.4s
+    Ep  9 | Train IR2: 0.2449 Val Sharpe: 0.272 | Val ARC: +8.0% | α: 0.434 | 13.4s
+    Ep 10 | Train IR2: 0.5761 Val Sharpe: 0.304 | Val ARC: +8.4% | α: 0.465 | 13.4s
+    Ep 11 | Train IR2: 0.5190 Val Sharpe: 0.278 | Val ARC: +8.0% | α: 0.499 | 13.4s
+    Ep 12 | Train IR2: 0.4277 Val Sharpe: 0.306 | Val ARC: +8.4% | α: 0.535 | 13.4s
+    Ep 13 | Train IR2: 0.1188 Val Sharpe: 0.261 | Val ARC: +7.7% | α: 0.574 | 13.4s
+    Ep 14 | Train IR2: 0.5101 Val Sharpe: 0.309 | Val ARC: +8.3% | α: 0.614 | 13.4s
+    Ep 15 | Train IR2: 0.4917 Val Sharpe: 0.287 | Val ARC: +8.0% | α: 0.658 | 13.4s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: 0.311 | Val ARC: +8.3% | α: 0.704 | 13.4s
+    Ep 17 | Train IR2: 0.4002 Val Sharpe: 0.319 | Val ARC: +8.4% | α: 0.754 | 13.4s
+    Ep 18 | Train IR2: 0.6135 Val Sharpe: 0.308 | Val ARC: +8.2% | α: 0.808 | 13.4s
+    Ep 19 | Train IR2: 0.1154 Val Sharpe: 0.310 | Val ARC: +8.3% | α: 0.866 | 13.4s
+    Ep 20 | Train IR2: 0.0112 Val Sharpe: 0.299 | Val ARC: +8.1% | α: 0.928 | 13.5s
+    Ep 21 | Train IR2: 0.0000 Val Sharpe: 0.318 | Val ARC: +8.3% | α: 0.995 | 13.5s
+    Ep 22 | Train IR2: 0.4675 Val Sharpe: 0.311 | Val ARC: +8.2% | α: 1.068 | 13.4s
+    Early stop at epoch 22 (best: 17)
+    → Med-Train Sharpe: 0.481 (25 months) | Max-Val Sharpe: 1.598 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.1322 Val Sharpe: -0.283 | Val ARC: +0.4% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.3113 Val Sharpe: -0.280 | Val ARC: +0.5% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.4736 Val Sharpe: -0.273 | Val ARC: +0.5% | α: 0.244 | 14.2s
+    Ep  3 | Train IR2: 0.1864 Val Sharpe: -0.277 | Val ARC: +0.5% | α: 0.263 | 14.2s
+    Ep  4 | Train IR2: 0.4942 Val Sharpe: -0.279 | Val ARC: +0.5% | α: 0.283 | 14.2s
+    Ep  5 | Train IR2: 0.4316 Val Sharpe: -0.276 | Val ARC: +0.5% | α: 0.305 | 14.2s
+    Ep  6 | Train IR2: 0.7623 Val Sharpe: -0.275 | Val ARC: +0.5% | α: 0.329 | 14.2s
+    Ep  7 | Train IR2: 0.3035 Val Sharpe: -0.277 | Val ARC: +0.5% | α: 0.354 | 14.3s
+    Ep  8 | Train IR2: 0.5827 Val Sharpe: -0.276 | Val ARC: +0.5% | α: 0.381 | 14.2s
+    Ep  9 | Train IR2: 0.2628 Val Sharpe: -0.273 | Val ARC: +0.5% | α: 0.410 | 14.3s
+    Ep 10 | Train IR2: 0.2929 Val Sharpe: -0.279 | Val ARC: +0.5% | α: 0.442 | 14.3s
+    Ep 11 | Train IR2: 0.3515 Val Sharpe: -0.274 | Val ARC: +0.5% | α: 0.476 | 14.3s
+    Ep 12 | Train IR2: 0.4571 Val Sharpe: -0.273 | Val ARC: +0.5% | α: 0.513 | 14.2s
+    Ep 13 | Train IR2: 0.4480 Val Sharpe: -0.275 | Val ARC: +0.5% | α: 0.552 | 14.2s
+    Ep 14 | Train IR2: 0.2037 Val Sharpe: -0.275 | Val ARC: +0.5% | α: 0.594 | 14.2s
+    Ep 15 | Train IR2: 0.7104 Val Sharpe: -0.276 | Val ARC: +0.5% | α: 0.640 | 14.3s
+    Ep 16 | Train IR2: 0.5420 Val Sharpe: -0.276 | Val ARC: +0.5% | α: 0.689 | 14.2s
+    Ep 17 | Train IR2: 0.5096 Val Sharpe: -0.276 | Val ARC: +0.5% | α: 0.742 | 14.3s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 0.773 (25 months) | Max-Val Sharpe: 0.375 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0599 Val Sharpe: -0.281 | Val ARC: +0.4% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.1263 Val Sharpe: -0.278 | Val ARC: +0.5% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.0137 Val Sharpe: -0.278 | Val ARC: +0.5% | α: 0.244 | 14.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -0.278 | Val ARC: +0.5% | α: 0.263 | 14.2s
+    Ep  4 | Train IR2: 0.0024 Val Sharpe: -0.277 | Val ARC: +0.5% | α: 0.283 | 14.1s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -0.275 | Val ARC: +0.5% | α: 0.305 | 14.1s
+    Ep  6 | Train IR2: 0.0557 Val Sharpe: -0.281 | Val ARC: +0.5% | α: 0.329 | 14.1s
+    Ep  7 | Train IR2: 0.0716 Val Sharpe: -0.281 | Val ARC: +0.5% | α: 0.354 | 14.2s
+    Ep  8 | Train IR2: 0.1523 Val Sharpe: -0.283 | Val ARC: +0.4% | α: 0.382 | 14.1s
+    Ep  9 | Train IR2: 0.4766 Val Sharpe: -0.285 | Val ARC: +0.4% | α: 0.411 | 14.2s
+    Ep 10 | Train IR2: 0.0168 Val Sharpe: -0.282 | Val ARC: +0.4% | α: 0.443 | 14.2s
+    Ep 11 | Train IR2: 0.0420 Val Sharpe: -0.282 | Val ARC: +0.4% | α: 0.477 | 14.1s
+    Ep 12 | Train IR2: 0.0047 Val Sharpe: -0.284 | Val ARC: +0.4% | α: 0.514 | 14.1s
+    Ep 13 | Train IR2: 0.0965 Val Sharpe: -0.285 | Val ARC: +0.4% | α: 0.553 | 14.1s
+    Ep 14 | Train IR2: 0.0048 Val Sharpe: -0.285 | Val ARC: +0.4% | α: 0.596 | 14.1s
+    Early stop at epoch 14 (best: 5)
+    → Med-Train Sharpe: 0.781 (25 months) | Max-Val Sharpe: 0.375 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1297 Val Sharpe: 0.327 | Val ARC: +7.7% | α: 0.209 | 10.8s
+    Ep  1 | Train IR2: 0.2577 Val Sharpe: 0.320 | Val ARC: +7.8% | α: 0.224 | 15.0s
+    Ep  2 | Train IR2: 0.2561 Val Sharpe: 0.346 | Val ARC: +7.8% | α: 0.241 | 15.0s
+    Ep  3 | Train IR2: 0.9713 Val Sharpe: 0.363 | Val ARC: +7.6% | α: 0.260 | 15.1s
+    Ep  4 | Train IR2: 0.4196 Val Sharpe: 0.376 | Val ARC: +7.6% | α: 0.282 | 15.0s
+    Ep  5 | Train IR2: 0.5448 Val Sharpe: 0.374 | Val ARC: +7.5% | α: 0.307 | 15.1s
+    Ep  6 | Train IR2: 0.3792 Val Sharpe: 0.407 | Val ARC: +7.8% | α: 0.333 | 15.0s
+    Ep  7 | Train IR2: 0.5648 Val Sharpe: 0.386 | Val ARC: +7.5% | α: 0.361 | 15.1s
+    Ep  8 | Train IR2: 0.4466 Val Sharpe: 0.329 | Val ARC: +6.9% | α: 0.390 | 15.1s
+    Ep  9 | Train IR2: 0.3156 Val Sharpe: 0.386 | Val ARC: +7.5% | α: 0.422 | 15.1s
+    Ep 10 | Train IR2: 0.3781 Val Sharpe: 0.363 | Val ARC: +7.3% | α: 0.455 | 15.0s
+    Ep 11 | Train IR2: 0.2218 Val Sharpe: 0.374 | Val ARC: +7.5% | α: 0.490 | 15.0s
+    Ep 12 | Train IR2: 0.1466 Val Sharpe: 0.378 | Val ARC: +7.6% | α: 0.528 | 15.0s
+    Ep 13 | Train IR2: 0.9488 Val Sharpe: 0.377 | Val ARC: +7.5% | α: 0.567 | 15.0s
+    Ep 14 | Train IR2: 0.5982 Val Sharpe: 0.360 | Val ARC: +7.4% | α: 0.610 | 15.1s
+    Early stop at epoch 14 (best: 6)
+    → Med-Train Sharpe: 0.595 (25 months) | Max-Val Sharpe: 1.637 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: 0.326 | Val ARC: +7.7% | α: 0.209 | 10.9s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: 0.340 | Val ARC: +7.9% | α: 0.224 | 15.1s
+    Ep  2 | Train IR2: 0.0314 Val Sharpe: 0.286 | Val ARC: +7.4% | α: 0.244 | 15.0s
+    Ep  3 | Train IR2: 0.1499 Val Sharpe: 0.348 | Val ARC: +8.4% | α: 0.272 | 15.0s
+    Ep  4 | Train IR2: 0.6327 Val Sharpe: 0.276 | Val ARC: +7.7% | α: 0.302 | 15.0s
+    Ep  5 | Train IR2: 0.8600 Val Sharpe: 0.294 | Val ARC: +7.9% | α: 0.331 | 15.0s
+    Ep  6 | Train IR2: 0.7780 Val Sharpe: 0.224 | Val ARC: +6.9% | α: 0.360 | 15.0s
+    Ep  7 | Train IR2: 0.3636 Val Sharpe: 0.208 | Val ARC: +6.7% | α: 0.389 | 15.1s
+    Ep  8 | Train IR2: 0.2800 Val Sharpe: 0.177 | Val ARC: +6.1% | α: 0.418 | 15.2s
+    Ep  9 | Train IR2: 0.7125 Val Sharpe: 0.218 | Val ARC: +6.9% | α: 0.449 | 15.2s
+    Ep 10 | Train IR2: 0.6439 Val Sharpe: 0.276 | Val ARC: +7.4% | α: 0.481 | 15.2s
+    Ep 11 | Train IR2: 0.3879 Val Sharpe: 0.275 | Val ARC: +7.4% | α: 0.515 | 15.1s
+    Ep 12 | Train IR2: 0.5298 Val Sharpe: 0.229 | Val ARC: +7.0% | α: 0.550 | 15.1s
+    Ep 13 | Train IR2: 0.1434 Val Sharpe: 0.234 | Val ARC: +6.6% | α: 0.587 | 15.0s
+    Ep 14 | Train IR2: 0.1894 Val Sharpe: 0.240 | Val ARC: +6.8% | α: 0.626 | 15.1s
+    Early stop at epoch 14 (best: 3)
+    → Med-Train Sharpe: 0.607 (25 months) | Max-Val Sharpe: 1.521 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0655 Val Sharpe: -0.215 | Val ARC: +1.1% | α: 0.210 | 11.5s
+    Ep  1 | Train IR2: 0.7085 Val Sharpe: -0.225 | Val ARC: +1.0% | α: 0.227 | 15.9s
+    Ep  2 | Train IR2: 0.2779 Val Sharpe: -0.232 | Val ARC: +0.9% | α: 0.244 | 16.1s
+    Ep  3 | Train IR2: 0.4781 Val Sharpe: -0.228 | Val ARC: +1.0% | α: 0.263 | 16.0s
+    Ep  4 | Train IR2: 0.4185 Val Sharpe: -0.231 | Val ARC: +0.9% | α: 0.283 | 16.0s
+    Ep  5 | Train IR2: 0.8100 Val Sharpe: -0.223 | Val ARC: +1.0% | α: 0.305 | 15.9s
+    Ep  6 | Train IR2: 0.4228 Val Sharpe: -0.208 | Val ARC: +1.2% | α: 0.328 | 16.0s
+    Ep  7 | Train IR2: 0.5823 Val Sharpe: -0.183 | Val ARC: +1.4% | α: 0.353 | 15.9s
+    Ep  8 | Train IR2: 0.5429 Val Sharpe: -0.172 | Val ARC: +1.5% | α: 0.381 | 16.0s
+    Ep  9 | Train IR2: 0.2787 Val Sharpe: -0.151 | Val ARC: +1.7% | α: 0.410 | 16.0s
+    Ep 10 | Train IR2: 0.4714 Val Sharpe: -0.166 | Val ARC: +1.5% | α: 0.441 | 16.1s
+    Ep 11 | Train IR2: 0.3460 Val Sharpe: -0.168 | Val ARC: +1.5% | α: 0.475 | 16.0s
+    Ep 12 | Train IR2: 0.2122 Val Sharpe: -0.181 | Val ARC: +1.4% | α: 0.512 | 16.1s
+    Ep 13 | Train IR2: 0.5130 Val Sharpe: -0.178 | Val ARC: +1.4% | α: 0.551 | 16.1s
+    Ep 14 | Train IR2: 0.4179 Val Sharpe: -0.173 | Val ARC: +1.5% | α: 0.594 | 16.0s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.874 (25 months) | Max-Val Sharpe: 0.492 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -0.226 | Val ARC: +1.0% | α: 0.210 | 11.5s
+    Ep  1 | Train IR2: 0.0075 Val Sharpe: -0.236 | Val ARC: +0.9% | α: 0.227 | 15.9s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -0.268 | Val ARC: +0.6% | α: 0.244 | 16.0s
+    Ep  3 | Train IR2: 0.4789 Val Sharpe: -0.218 | Val ARC: +1.2% | α: 0.263 | 16.0s
+    Ep  4 | Train IR2: 0.2103 Val Sharpe: -0.222 | Val ARC: +1.2% | α: 0.283 | 16.0s
+    Ep  5 | Train IR2: 0.1107 Val Sharpe: -0.209 | Val ARC: +1.3% | α: 0.305 | 16.0s
+    Ep  6 | Train IR2: 0.0001 Val Sharpe: -0.187 | Val ARC: +1.5% | α: 0.329 | 16.0s
+    Ep  7 | Train IR2: 0.1524 Val Sharpe: -0.259 | Val ARC: +0.8% | α: 0.354 | 16.0s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -0.262 | Val ARC: +0.7% | α: 0.382 | 15.9s
+    Ep  9 | Train IR2: 0.0838 Val Sharpe: -0.210 | Val ARC: +1.3% | α: 0.411 | 16.0s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -0.238 | Val ARC: +0.9% | α: 0.442 | 15.9s
+    Ep 11 | Train IR2: 0.0796 Val Sharpe: -0.224 | Val ARC: +1.1% | α: 0.476 | 16.0s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -0.207 | Val ARC: +1.2% | α: 0.513 | 15.9s
+    Ep 13 | Train IR2: 0.0181 Val Sharpe: -0.199 | Val ARC: +1.3% | α: 0.552 | 16.1s
+    Ep 14 | Train IR2: 0.0284 Val Sharpe: -0.160 | Val ARC: +1.7% | α: 0.594 | 16.1s
+    Ep 15 | Train IR2: 0.1478 Val Sharpe: -0.165 | Val ARC: +1.7% | α: 0.640 | 16.1s
+    Ep 16 | Train IR2: 0.0350 Val Sharpe: -0.170 | Val ARC: +1.6% | α: 0.689 | 16.1s
+    Ep 17 | Train IR2: 0.0108 Val Sharpe: -0.178 | Val ARC: +1.6% | α: 0.742 | 16.0s
+    Ep 18 | Train IR2: 0.1198 Val Sharpe: -0.200 | Val ARC: +1.3% | α: 0.799 | 16.0s
+    Ep 19 | Train IR2: 0.0065 Val Sharpe: -0.189 | Val ARC: +1.4% | α: 0.860 | 16.0s
+    Early stop at epoch 19 (best: 14)
+    → Med-Train Sharpe: 0.951 (25 months) | Max-Val Sharpe: 0.477 (2 months)
+
+  ★ Selected: 'hier_k10_smooth' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.595 | Max-Val: 1.637 | Val Sharpe: 0.3969 | IR2: 2.1515
+    Test: 2024-10-29→2024-12-27 → RL ARC: +104.0% | QQQ ARC: +46.2%
+  Fold 10/15 | CARRY (Sharpe: 3.297) → RL ARC: -17.7% | QQQ ARC: -1.3%
+
+  Fold 11/15 | RETRAIN (Sharpe -0.855 < 0)
+
+  HP Selection on fold 11:
+    Train: 2022-12-27 → 2024-12-26 (996d)
+    Val:   2024-12-30 → 2025-02-27 (80d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 2.4691 Val Sharpe: -0.899 | Val ARC: -22.6% | α: 0.211 | 9.9s
+    Ep  1 | Train IR2: 0.8262 Val Sharpe: -0.883 | Val ARC: -22.3% | α: 0.227 | 13.6s
+    Ep  2 | Train IR2: 0.8337 Val Sharpe: -0.914 | Val ARC: -23.1% | α: 0.245 | 13.6s
+    Ep  3 | Train IR2: 0.9504 Val Sharpe: -0.887 | Val ARC: -22.7% | α: 0.266 | 13.6s
+    Ep  4 | Train IR2: 1.6925 Val Sharpe: -0.962 | Val ARC: -24.9% | α: 0.289 | 13.6s
+    Ep  5 | Train IR2: 1.0171 Val Sharpe: -0.900 | Val ARC: -23.2% | α: 0.313 | 13.5s
+    Ep  6 | Train IR2: 2.0395 Val Sharpe: -0.908 | Val ARC: -23.6% | α: 0.339 | 13.6s
+    Ep  7 | Train IR2: 1.0301 Val Sharpe: -0.889 | Val ARC: -22.9% | α: 0.366 | 13.5s
+    Ep  8 | Train IR2: 0.8543 Val Sharpe: -0.926 | Val ARC: -23.6% | α: 0.394 | 13.5s
+    Ep  9 | Train IR2: 1.6602 Val Sharpe: -0.894 | Val ARC: -22.8% | α: 0.425 | 13.5s
+    Ep 10 | Train IR2: 1.7978 Val Sharpe: -0.867 | Val ARC: -22.2% | α: 0.457 | 13.5s
+    Ep 11 | Train IR2: 1.7817 Val Sharpe: -0.883 | Val ARC: -22.5% | α: 0.491 | 13.5s
+    Ep 12 | Train IR2: 1.4652 Val Sharpe: -0.913 | Val ARC: -23.1% | α: 0.527 | 13.5s
+    Ep 13 | Train IR2: 1.5700 Val Sharpe: -0.893 | Val ARC: -22.8% | α: 0.566 | 13.5s
+    Ep 14 | Train IR2: 1.1500 Val Sharpe: -0.869 | Val ARC: -22.2% | α: 0.607 | 13.5s
+    Ep 15 | Train IR2: 1.0613 Val Sharpe: -0.867 | Val ARC: -22.0% | α: 0.652 | 13.5s
+    Early stop at epoch 15 (best: 10)
+    → Med-Train Sharpe: 0.736 (25 months) | Max-Val Sharpe: 2.454 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.5951 Val Sharpe: -0.877 | Val ARC: -22.0% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.1173 Val Sharpe: -0.885 | Val ARC: -22.7% | α: 0.227 | 13.4s
+    Ep  2 | Train IR2: 2.2857 Val Sharpe: -0.932 | Val ARC: -24.7% | α: 0.247 | 13.5s
+    Ep  3 | Train IR2: 0.8959 Val Sharpe: -0.938 | Val ARC: -25.1% | α: 0.270 | 13.5s
+    Ep  4 | Train IR2: 0.8668 Val Sharpe: -0.974 | Val ARC: -26.0% | α: 0.297 | 13.5s
+    Ep  5 | Train IR2: 1.2385 Val Sharpe: -0.858 | Val ARC: -23.0% | α: 0.323 | 13.5s
+    Ep  6 | Train IR2: 0.7169 Val Sharpe: -0.874 | Val ARC: -23.1% | α: 0.350 | 13.5s
+    Ep  7 | Train IR2: 0.8802 Val Sharpe: -0.921 | Val ARC: -24.1% | α: 0.378 | 13.5s
+    Ep  8 | Train IR2: 1.5002 Val Sharpe: -0.886 | Val ARC: -23.4% | α: 0.406 | 13.4s
+    Ep  9 | Train IR2: 1.2597 Val Sharpe: -0.937 | Val ARC: -24.4% | α: 0.437 | 13.4s
+    Ep 10 | Train IR2: 2.1435 Val Sharpe: -0.995 | Val ARC: -25.4% | α: 0.468 | 13.4s
+    Ep 11 | Train IR2: 0.7603 Val Sharpe: -0.954 | Val ARC: -24.5% | α: 0.502 | 13.4s
+    Ep 12 | Train IR2: 1.3526 Val Sharpe: -0.958 | Val ARC: -24.9% | α: 0.538 | 13.4s
+    Ep 13 | Train IR2: 1.0413 Val Sharpe: -0.938 | Val ARC: -24.3% | α: 0.576 | 13.4s
+    Ep 14 | Train IR2: 0.2085 Val Sharpe: -0.959 | Val ARC: -24.5% | α: 0.616 | 13.4s
+    Early stop at epoch 14 (best: 5)
+    → Med-Train Sharpe: 0.633 (25 months) | Max-Val Sharpe: 2.503 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.8937 Val Sharpe: -0.863 | Val ARC: -17.2% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 1.1015 Val Sharpe: -0.867 | Val ARC: -17.4% | α: 0.227 | 14.3s
+    Ep  2 | Train IR2: 0.6645 Val Sharpe: -0.873 | Val ARC: -17.5% | α: 0.245 | 14.3s
+    Ep  3 | Train IR2: 0.8803 Val Sharpe: -0.875 | Val ARC: -17.7% | α: 0.264 | 14.3s
+    Ep  4 | Train IR2: 1.0714 Val Sharpe: -0.883 | Val ARC: -17.8% | α: 0.284 | 14.4s
+    Ep  5 | Train IR2: 0.8340 Val Sharpe: -0.868 | Val ARC: -17.5% | α: 0.306 | 14.3s
+    Ep  6 | Train IR2: 1.3542 Val Sharpe: -0.871 | Val ARC: -17.6% | α: 0.330 | 14.3s
+    Ep  7 | Train IR2: 0.9822 Val Sharpe: -0.879 | Val ARC: -17.7% | α: 0.356 | 14.4s
+    Ep  8 | Train IR2: 1.4550 Val Sharpe: -0.884 | Val ARC: -17.8% | α: 0.383 | 14.3s
+    Ep  9 | Train IR2: 1.1846 Val Sharpe: -0.854 | Val ARC: -17.2% | α: 0.413 | 14.3s
+    Ep 10 | Train IR2: 0.6709 Val Sharpe: -0.858 | Val ARC: -17.2% | α: 0.444 | 14.3s
+    Ep 11 | Train IR2: 1.2883 Val Sharpe: -0.860 | Val ARC: -17.3% | α: 0.478 | 14.3s
+    Ep 12 | Train IR2: 0.9835 Val Sharpe: -0.869 | Val ARC: -17.5% | α: 0.515 | 14.3s
+    Ep 13 | Train IR2: 1.3051 Val Sharpe: -0.866 | Val ARC: -17.4% | α: 0.555 | 14.3s
+    Ep 14 | Train IR2: 1.0165 Val Sharpe: -0.874 | Val ARC: -17.6% | α: 0.597 | 14.3s
+    Early stop at epoch 14 (best: 9)
+    → Med-Train Sharpe: 0.602 (25 months) | Max-Val Sharpe: 1.987 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.2213 Val Sharpe: -0.865 | Val ARC: -17.3% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.4225 Val Sharpe: -0.869 | Val ARC: -17.4% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.1168 Val Sharpe: -0.864 | Val ARC: -17.2% | α: 0.245 | 14.2s
+    Ep  3 | Train IR2: 0.1617 Val Sharpe: -0.861 | Val ARC: -17.3% | α: 0.263 | 14.3s
+    Ep  4 | Train IR2: 0.3433 Val Sharpe: -0.860 | Val ARC: -17.3% | α: 0.284 | 14.3s
+    Ep  5 | Train IR2: 0.0713 Val Sharpe: -0.861 | Val ARC: -17.3% | α: 0.306 | 14.3s
+    Ep  6 | Train IR2: 0.2557 Val Sharpe: -0.862 | Val ARC: -17.3% | α: 0.329 | 14.3s
+    Ep  7 | Train IR2: 0.1909 Val Sharpe: -0.859 | Val ARC: -17.3% | α: 0.355 | 14.3s
+    Ep  8 | Train IR2: 0.7639 Val Sharpe: -0.862 | Val ARC: -17.3% | α: 0.382 | 14.3s
+    Ep  9 | Train IR2: 0.0960 Val Sharpe: -0.863 | Val ARC: -17.4% | α: 0.412 | 14.2s
+    Ep 10 | Train IR2: 0.4423 Val Sharpe: -0.859 | Val ARC: -17.2% | α: 0.444 | 14.3s
+    Ep 11 | Train IR2: 0.2752 Val Sharpe: -0.858 | Val ARC: -17.2% | α: 0.478 | 14.3s
+    Ep 12 | Train IR2: 0.3569 Val Sharpe: -0.856 | Val ARC: -17.2% | α: 0.515 | 14.3s
+    Ep 13 | Train IR2: 0.0786 Val Sharpe: -0.860 | Val ARC: -17.2% | α: 0.555 | 14.3s
+    Ep 14 | Train IR2: 0.0748 Val Sharpe: -0.869 | Val ARC: -17.4% | α: 0.598 | 14.3s
+    Ep 15 | Train IR2: 0.2327 Val Sharpe: -0.862 | Val ARC: -17.3% | α: 0.644 | 14.3s
+    Ep 16 | Train IR2: 0.1158 Val Sharpe: -0.861 | Val ARC: -17.3% | α: 0.693 | 14.3s
+    Ep 17 | Train IR2: 0.0963 Val Sharpe: -0.863 | Val ARC: -17.3% | α: 0.747 | 14.3s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 0.599 (25 months) | Max-Val Sharpe: 2.009 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 1.3952 Val Sharpe: -0.874 | Val ARC: -20.4% | α: 0.210 | 10.8s
+    Ep  1 | Train IR2: 1.0402 Val Sharpe: -0.882 | Val ARC: -20.9% | α: 0.225 | 15.2s
+    Ep  2 | Train IR2: 1.2010 Val Sharpe: -0.894 | Val ARC: -21.3% | α: 0.243 | 15.2s
+    Ep  3 | Train IR2: 1.4698 Val Sharpe: -0.851 | Val ARC: -20.1% | α: 0.263 | 15.2s
+    Ep  4 | Train IR2: 1.5265 Val Sharpe: -0.841 | Val ARC: -19.6% | α: 0.287 | 15.1s
+    Ep  5 | Train IR2: 1.5220 Val Sharpe: -0.825 | Val ARC: -18.9% | α: 0.313 | 15.1s
+    Ep  6 | Train IR2: 1.8256 Val Sharpe: -0.815 | Val ARC: -18.4% | α: 0.341 | 15.1s
+    Ep  7 | Train IR2: 1.4917 Val Sharpe: -0.815 | Val ARC: -18.4% | α: 0.370 | 15.1s
+    Ep  8 | Train IR2: 1.4986 Val Sharpe: -0.826 | Val ARC: -18.5% | α: 0.402 | 15.0s
+    Ep  9 | Train IR2: 1.0961 Val Sharpe: -0.832 | Val ARC: -18.3% | α: 0.435 | 15.1s
+    Ep 10 | Train IR2: 1.8117 Val Sharpe: -0.837 | Val ARC: -18.5% | α: 0.470 | 15.1s
+    Ep 11 | Train IR2: 1.2530 Val Sharpe: -0.829 | Val ARC: -18.4% | α: 0.507 | 15.2s
+    Ep 12 | Train IR2: 1.4768 Val Sharpe: -0.805 | Val ARC: -18.0% | α: 0.546 | 15.0s
+    Ep 13 | Train IR2: 1.1062 Val Sharpe: -0.885 | Val ARC: -19.7% | α: 0.586 | 15.1s
+    Ep 14 | Train IR2: 1.9103 Val Sharpe: -0.880 | Val ARC: -19.9% | α: 0.629 | 15.1s
+    Ep 15 | Train IR2: 1.8144 Val Sharpe: -0.850 | Val ARC: -19.1% | α: 0.674 | 15.2s
+    Ep 16 | Train IR2: 1.9840 Val Sharpe: -0.845 | Val ARC: -18.8% | α: 0.722 | 15.2s
+    Ep 17 | Train IR2: 1.7683 Val Sharpe: -0.836 | Val ARC: -18.7% | α: 0.773 | 15.3s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 0.734 (25 months) | Max-Val Sharpe: 2.510 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1871 Val Sharpe: -0.873 | Val ARC: -20.5% | α: 0.210 | 11.0s
+    Ep  1 | Train IR2: 0.5173 Val Sharpe: -0.885 | Val ARC: -21.9% | α: 0.225 | 15.2s
+    Ep  2 | Train IR2: 0.1308 Val Sharpe: -0.888 | Val ARC: -22.4% | α: 0.244 | 15.0s
+    Ep  3 | Train IR2: 0.9808 Val Sharpe: -0.819 | Val ARC: -21.3% | α: 0.272 | 15.1s
+    Ep  4 | Train IR2: 1.5284 Val Sharpe: -0.884 | Val ARC: -23.0% | α: 0.305 | 14.9s
+    Ep  5 | Train IR2: 1.4433 Val Sharpe: -0.817 | Val ARC: -20.7% | α: 0.337 | 15.0s
+    Ep  6 | Train IR2: 1.3927 Val Sharpe: -0.855 | Val ARC: -22.0% | α: 0.367 | 15.0s
+    Ep  7 | Train IR2: 0.8002 Val Sharpe: -0.813 | Val ARC: -20.7% | α: 0.398 | 15.1s
+    Ep  8 | Train IR2: 0.7115 Val Sharpe: -0.817 | Val ARC: -20.5% | α: 0.428 | 15.1s
+    Ep  9 | Train IR2: 0.8670 Val Sharpe: -0.859 | Val ARC: -21.6% | α: 0.460 | 15.1s
+    Ep 10 | Train IR2: 0.3270 Val Sharpe: -0.842 | Val ARC: -20.8% | α: 0.493 | 15.2s
+    Ep 11 | Train IR2: 1.9046 Val Sharpe: -0.818 | Val ARC: -20.1% | α: 0.527 | 15.2s
+    Ep 12 | Train IR2: 1.0839 Val Sharpe: -0.884 | Val ARC: -21.5% | α: 0.563 | 15.2s
+    Ep 13 | Train IR2: 1.0863 Val Sharpe: -0.809 | Val ARC: -19.4% | α: 0.600 | 15.2s
+    Ep 14 | Train IR2: 1.7751 Val Sharpe: -0.813 | Val ARC: -19.8% | α: 0.638 | 15.1s
+    Ep 15 | Train IR2: 1.4702 Val Sharpe: -0.843 | Val ARC: -20.4% | α: 0.679 | 15.2s
+    Ep 16 | Train IR2: 0.7612 Val Sharpe: -0.862 | Val ARC: -20.6% | α: 0.722 | 15.3s
+    Ep 17 | Train IR2: 2.8818 Val Sharpe: -0.851 | Val ARC: -19.9% | α: 0.769 | 15.2s
+    Ep 18 | Train IR2: 0.4237 Val Sharpe: -0.838 | Val ARC: -19.8% | α: 0.818 | 15.1s
+    Early stop at epoch 18 (best: 13)
+    → Med-Train Sharpe: 0.908 (25 months) | Max-Val Sharpe: 2.468 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.4528 Val Sharpe: -0.844 | Val ARC: -14.8% | α: 0.211 | 11.4s
+    Ep  1 | Train IR2: 1.2055 Val Sharpe: -0.838 | Val ARC: -13.8% | α: 0.227 | 15.8s
+    Ep  2 | Train IR2: 1.6598 Val Sharpe: -0.829 | Val ARC: -13.1% | α: 0.244 | 15.8s
+    Ep  3 | Train IR2: 0.8604 Val Sharpe: -0.704 | Val ARC: -11.2% | α: 0.263 | 15.9s
+    Ep  4 | Train IR2: 1.0391 Val Sharpe: -0.726 | Val ARC: -11.9% | α: 0.283 | 15.9s
+    Ep  5 | Train IR2: 1.1165 Val Sharpe: -0.732 | Val ARC: -12.0% | α: 0.305 | 15.9s
+    Ep  6 | Train IR2: 0.8844 Val Sharpe: -0.747 | Val ARC: -12.1% | α: 0.328 | 16.0s
+    Ep  7 | Train IR2: 1.1685 Val Sharpe: -0.776 | Val ARC: -12.6% | α: 0.354 | 16.0s
+    Ep  8 | Train IR2: 1.1763 Val Sharpe: -0.759 | Val ARC: -12.6% | α: 0.381 | 16.1s
+    Ep  9 | Train IR2: 1.7952 Val Sharpe: -0.733 | Val ARC: -12.0% | α: 0.410 | 16.1s
+    Ep 10 | Train IR2: 1.3443 Val Sharpe: -0.796 | Val ARC: -13.3% | α: 0.442 | 16.0s
+    Ep 11 | Train IR2: 1.5063 Val Sharpe: -0.751 | Val ARC: -12.4% | α: 0.476 | 16.0s
+    Ep 12 | Train IR2: 1.0874 Val Sharpe: -0.772 | Val ARC: -12.8% | α: 0.513 | 15.8s
+    Ep 13 | Train IR2: 1.5269 Val Sharpe: -0.782 | Val ARC: -13.1% | α: 0.553 | 16.0s
+    Ep 14 | Train IR2: 1.3914 Val Sharpe: -0.788 | Val ARC: -13.0% | α: 0.595 | 16.0s
+    Early stop at epoch 14 (best: 3)
+    → Med-Train Sharpe: 0.561 (25 months) | Max-Val Sharpe: 2.241 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.5253 Val Sharpe: -0.845 | Val ARC: -14.7% | α: 0.211 | 11.6s
+    Ep  1 | Train IR2: 0.4076 Val Sharpe: -0.848 | Val ARC: -14.7% | α: 0.227 | 16.1s
+    Ep  2 | Train IR2: 0.7650 Val Sharpe: -0.853 | Val ARC: -15.5% | α: 0.244 | 16.2s
+    Ep  3 | Train IR2: 0.1049 Val Sharpe: -0.832 | Val ARC: -15.5% | α: 0.263 | 16.1s
+    Ep  4 | Train IR2: 0.6070 Val Sharpe: -0.837 | Val ARC: -15.3% | α: 0.283 | 16.0s
+    Ep  5 | Train IR2: 0.6673 Val Sharpe: -0.816 | Val ARC: -14.8% | α: 0.305 | 16.0s
+    Ep  6 | Train IR2: 0.1518 Val Sharpe: -0.848 | Val ARC: -15.3% | α: 0.329 | 16.0s
+    Ep  7 | Train IR2: 1.3179 Val Sharpe: -0.831 | Val ARC: -15.1% | α: 0.354 | 16.1s
+    Ep  8 | Train IR2: 0.4726 Val Sharpe: -0.825 | Val ARC: -14.9% | α: 0.382 | 16.1s
+    Ep  9 | Train IR2: 0.7322 Val Sharpe: -0.776 | Val ARC: -13.9% | α: 0.411 | 16.2s
+    Ep 10 | Train IR2: 0.7766 Val Sharpe: -0.792 | Val ARC: -14.3% | α: 0.443 | 16.1s
+    Ep 11 | Train IR2: 0.2553 Val Sharpe: -0.763 | Val ARC: -13.9% | α: 0.477 | 16.0s
+    Ep 12 | Train IR2: 0.2136 Val Sharpe: -0.773 | Val ARC: -13.8% | α: 0.514 | 15.9s
+    Ep 13 | Train IR2: 1.8124 Val Sharpe: -0.767 | Val ARC: -13.7% | α: 0.554 | 15.8s
+    Ep 14 | Train IR2: 1.2633 Val Sharpe: -0.739 | Val ARC: -12.9% | α: 0.596 | 16.0s
+    Ep 15 | Train IR2: 1.0379 Val Sharpe: -0.800 | Val ARC: -14.3% | α: 0.642 | 15.9s
+    Ep 16 | Train IR2: 0.1530 Val Sharpe: -0.815 | Val ARC: -14.2% | α: 0.692 | 16.0s
+    Ep 17 | Train IR2: 1.8701 Val Sharpe: -0.838 | Val ARC: -14.7% | α: 0.745 | 16.0s
+    Ep 18 | Train IR2: 0.9369 Val Sharpe: -0.830 | Val ARC: -14.4% | α: 0.803 | 15.9s
+    Ep 19 | Train IR2: 1.3051 Val Sharpe: -0.814 | Val ARC: -14.2% | α: 0.864 | 16.0s
+    Early stop at epoch 19 (best: 14)
+    → Med-Train Sharpe: 0.633 (25 months) | Max-Val Sharpe: 2.078 (2 months)
+
+  ★ Selected: 'hier_k10_smooth' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.734 | Max-Val: 2.510 | Val Sharpe: -0.8219 | IR2: 0.0000
+    Test: 2025-02-28→2025-04-25 → RL ARC: -38.2% | QQQ ARC: -41.2%
+
+  Fold 12/15 | RETRAIN (Sharpe -1.647 < 0)
+
+  HP Selection on fold 12:
+    Train: 2023-02-27 → 2025-02-26 (994d)
+    Val:   2025-03-03 → 2025-04-30 (84d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.1679 Val Sharpe: -1.720 | Val ARC: -39.0% | α: 0.211 | 9.9s
+    Ep  1 | Train IR2: 0.4559 Val Sharpe: -1.708 | Val ARC: -39.1% | α: 0.227 | 13.6s
+    Ep  2 | Train IR2: 0.4199 Val Sharpe: -1.757 | Val ARC: -39.7% | α: 0.246 | 13.6s
+    Ep  3 | Train IR2: 0.4860 Val Sharpe: -1.719 | Val ARC: -40.2% | α: 0.267 | 13.6s
+    Ep  4 | Train IR2: 0.6026 Val Sharpe: -1.734 | Val ARC: -40.4% | α: 0.291 | 13.6s
+    Ep  5 | Train IR2: 0.8617 Val Sharpe: -1.719 | Val ARC: -40.1% | α: 0.317 | 13.6s
+    Ep  6 | Train IR2: 0.7267 Val Sharpe: -1.687 | Val ARC: -39.8% | α: 0.343 | 13.5s
+    Ep  7 | Train IR2: 0.6536 Val Sharpe: -1.767 | Val ARC: -40.6% | α: 0.370 | 13.5s
+    Ep  8 | Train IR2: 1.1117 Val Sharpe: -1.715 | Val ARC: -40.0% | α: 0.399 | 13.5s
+    Ep  9 | Train IR2: 0.6217 Val Sharpe: -1.730 | Val ARC: -40.1% | α: 0.429 | 13.5s
+    Ep 10 | Train IR2: 0.7242 Val Sharpe: -1.755 | Val ARC: -40.2% | α: 0.461 | 13.6s
+    Ep 11 | Train IR2: 0.7310 Val Sharpe: -1.748 | Val ARC: -40.2% | α: 0.494 | 13.5s
+    Ep 12 | Train IR2: 0.7006 Val Sharpe: -1.691 | Val ARC: -39.3% | α: 0.529 | 13.5s
+    Ep 13 | Train IR2: 0.6926 Val Sharpe: -1.765 | Val ARC: -40.1% | α: 0.567 | 13.5s
+    Ep 14 | Train IR2: 1.1088 Val Sharpe: -1.777 | Val ARC: -40.1% | α: 0.607 | 13.5s
+    Early stop at epoch 14 (best: 6)
+    → Med-Train Sharpe: 0.702 (24 months) | Max-Val Sharpe: 1.059 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.1691 Val Sharpe: -1.726 | Val ARC: -38.9% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.743 | Val ARC: -39.5% | α: 0.227 | 13.4s
+    Ep  2 | Train IR2: 0.2267 Val Sharpe: -1.718 | Val ARC: -40.2% | α: 0.246 | 13.4s
+    Ep  3 | Train IR2: 0.5525 Val Sharpe: -1.679 | Val ARC: -40.2% | α: 0.270 | 13.5s
+    Ep  4 | Train IR2: 0.3281 Val Sharpe: -1.663 | Val ARC: -39.9% | α: 0.296 | 13.4s
+    Ep  5 | Train IR2: 0.6454 Val Sharpe: -1.770 | Val ARC: -41.5% | α: 0.323 | 13.5s
+    Ep  6 | Train IR2: 0.0851 Val Sharpe: -1.738 | Val ARC: -40.8% | α: 0.349 | 13.4s
+    Ep  7 | Train IR2: 0.2801 Val Sharpe: -1.767 | Val ARC: -41.2% | α: 0.377 | 13.5s
+    Ep  8 | Train IR2: 1.1292 Val Sharpe: -1.763 | Val ARC: -41.1% | α: 0.406 | 13.6s
+    Ep  9 | Train IR2: 0.2292 Val Sharpe: -1.724 | Val ARC: -40.5% | α: 0.436 | 13.5s
+    Ep 10 | Train IR2: 0.1495 Val Sharpe: -1.758 | Val ARC: -41.0% | α: 0.467 | 13.5s
+    Ep 11 | Train IR2: 0.0859 Val Sharpe: -1.737 | Val ARC: -40.6% | α: 0.500 | 13.4s
+    Ep 12 | Train IR2: 0.7856 Val Sharpe: -1.724 | Val ARC: -40.4% | α: 0.536 | 13.5s
+    Ep 13 | Train IR2: 0.1344 Val Sharpe: -1.722 | Val ARC: -40.2% | α: 0.574 | 13.5s
+    Ep 14 | Train IR2: 0.4134 Val Sharpe: -1.684 | Val ARC: -39.6% | α: 0.613 | 13.4s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: 0.604 (24 months) | Max-Val Sharpe: 1.088 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.1311 Val Sharpe: -1.564 | Val ARC: -38.6% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.4440 Val Sharpe: -1.566 | Val ARC: -38.6% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.2929 Val Sharpe: -1.567 | Val ARC: -38.6% | α: 0.244 | 14.2s
+    Ep  3 | Train IR2: 0.2240 Val Sharpe: -1.569 | Val ARC: -38.7% | α: 0.263 | 14.2s
+    Ep  4 | Train IR2: 0.2454 Val Sharpe: -1.571 | Val ARC: -38.7% | α: 0.283 | 14.2s
+    Ep  5 | Train IR2: 0.1769 Val Sharpe: -1.563 | Val ARC: -38.5% | α: 0.305 | 14.3s
+    Ep  6 | Train IR2: 0.2397 Val Sharpe: -1.563 | Val ARC: -38.7% | α: 0.329 | 14.2s
+    Ep  7 | Train IR2: 0.2030 Val Sharpe: -1.570 | Val ARC: -38.7% | α: 0.354 | 14.3s
+    Ep  8 | Train IR2: 0.1882 Val Sharpe: -1.574 | Val ARC: -38.8% | α: 0.382 | 14.3s
+    Ep  9 | Train IR2: 0.4522 Val Sharpe: -1.565 | Val ARC: -38.5% | α: 0.411 | 14.3s
+    Ep 10 | Train IR2: 0.2671 Val Sharpe: -1.553 | Val ARC: -38.4% | α: 0.442 | 14.2s
+    Ep 11 | Train IR2: 0.5098 Val Sharpe: -1.564 | Val ARC: -38.4% | α: 0.476 | 14.3s
+    Ep 12 | Train IR2: 0.3582 Val Sharpe: -1.551 | Val ARC: -38.3% | α: 0.513 | 14.3s
+    Ep 13 | Train IR2: 0.2498 Val Sharpe: -1.568 | Val ARC: -38.6% | α: 0.552 | 14.3s
+    Ep 14 | Train IR2: 0.2961 Val Sharpe: -1.551 | Val ARC: -38.5% | α: 0.595 | 14.2s
+    Ep 15 | Train IR2: 0.2313 Val Sharpe: -1.554 | Val ARC: -38.4% | α: 0.641 | 14.2s
+    Ep 16 | Train IR2: 0.2743 Val Sharpe: -1.559 | Val ARC: -38.6% | α: 0.690 | 14.3s
+    Ep 17 | Train IR2: 0.2365 Val Sharpe: -1.556 | Val ARC: -38.4% | α: 0.743 | 14.3s
+    Early stop at epoch 17 (best: 12)
+    → Med-Train Sharpe: 0.421 (24 months) | Max-Val Sharpe: 0.032 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.558 | Val ARC: -38.5% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.0425 Val Sharpe: -1.568 | Val ARC: -38.6% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.577 | Val ARC: -38.8% | α: 0.244 | 14.3s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.571 | Val ARC: -38.8% | α: 0.263 | 14.2s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.593 | Val ARC: -39.1% | α: 0.283 | 14.3s
+    Ep  5 | Train IR2: 0.0648 Val Sharpe: -1.580 | Val ARC: -39.1% | α: 0.305 | 14.3s
+    Ep  6 | Train IR2: 0.1064 Val Sharpe: -1.548 | Val ARC: -38.5% | α: 0.329 | 14.3s
+    Ep  7 | Train IR2: 0.0051 Val Sharpe: -1.558 | Val ARC: -38.8% | α: 0.354 | 14.3s
+    Ep  8 | Train IR2: 0.0065 Val Sharpe: -1.550 | Val ARC: -38.7% | α: 0.382 | 14.3s
+    Ep  9 | Train IR2: 0.0340 Val Sharpe: -1.560 | Val ARC: -38.7% | α: 0.411 | 14.3s
+    Ep 10 | Train IR2: 0.1102 Val Sharpe: -1.558 | Val ARC: -38.7% | α: 0.443 | 14.3s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.557 | Val ARC: -38.7% | α: 0.477 | 14.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.556 | Val ARC: -38.7% | α: 0.514 | 14.3s
+    Ep 13 | Train IR2: 0.0260 Val Sharpe: -1.562 | Val ARC: -38.8% | α: 0.553 | 14.3s
+    Ep 14 | Train IR2: 0.1299 Val Sharpe: -1.565 | Val ARC: -38.8% | α: 0.596 | 14.3s
+    Early stop at epoch 14 (best: 6)
+    → Med-Train Sharpe: 0.423 (24 months) | Max-Val Sharpe: 0.041 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 1.2139 Val Sharpe: -1.701 | Val ARC: -36.9% | α: 0.209 | 10.9s
+    Ep  1 | Train IR2: 0.4002 Val Sharpe: -1.697 | Val ARC: -37.3% | α: 0.224 | 15.1s
+    Ep  2 | Train IR2: 0.3747 Val Sharpe: -1.744 | Val ARC: -37.9% | α: 0.242 | 15.1s
+    Ep  3 | Train IR2: 0.4990 Val Sharpe: -1.693 | Val ARC: -36.9% | α: 0.265 | 15.1s
+    Ep  4 | Train IR2: 0.6405 Val Sharpe: -1.672 | Val ARC: -35.4% | α: 0.291 | 15.0s
+    Ep  5 | Train IR2: 0.3277 Val Sharpe: -1.727 | Val ARC: -35.6% | α: 0.318 | 15.0s
+    Ep  6 | Train IR2: 0.5191 Val Sharpe: -1.684 | Val ARC: -35.3% | α: 0.345 | 15.1s
+    Ep  7 | Train IR2: 0.7770 Val Sharpe: -1.659 | Val ARC: -33.9% | α: 0.373 | 15.1s
+    Ep  8 | Train IR2: 0.9858 Val Sharpe: -1.682 | Val ARC: -34.6% | α: 0.402 | 15.3s
+    Ep  9 | Train IR2: 0.6352 Val Sharpe: -1.697 | Val ARC: -34.6% | α: 0.432 | 15.1s
+    Ep 10 | Train IR2: 0.5739 Val Sharpe: -1.684 | Val ARC: -34.4% | α: 0.463 | 15.2s
+    Ep 11 | Train IR2: 0.5402 Val Sharpe: -1.656 | Val ARC: -34.2% | α: 0.496 | 15.1s
+    Ep 12 | Train IR2: 0.6402 Val Sharpe: -1.697 | Val ARC: -34.6% | α: 0.531 | 15.0s
+    Ep 13 | Train IR2: 0.6851 Val Sharpe: -1.688 | Val ARC: -35.1% | α: 0.568 | 15.0s
+    Ep 14 | Train IR2: 1.1422 Val Sharpe: -1.688 | Val ARC: -35.1% | α: 0.607 | 15.0s
+    Ep 15 | Train IR2: 0.6659 Val Sharpe: -1.697 | Val ARC: -35.0% | α: 0.647 | 15.1s
+    Ep 16 | Train IR2: 0.5033 Val Sharpe: -1.692 | Val ARC: -35.0% | α: 0.691 | 15.2s
+    Early stop at epoch 16 (best: 11)
+    → Med-Train Sharpe: 0.707 (24 months) | Max-Val Sharpe: 1.119 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1740 Val Sharpe: -1.729 | Val ARC: -36.7% | α: 0.210 | 10.9s
+    Ep  1 | Train IR2: 0.2100 Val Sharpe: -1.717 | Val ARC: -36.6% | α: 0.226 | 15.1s
+    Ep  2 | Train IR2: 0.0607 Val Sharpe: -1.698 | Val ARC: -36.9% | α: 0.244 | 15.1s
+    Ep  3 | Train IR2: 0.6879 Val Sharpe: -1.721 | Val ARC: -39.5% | α: 0.267 | 15.1s
+    Ep  4 | Train IR2: 0.2278 Val Sharpe: -1.683 | Val ARC: -39.4% | α: 0.301 | 15.1s
+    Ep  5 | Train IR2: 0.3993 Val Sharpe: -1.703 | Val ARC: -39.8% | α: 0.337 | 15.1s
+    Ep  6 | Train IR2: 0.3982 Val Sharpe: -1.726 | Val ARC: -39.7% | α: 0.371 | 15.2s
+    Ep  7 | Train IR2: 0.8684 Val Sharpe: -1.701 | Val ARC: -38.8% | α: 0.403 | 15.1s
+    Ep  8 | Train IR2: 0.1490 Val Sharpe: -1.671 | Val ARC: -38.2% | α: 0.435 | 15.1s
+    Ep  9 | Train IR2: 0.0904 Val Sharpe: -1.639 | Val ARC: -37.1% | α: 0.467 | 15.1s
+    Ep 10 | Train IR2: 0.4252 Val Sharpe: -1.723 | Val ARC: -38.4% | α: 0.500 | 15.0s
+    Ep 11 | Train IR2: 0.4484 Val Sharpe: -1.636 | Val ARC: -36.3% | α: 0.534 | 15.0s
+    Ep 12 | Train IR2: 0.4460 Val Sharpe: -1.650 | Val ARC: -36.3% | α: 0.568 | 15.1s
+    Ep 13 | Train IR2: 0.3159 Val Sharpe: -1.675 | Val ARC: -36.7% | α: 0.604 | 15.0s
+    Ep 14 | Train IR2: 0.1274 Val Sharpe: -1.688 | Val ARC: -36.7% | α: 0.642 | 15.2s
+    Ep 15 | Train IR2: 0.0164 Val Sharpe: -1.694 | Val ARC: -36.6% | α: 0.683 | 15.2s
+    Ep 16 | Train IR2: 0.1842 Val Sharpe: -1.710 | Val ARC: -36.7% | α: 0.726 | 15.2s
+    Early stop at epoch 16 (best: 11)
+    → Med-Train Sharpe: 0.797 (24 months) | Max-Val Sharpe: 1.127 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.2247 Val Sharpe: -1.548 | Val ARC: -34.5% | α: 0.210 | 11.4s
+    Ep  1 | Train IR2: 0.4110 Val Sharpe: -1.558 | Val ARC: -34.2% | α: 0.226 | 15.9s
+    Ep  2 | Train IR2: 0.5193 Val Sharpe: -1.578 | Val ARC: -34.6% | α: 0.244 | 16.0s
+    Ep  3 | Train IR2: 0.3640 Val Sharpe: -1.585 | Val ARC: -35.0% | α: 0.263 | 15.9s
+    Ep  4 | Train IR2: 0.6436 Val Sharpe: -1.598 | Val ARC: -35.2% | α: 0.283 | 15.9s
+    Ep  5 | Train IR2: 0.6622 Val Sharpe: -1.592 | Val ARC: -35.5% | α: 0.305 | 16.0s
+    Ep  6 | Train IR2: 0.4134 Val Sharpe: -1.583 | Val ARC: -34.9% | α: 0.328 | 15.9s
+    Ep  7 | Train IR2: 0.5126 Val Sharpe: -1.592 | Val ARC: -34.2% | α: 0.353 | 15.9s
+    Ep  8 | Train IR2: 0.2141 Val Sharpe: -1.612 | Val ARC: -34.7% | α: 0.381 | 16.0s
+    Ep  9 | Train IR2: 0.3629 Val Sharpe: -1.570 | Val ARC: -33.8% | α: 0.410 | 16.0s
+    Ep 10 | Train IR2: 0.6674 Val Sharpe: -1.576 | Val ARC: -33.7% | α: 0.441 | 16.0s
+    Ep 11 | Train IR2: 0.6494 Val Sharpe: -1.584 | Val ARC: -33.9% | α: 0.475 | 16.0s
+    Ep 12 | Train IR2: 0.3073 Val Sharpe: -1.588 | Val ARC: -34.0% | α: 0.512 | 16.1s
+    Ep 13 | Train IR2: 0.5715 Val Sharpe: -1.572 | Val ARC: -33.4% | α: 0.551 | 15.9s
+    Ep 14 | Train IR2: 0.4961 Val Sharpe: -1.562 | Val ARC: -33.5% | α: 0.593 | 16.1s
+    Early stop at epoch 14 (best: 0)
+    → Med-Train Sharpe: 0.458 (24 months) | Max-Val Sharpe: 0.020 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1161 Val Sharpe: -1.550 | Val ARC: -34.9% | α: 0.211 | 11.4s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.551 | Val ARC: -35.9% | α: 0.227 | 15.8s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.418 | Val ARC: -35.0% | α: 0.244 | 15.8s
+    Ep  3 | Train IR2: 1.5092 Val Sharpe: -1.362 | Val ARC: -32.0% | α: 0.263 | 15.9s
+    Ep  4 | Train IR2: 0.1136 Val Sharpe: -1.205 | Val ARC: -30.1% | α: 0.284 | 16.0s
+    Ep  5 | Train IR2: 0.0721 Val Sharpe: -1.287 | Val ARC: -32.0% | α: 0.306 | 16.0s
+    Ep  6 | Train IR2: 0.0822 Val Sharpe: -1.337 | Val ARC: -32.4% | α: 0.329 | 16.0s
+    Ep  7 | Train IR2: 0.0009 Val Sharpe: -1.388 | Val ARC: -33.5% | α: 0.355 | 16.1s
+    Ep  8 | Train IR2: 0.0653 Val Sharpe: -1.442 | Val ARC: -33.8% | α: 0.382 | 16.0s
+    Ep  9 | Train IR2: 0.0010 Val Sharpe: -1.424 | Val ARC: -33.5% | α: 0.411 | 16.0s
+    Ep 10 | Train IR2: 0.1244 Val Sharpe: -1.434 | Val ARC: -33.0% | α: 0.443 | 16.0s
+    Ep 11 | Train IR2: 0.0773 Val Sharpe: -1.445 | Val ARC: -33.5% | α: 0.476 | 16.0s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.473 | Val ARC: -33.2% | α: 0.513 | 15.9s
+    Ep 13 | Train IR2: 0.4128 Val Sharpe: -1.459 | Val ARC: -33.1% | α: 0.552 | 15.9s
+    Ep 14 | Train IR2: 0.0021 Val Sharpe: -1.480 | Val ARC: -33.9% | α: 0.594 | 15.9s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: 0.507 (24 months) | Max-Val Sharpe: 0.364 (2 months)
+
+  ★ Selected: 'hier_k10_fast' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.797 | Max-Val: 1.127 | Val Sharpe: -1.6390 | IR2: 0.0000
+    Test: 2025-05-01→2025-06-30 → RL ARC: +47.9% | QQQ ARC: +127.2%
+  Fold 13/15 | CARRY (Sharpe: 3.099) → RL ARC: -45.5% | QQQ ARC: +27.0%
+
+  Fold 14/15 | RETRAIN (Sharpe -3.240 < 0)
+
+  HP Selection on fold 14:
+    Train: 2023-06-27 → 2025-06-26 (994d)
+    Val:   2025-06-30 → 2025-08-28 (84d)
+
+    --- Config: flat_k10_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0123 Val Sharpe: -3.181 | Val ARC: -46.4% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.0663 Val Sharpe: -3.187 | Val ARC: -47.6% | α: 0.227 | 13.5s
+    Ep  2 | Train IR2: 0.1977 Val Sharpe: -3.163 | Val ARC: -47.6% | α: 0.245 | 13.6s
+    Ep  3 | Train IR2: 0.1026 Val Sharpe: -3.221 | Val ARC: -48.8% | α: 0.267 | 13.6s
+    Ep  4 | Train IR2: 0.1231 Val Sharpe: -3.242 | Val ARC: -48.9% | α: 0.290 | 13.6s
+    Ep  5 | Train IR2: 0.1960 Val Sharpe: -3.215 | Val ARC: -48.6% | α: 0.316 | 13.6s
+    Ep  6 | Train IR2: 0.2560 Val Sharpe: -3.239 | Val ARC: -48.7% | α: 0.342 | 13.6s
+    Ep  7 | Train IR2: 0.0521 Val Sharpe: -3.192 | Val ARC: -48.0% | α: 0.370 | 13.6s
+    Ep  8 | Train IR2: 0.1693 Val Sharpe: -3.272 | Val ARC: -48.6% | α: 0.398 | 13.6s
+    Ep  9 | Train IR2: 0.0113 Val Sharpe: -3.232 | Val ARC: -48.2% | α: 0.428 | 13.5s
+    Ep 10 | Train IR2: 0.0761 Val Sharpe: -3.208 | Val ARC: -47.9% | α: 0.459 | 13.6s
+    Ep 11 | Train IR2: 0.1360 Val Sharpe: -3.240 | Val ARC: -48.1% | α: 0.492 | 13.5s
+    Ep 12 | Train IR2: 0.1470 Val Sharpe: -3.224 | Val ARC: -47.8% | α: 0.528 | 13.6s
+    Ep 13 | Train IR2: 0.1694 Val Sharpe: -3.156 | Val ARC: -47.3% | α: 0.565 | 13.6s
+    Ep 14 | Train IR2: 0.1138 Val Sharpe: -3.185 | Val ARC: -47.2% | α: 0.606 | 13.5s
+    Ep 15 | Train IR2: 0.2139 Val Sharpe: -3.202 | Val ARC: -47.4% | α: 0.649 | 13.6s
+    Ep 16 | Train IR2: 0.1499 Val Sharpe: -3.172 | Val ARC: -47.0% | α: 0.696 | 13.6s
+    Ep 17 | Train IR2: 0.1938 Val Sharpe: -3.193 | Val ARC: -47.1% | α: 0.747 | 13.5s
+    Ep 18 | Train IR2: 0.0435 Val Sharpe: -3.165 | Val ARC: -46.8% | α: 0.801 | 13.5s
+    Early stop at epoch 18 (best: 13)
+    → Med-Train Sharpe: 0.668 (25 months) | Max-Val Sharpe: -0.941 (2 months)
+
+    --- Config: flat_k10_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0426 Val Sharpe: -3.200 | Val ARC: -46.7% | α: 0.211 | 9.8s
+    Ep  1 | Train IR2: 0.3198 Val Sharpe: -3.168 | Val ARC: -47.0% | α: 0.227 | 13.5s
+    Ep  2 | Train IR2: 0.0305 Val Sharpe: -3.204 | Val ARC: -48.1% | α: 0.246 | 13.5s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -3.278 | Val ARC: -49.2% | α: 0.269 | 13.5s
+    Ep  4 | Train IR2: 0.0880 Val Sharpe: -3.186 | Val ARC: -48.5% | α: 0.294 | 13.4s
+    Ep  5 | Train IR2: 0.0060 Val Sharpe: -3.272 | Val ARC: -49.3% | α: 0.320 | 13.4s
+    Ep  6 | Train IR2: 0.0386 Val Sharpe: -3.305 | Val ARC: -49.7% | α: 0.347 | 13.4s
+    Ep  7 | Train IR2: 0.0479 Val Sharpe: -3.262 | Val ARC: -48.7% | α: 0.374 | 13.5s
+    Ep  8 | Train IR2: 0.0042 Val Sharpe: -3.284 | Val ARC: -48.9% | α: 0.403 | 13.4s
+    Ep  9 | Train IR2: 0.0752 Val Sharpe: -3.222 | Val ARC: -48.1% | α: 0.434 | 13.4s
+    Ep 10 | Train IR2: 0.0362 Val Sharpe: -3.185 | Val ARC: -47.7% | α: 0.466 | 13.4s
+    Ep 11 | Train IR2: 0.0176 Val Sharpe: -3.190 | Val ARC: -47.6% | α: 0.500 | 13.4s
+    Ep 12 | Train IR2: 0.0055 Val Sharpe: -3.156 | Val ARC: -47.0% | α: 0.535 | 13.4s
+    Ep 13 | Train IR2: 0.0498 Val Sharpe: -3.156 | Val ARC: -47.0% | α: 0.574 | 13.4s
+    Ep 14 | Train IR2: 0.2769 Val Sharpe: -3.172 | Val ARC: -47.2% | α: 0.614 | 13.4s
+    Ep 15 | Train IR2: 0.0405 Val Sharpe: -3.143 | Val ARC: -46.6% | α: 0.658 | 13.4s
+    Ep 16 | Train IR2: 0.0575 Val Sharpe: -3.151 | Val ARC: -46.5% | α: 0.705 | 13.4s
+    Ep 17 | Train IR2: 0.0952 Val Sharpe: -3.181 | Val ARC: -46.9% | α: 0.755 | 13.4s
+    Ep 18 | Train IR2: 0.0506 Val Sharpe: -3.152 | Val ARC: -46.5% | α: 0.809 | 13.5s
+    Ep 19 | Train IR2: 0.2029 Val Sharpe: -3.134 | Val ARC: -46.3% | α: 0.866 | 13.5s
+    Ep 20 | Train IR2: 0.3959 Val Sharpe: -3.143 | Val ARC: -46.3% | α: 0.929 | 13.5s
+    Ep 21 | Train IR2: 0.0000 Val Sharpe: -3.152 | Val ARC: -46.4% | α: 0.996 | 13.5s
+    Ep 22 | Train IR2: 0.3908 Val Sharpe: -3.147 | Val ARC: -46.3% | α: 1.068 | 13.5s
+    Ep 23 | Train IR2: 0.0126 Val Sharpe: -3.161 | Val ARC: -46.5% | α: 1.145 | 13.5s
+    Ep 24 | Train IR2: 0.0564 Val Sharpe: -3.137 | Val ARC: -46.2% | α: 1.229 | 13.5s
+    Early stop at epoch 24 (best: 19)
+    → Med-Train Sharpe: 0.695 (25 months) | Max-Val Sharpe: -0.962 (2 months)
+
+    --- Config: flat_k20_smooth ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.436 | Val ARC: -24.3% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.0181 Val Sharpe: -1.431 | Val ARC: -24.2% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.0021 Val Sharpe: -1.432 | Val ARC: -24.2% | α: 0.244 | 14.2s
+    Ep  3 | Train IR2: 0.0325 Val Sharpe: -1.431 | Val ARC: -24.3% | α: 0.263 | 14.3s
+    Ep  4 | Train IR2: 0.0088 Val Sharpe: -1.434 | Val ARC: -24.2% | α: 0.283 | 14.2s
+    Ep  5 | Train IR2: 0.0054 Val Sharpe: -1.435 | Val ARC: -24.2% | α: 0.305 | 14.3s
+    Ep  6 | Train IR2: 0.0438 Val Sharpe: -1.429 | Val ARC: -24.2% | α: 0.329 | 14.2s
+    Ep  7 | Train IR2: 0.0182 Val Sharpe: -1.427 | Val ARC: -24.2% | α: 0.354 | 14.3s
+    Ep  8 | Train IR2: 0.0204 Val Sharpe: -1.431 | Val ARC: -24.2% | α: 0.381 | 14.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.430 | Val ARC: -24.2% | α: 0.411 | 14.3s
+    Ep 10 | Train IR2: 0.0282 Val Sharpe: -1.429 | Val ARC: -24.2% | α: 0.442 | 14.3s
+    Ep 11 | Train IR2: 0.0091 Val Sharpe: -1.428 | Val ARC: -24.2% | α: 0.476 | 14.3s
+    Ep 12 | Train IR2: 0.0185 Val Sharpe: -1.429 | Val ARC: -24.2% | α: 0.513 | 14.3s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.426 | Val ARC: -24.1% | α: 0.552 | 14.3s
+    Ep 14 | Train IR2: 0.0423 Val Sharpe: -1.423 | Val ARC: -24.1% | α: 0.595 | 14.3s
+    Ep 15 | Train IR2: 0.0301 Val Sharpe: -1.431 | Val ARC: -24.3% | α: 0.640 | 14.3s
+    Ep 16 | Train IR2: 0.0448 Val Sharpe: -1.418 | Val ARC: -24.1% | α: 0.689 | 14.4s
+    Ep 17 | Train IR2: 0.0126 Val Sharpe: -1.424 | Val ARC: -24.1% | α: 0.742 | 14.3s
+    Ep 18 | Train IR2: 0.0031 Val Sharpe: -1.424 | Val ARC: -24.1% | α: 0.799 | 14.4s
+    Ep 19 | Train IR2: 0.0133 Val Sharpe: -1.426 | Val ARC: -24.2% | α: 0.861 | 14.3s
+    Ep 20 | Train IR2: 0.0001 Val Sharpe: -1.424 | Val ARC: -24.1% | α: 0.927 | 14.3s
+    Ep 21 | Train IR2: 0.0143 Val Sharpe: -1.424 | Val ARC: -24.2% | α: 0.998 | 14.3s
+    Early stop at epoch 21 (best: 16)
+    → Med-Train Sharpe: 0.369 (25 months) | Max-Val Sharpe: -0.065 (2 months)
+
+    --- Config: flat_k20_fast ---
+  SAC Agent using device: cuda (mode: flat)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.414 | Val ARC: -24.1% | α: 0.211 | 10.3s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.438 | Val ARC: -24.4% | α: 0.227 | 14.2s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.438 | Val ARC: -24.5% | α: 0.244 | 14.2s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.440 | Val ARC: -24.5% | α: 0.263 | 14.2s
+    Ep  4 | Train IR2: 0.0010 Val Sharpe: -1.427 | Val ARC: -24.2% | α: 0.284 | 14.3s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.416 | Val ARC: -24.2% | α: 0.306 | 14.2s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.431 | Val ARC: -24.4% | α: 0.329 | 14.2s
+    Ep  7 | Train IR2: 0.0191 Val Sharpe: -1.422 | Val ARC: -24.2% | α: 0.355 | 14.2s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.409 | Val ARC: -24.0% | α: 0.382 | 14.3s
+    Ep  9 | Train IR2: 0.0000 Val Sharpe: -1.410 | Val ARC: -24.1% | α: 0.411 | 14.2s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.430 | Val ARC: -24.3% | α: 0.443 | 14.2s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.406 | Val ARC: -24.0% | α: 0.477 | 14.3s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.422 | Val ARC: -24.2% | α: 0.514 | 14.2s
+    Ep 13 | Train IR2: 0.0011 Val Sharpe: -1.424 | Val ARC: -24.2% | α: 0.553 | 14.3s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.409 | Val ARC: -24.0% | α: 0.596 | 14.2s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.417 | Val ARC: -24.1% | α: 0.641 | 14.2s
+    Ep 16 | Train IR2: 0.0000 Val Sharpe: -1.403 | Val ARC: -23.9% | α: 0.690 | 14.2s
+    Ep 17 | Train IR2: 0.0000 Val Sharpe: -1.415 | Val ARC: -24.1% | α: 0.743 | 14.2s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -1.410 | Val ARC: -24.1% | α: 0.800 | 14.2s
+    Ep 19 | Train IR2: 0.0000 Val Sharpe: -1.419 | Val ARC: -24.1% | α: 0.862 | 14.2s
+    Ep 20 | Train IR2: 0.0000 Val Sharpe: -1.403 | Val ARC: -23.9% | α: 0.928 | 14.2s
+    Ep 21 | Train IR2: 0.0000 Val Sharpe: -1.419 | Val ARC: -24.2% | α: 0.999 | 14.2s
+    Early stop at epoch 21 (best: 16)
+    → Med-Train Sharpe: 0.372 (25 months) | Max-Val Sharpe: -0.044 (2 months)
+
+    --- Config: hier_k10_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.1081 Val Sharpe: -3.167 | Val ARC: -43.6% | α: 0.210 | 10.8s
+    Ep  1 | Train IR2: 0.1613 Val Sharpe: -3.164 | Val ARC: -44.1% | α: 0.225 | 14.9s
+    Ep  2 | Train IR2: 0.1071 Val Sharpe: -3.150 | Val ARC: -44.3% | α: 0.244 | 15.0s
+    Ep  3 | Train IR2: 0.0754 Val Sharpe: -3.165 | Val ARC: -44.0% | α: 0.267 | 15.0s
+    Ep  4 | Train IR2: 0.2659 Val Sharpe: -3.230 | Val ARC: -44.2% | α: 0.294 | 15.0s
+    Ep  5 | Train IR2: 0.0811 Val Sharpe: -3.152 | Val ARC: -43.8% | α: 0.323 | 14.9s
+    Ep  6 | Train IR2: 0.1660 Val Sharpe: -3.262 | Val ARC: -44.7% | α: 0.353 | 14.9s
+    Ep  7 | Train IR2: 0.1620 Val Sharpe: -3.130 | Val ARC: -43.6% | α: 0.383 | 15.0s
+    Ep  8 | Train IR2: 0.0955 Val Sharpe: -3.166 | Val ARC: -44.1% | α: 0.415 | 15.0s
+    Ep  9 | Train IR2: 0.1648 Val Sharpe: -3.253 | Val ARC: -44.8% | α: 0.447 | 15.1s
+    Ep 10 | Train IR2: 0.0898 Val Sharpe: -3.248 | Val ARC: -44.4% | α: 0.480 | 15.2s
+    Ep 11 | Train IR2: 0.0819 Val Sharpe: -3.196 | Val ARC: -43.8% | α: 0.514 | 15.2s
+    Ep 12 | Train IR2: 0.0359 Val Sharpe: -3.204 | Val ARC: -43.8% | α: 0.550 | 15.3s
+    Ep 13 | Train IR2: 0.0984 Val Sharpe: -3.186 | Val ARC: -43.6% | α: 0.587 | 15.2s
+    Ep 14 | Train IR2: 0.0307 Val Sharpe: -3.164 | Val ARC: -43.8% | α: 0.626 | 15.2s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: 0.810 (25 months) | Max-Val Sharpe: -0.897 (2 months)
+
+    --- Config: hier_k10_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -3.161 | Val ARC: -44.1% | α: 0.209 | 10.8s
+    Ep  1 | Train IR2: 0.1454 Val Sharpe: -3.183 | Val ARC: -47.0% | α: 0.227 | 15.0s
+    Ep  2 | Train IR2: 0.1847 Val Sharpe: -3.242 | Val ARC: -48.2% | α: 0.254 | 15.3s
+    Ep  3 | Train IR2: 0.0640 Val Sharpe: -3.172 | Val ARC: -47.2% | α: 0.285 | 15.1s
+    Ep  4 | Train IR2: 0.1766 Val Sharpe: -3.134 | Val ARC: -45.6% | α: 0.312 | 15.0s
+    Ep  5 | Train IR2: 0.0907 Val Sharpe: -3.146 | Val ARC: -45.1% | α: 0.338 | 15.1s
+    Ep  6 | Train IR2: 0.0190 Val Sharpe: -3.209 | Val ARC: -45.3% | α: 0.363 | 15.0s
+    Ep  7 | Train IR2: 0.0256 Val Sharpe: -3.088 | Val ARC: -43.4% | α: 0.388 | 15.1s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -3.210 | Val ARC: -45.4% | α: 0.414 | 15.2s
+    Ep  9 | Train IR2: 0.0521 Val Sharpe: -3.156 | Val ARC: -45.0% | α: 0.441 | 15.2s
+    Ep 10 | Train IR2: 0.0816 Val Sharpe: -3.192 | Val ARC: -44.4% | α: 0.469 | 15.2s
+    Ep 11 | Train IR2: 0.0946 Val Sharpe: -3.213 | Val ARC: -44.4% | α: 0.499 | 15.3s
+    Ep 12 | Train IR2: 0.0401 Val Sharpe: -3.219 | Val ARC: -44.8% | α: 0.530 | 15.1s
+    Ep 13 | Train IR2: 0.0645 Val Sharpe: -3.242 | Val ARC: -44.4% | α: 0.563 | 15.1s
+    Ep 14 | Train IR2: 0.0301 Val Sharpe: -3.201 | Val ARC: -43.6% | α: 0.599 | 15.1s
+    Early stop at epoch 14 (best: 7)
+    → Med-Train Sharpe: 0.632 (25 months) | Max-Val Sharpe: -0.897 (2 months)
+
+    --- Config: hier_k20_smooth ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0112 Val Sharpe: -1.388 | Val ARC: -21.0% | α: 0.211 | 11.5s
+    Ep  1 | Train IR2: 0.0191 Val Sharpe: -1.389 | Val ARC: -20.5% | α: 0.227 | 16.0s
+    Ep  2 | Train IR2: 0.0062 Val Sharpe: -1.373 | Val ARC: -20.0% | α: 0.244 | 15.8s
+    Ep  3 | Train IR2: 0.0176 Val Sharpe: -1.342 | Val ARC: -20.0% | α: 0.263 | 15.8s
+    Ep  4 | Train IR2: 0.0678 Val Sharpe: -1.315 | Val ARC: -19.5% | α: 0.283 | 15.9s
+    Ep  5 | Train IR2: 0.0002 Val Sharpe: -1.342 | Val ARC: -19.5% | α: 0.305 | 15.9s
+    Ep  6 | Train IR2: 0.0788 Val Sharpe: -1.356 | Val ARC: -20.0% | α: 0.329 | 15.9s
+    Ep  7 | Train IR2: 0.0321 Val Sharpe: -1.363 | Val ARC: -20.1% | α: 0.354 | 15.9s
+    Ep  8 | Train IR2: 0.0055 Val Sharpe: -1.334 | Val ARC: -19.5% | α: 0.381 | 15.9s
+    Ep  9 | Train IR2: 0.0811 Val Sharpe: -1.345 | Val ARC: -19.7% | α: 0.411 | 15.9s
+    Ep 10 | Train IR2: 0.0189 Val Sharpe: -1.365 | Val ARC: -20.0% | α: 0.442 | 16.0s
+    Ep 11 | Train IR2: 0.0114 Val Sharpe: -1.392 | Val ARC: -20.1% | α: 0.476 | 16.0s
+    Ep 12 | Train IR2: 0.0155 Val Sharpe: -1.379 | Val ARC: -20.0% | α: 0.513 | 16.1s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.377 | Val ARC: -20.0% | α: 0.552 | 16.0s
+    Ep 14 | Train IR2: 0.0161 Val Sharpe: -1.383 | Val ARC: -20.2% | α: 0.594 | 16.0s
+    Early stop at epoch 14 (best: 4)
+    → Med-Train Sharpe: 0.405 (25 months) | Max-Val Sharpe: 0.056 (2 months)
+
+    --- Config: hier_k20_fast ---
+  SAC Agent using device: cuda (mode: hierarchical)
+    Ep  0 | Train IR2: 0.0000 Val Sharpe: -1.388 | Val ARC: -21.1% | α: 0.211 | 11.4s
+    Ep  1 | Train IR2: 0.0000 Val Sharpe: -1.396 | Val ARC: -21.0% | α: 0.227 | 15.9s
+    Ep  2 | Train IR2: 0.0000 Val Sharpe: -1.394 | Val ARC: -21.0% | α: 0.244 | 15.9s
+    Ep  3 | Train IR2: 0.0000 Val Sharpe: -1.395 | Val ARC: -21.4% | α: 0.263 | 15.8s
+    Ep  4 | Train IR2: 0.0000 Val Sharpe: -1.401 | Val ARC: -21.9% | α: 0.283 | 16.0s
+    Ep  5 | Train IR2: 0.0000 Val Sharpe: -1.397 | Val ARC: -21.8% | α: 0.305 | 16.0s
+    Ep  6 | Train IR2: 0.0000 Val Sharpe: -1.397 | Val ARC: -22.2% | α: 0.329 | 16.1s
+    Ep  7 | Train IR2: 0.0000 Val Sharpe: -1.446 | Val ARC: -22.3% | α: 0.354 | 16.0s
+    Ep  8 | Train IR2: 0.0000 Val Sharpe: -1.456 | Val ARC: -22.1% | α: 0.382 | 16.1s
+    Ep  9 | Train IR2: 0.0026 Val Sharpe: -1.411 | Val ARC: -21.4% | α: 0.411 | 16.0s
+    Ep 10 | Train IR2: 0.0000 Val Sharpe: -1.391 | Val ARC: -21.2% | α: 0.443 | 15.9s
+    Ep 11 | Train IR2: 0.0000 Val Sharpe: -1.448 | Val ARC: -22.0% | α: 0.477 | 16.0s
+    Ep 12 | Train IR2: 0.0000 Val Sharpe: -1.380 | Val ARC: -21.0% | α: 0.514 | 15.9s
+    Ep 13 | Train IR2: 0.0000 Val Sharpe: -1.358 | Val ARC: -20.7% | α: 0.553 | 16.0s
+    Ep 14 | Train IR2: 0.0000 Val Sharpe: -1.330 | Val ARC: -20.3% | α: 0.595 | 16.0s
+    Ep 15 | Train IR2: 0.0000 Val Sharpe: -1.372 | Val ARC: -20.8% | α: 0.641 | 16.0s
+    Ep 16 | Train IR2: 0.0015 Val Sharpe: -1.337 | Val ARC: -20.4% | α: 0.690 | 16.1s
+    Ep 17 | Train IR2: 0.0280 Val Sharpe: -1.378 | Val ARC: -21.0% | α: 0.743 | 16.1s
+    Ep 18 | Train IR2: 0.0000 Val Sharpe: -1.340 | Val ARC: -20.5% | α: 0.800 | 16.1s
+    Ep 19 | Train IR2: 0.0001 Val Sharpe: -1.359 | Val ARC: -20.7% | α: 0.861 | 16.1s
+    Early stop at epoch 19 (best: 14)
+    → Med-Train Sharpe: 0.498 (25 months) | Max-Val Sharpe: 0.031 (2 months)
+
+  ★ Selected: 'hier_k20_smooth' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.405 | Max-Val: 0.056 | Val Sharpe: -1.3147 | IR2: 0.0000
+    Test: 2025-08-29→2025-10-28 → RL ARC: +140.5% | QQQ ARC: +82.1%
+  Fold 15/15 | CARRY (Sharpe: 5.397) → RL ARC: +11.9% | QQQ ARC: -12.7%
+
+======================================================================
+STITCHING TEST RETURNS
+======================================================================
+
+  OOS: 2023-06-29 → 2025-12-23
+  Days: 1189, Retrains: 9/15
+
+  METRIC                              RL          QQQ
+  ---------------------------------------------------
+  Absolute Return (%)            22.8579      62.7382
+  ARC (%)                         9.1242      22.9057
+  ASD (%)                        18.8130      20.2651
+  Max Drawdown (%)               22.9524      21.7972
+  MLD (years)                     0.8095       0.3294
+  IR1                             0.4850       1.1303
+  IR2                             0.1928       1.1878
+  Sharpe                          0.5581       1.1195
+  Sortino                         0.7158       1.0554
+  Calmar                          0.3975       1.0509
+  N Days                       1189.0000    1189.0000
+  Avg Daily Turnover (%)         15.0016          N/A
+
+  All saved to ../Results_Intraday
+
+
+Total time: 336.4 minutes
+============================================================
+OUT-OF-SAMPLE PERFORMANCE (Run 9: 8-config, log_return, 2.0bps)
+============================================================
+          Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+RL Agent              22.8579   9.1242  18.8130           22.9524       0.8095  0.4850  0.1928  0.5581   0.7158  0.3975  1189.0                 15.0016
+QQQ                   62.7382  22.9057  20.2651           21.7972       0.3294  1.1303  1.1878  1.1195   1.0554  1.0509  1189.0                     NaN
+Retrains: 9 / 15 folds
+    fold_id train_start   train_end   val_start     val_end  test_start    test_end  n_train  n_test  retrained  selected_config    val_ir2  val_sharpe   test_ir2  test_arc  qqq_test_arc  test_mdd  test_sharpe  test_sortino  test_n_trades  test_total_tc  test_cash
+0         1  2021-04-27  2023-04-26  2023-05-01  2023-06-28  2023-06-29  2023-08-28     1004      82       True  hier_k20_smooth    87.4020      3.6493     0.0000    -18.94          0.36      9.51      -0.8832       -1.0369             65         0.1662      22.44
+1         2  2021-06-28  2023-06-26  2023-06-29  2023-08-28  2023-08-29  2023-10-27     1000      86       True    flat_k10_fast     0.0000     -0.0578     0.0000    -22.22        -40.03      5.62      -1.7809       -2.8261             81         0.4075      13.11
+2         3  2021-08-27  2023-08-25  2023-08-29  2023-10-27  2023-10-30  2023-12-28      998      82       True    hier_k20_fast     0.0000     -2.9603  2166.8534    210.98        185.80      1.62       9.0691       12.5605             75         0.2197      13.09
+3         4  2021-10-27  2023-10-26  2023-10-30  2023-12-28  2023-12-29  2024-02-28     1000      82      False    hier_k20_fast  2188.7082      9.0278     3.4156     21.74         51.86      6.32       1.0359        1.6278             72         0.2334      13.22
+4         5  2021-12-27  2023-12-26  2023-12-29  2024-02-28  2024-02-29  2024-04-26     1000      82      False    hier_k20_fast     3.2624      1.0126     0.0000    -24.98        -18.46     10.09      -1.1885       -1.5603             73         0.1840      12.65
+5         6  2022-02-28  2024-02-26  2024-02-29  2024-04-26  2024-04-29  2024-06-28      996      86       True  hier_k20_smooth     0.0000     -1.0629    10.7719     23.41         91.82      3.75       1.6359        2.3432             75         0.2487      15.38
+6         7  2022-04-27  2024-04-26  2024-04-29  2024-06-28  2024-07-01  2024-08-28     1000      82      False  hier_k20_smooth    10.7823      1.6232     0.0000    -23.15         -6.56     13.49      -1.1556       -1.3744             77         0.2418      15.37
+7         8  2022-06-27  2024-06-26  2024-07-01  2024-08-28  2024-08-29  2024-10-28     1000      84       True    hier_k20_fast     0.0000     -1.1687     0.0233      0.93         38.06      3.67      -0.2346       -0.2893             77         0.2119      13.17
+8         9  2022-08-29  2024-08-26  2024-08-29  2024-10-28  2024-10-29  2024-12-27      994      80       True  hier_k10_smooth     2.1515      0.3831    82.7531    103.95         46.22      5.79       3.3008        5.7394             65         0.2112      23.94
+9        10  2022-10-27  2024-10-25  2024-10-29  2024-12-27  2024-12-30  2025-02-27      996      80      False  hier_k10_smooth    84.3398      3.2974     0.0000    -17.72         -1.31     11.65      -0.8513       -1.0565             68         0.1943      23.04
+10       11  2022-12-27  2024-12-26  2024-12-30  2025-02-27  2025-02-28  2025-04-25      996      80       True  hier_k10_smooth     0.0000     -0.8000     0.0000    -38.21        -41.22     13.45      -2.0563       -2.7448             62         0.2768      16.45
+11       12  2023-02-27  2025-02-26  2025-03-03  2025-04-30  2025-05-01  2025-06-30      994      82       True    hier_k10_fast     0.0000     -1.6384    45.4514     47.92        127.23      3.42       2.5009        4.2496             77         0.2543      13.69
+12       13  2023-04-27  2025-04-25  2025-04-29  2025-06-27  2025-06-30  2025-08-28      992      84      False    hier_k10_fast    57.2220      3.0990     0.0000    -45.55         26.97     11.88      -3.2383       -3.6284             81         0.3911      12.73
+13       14  2023-06-27  2025-06-26  2025-06-30  2025-08-28  2025-08-29  2025-10-28      994      84       True  hier_k20_smooth     0.0000     -1.3160   252.9428    140.45         82.08      4.62       5.4240        7.7220             66         0.1474      20.47
+14       15  2023-08-28  2025-08-26  2025-08-29  2025-10-28  2025-10-29  2025-12-26      992      78      False  hier_k20_smooth   254.1513      5.3967     1.0700     11.91        -12.67      6.46       0.6492        0.7741             68         0.1793      19.71
+
+Running baselines on OOS period: 2023-06-29 19:00:00 → 2025-12-23 19:00:00
+
+======================================================================
+RUNNING ALL BASELINES
+  Period: 2023-06-29 19:00:00 → 2025-12-23 19:00:00
+  Transaction cost: 2.0 bps one-way
+  Annualization: 504
+  Results dir: /home/kamilkashif/MS_Thesis_RL/Results_Intraday
+======================================================================
+
+  ▶ QQQ Buy-and-Hold... Done — IR2: 1.3829, ARC: 25.2%, MDD: 22.8%
+
+  ▶ Equal-Weight Monthly... Done — IR2: 0.5805, ARC: 14.8%, MDD: 21.2%
+
+  ▶ Inverse Volatility... Done — IR2: 0.6108, ARC: 15.1%, MDD: 20.9%
+
+  ▶ Momentum Top-20%... Done — IR2: 0.0072, ARC: 2.3%, MDD: 35.3%
+
+  ▶ Supervised + MVO... Done — IR2: 0.5384, ARC: 15.0%, MDD: 20.5%
+
+  Saved: ../Results_Intraday/equity_curves_oos.csv
+  Saved: ../Results_Intraday/daily_returns_oos.csv
+  Saved: ../Results_Intraday/turnover_oos.csv
+  Saved: ../Results_Intraday/performance_metrics_oos.csv
+
+==================================================================================================================================
+STRATEGY                     ARC%    ASD%    MDD%    MLD     IR1     IR2  Sharpe  Sortino  Calmar     TO%
+==================================================================================================================================
+  QQQ Buy-and-Hold          25.2   20.2   22.8  0.34  1.248 1.3829  1.214   1.151  1.108   0.00
+  Inverse Volatility        15.1   17.9   20.9  0.34  0.846 0.6108  0.879   1.181  0.722   0.88
+  Equal-Weight Monthly      14.8   17.8   21.2  0.35  0.832 0.5805  0.866   1.162  0.698   0.18
+  Supervised + MVO          15.0   20.5   20.5  0.24  0.734 0.5384  0.787   1.057  0.734  47.27
+  Momentum Top-20%           2.3   20.4   35.3  1.84  0.111 0.0072  0.210   0.278  0.064  32.50
+==================================================================================================================================
+  (Sorted by IR2 — primary optimization target)
+
+================================================================================
+COMBINED COMPARISON — Run 9 (8 configs, log_return, 2.0bps)
+================================================================================
+                      Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+QQQ Buy-and-Hold                  73.5745  25.2372  20.2280           22.7683       0.3413  1.2476  1.3829  1.2142   1.1512  1.1084  1234.0                  0.0000
+Inverse Volatility                41.2906  15.1135  17.8651           20.9328       0.3413  0.8460  0.6108  0.8792   1.1811  0.7220  1234.0                  0.8759
+Equal-Weight Monthly              40.3439  14.8005  17.8000           21.2011       0.3512  0.8315  0.5805  0.8664   1.1622  0.6981  1234.0                  0.1769
+Supervised + MVO                  41.0516  15.0449  20.5050           20.5013       0.2440  0.7337  0.5384  0.7873   1.0572  0.7339  1234.0                 47.2653
+RL Agent                          22.8579   9.1242  18.8130           22.9524       0.8095  0.4850  0.1928  0.5581   0.7158  0.3975  1189.0                 15.0016
+Momentum Top-20%                   5.5150   2.2719  20.3863           35.2960       1.8413  0.1114  0.0072  0.2096   0.2782  0.0644  1234.0                 32.5023
+
+RL files in ../Results_Intraday/:
+  agent_checkpoint.pt                             5397.3 KB
+  agent_final.pt                                  5395.5 KB
+  rl_daily_returns_oos.csv                          63.3 KB
+  rl_equity_oos.csv                                 66.8 KB
+  rl_fold_10_qqq_returns.csv                         2.5 KB
+  rl_fold_10_test_returns.csv                        3.2 KB
+  rl_fold_11_qqq_returns.csv                         2.5 KB
+  rl_fold_11_test_returns.csv                        3.2 KB
+  rl_fold_12_qqq_returns.csv                         2.5 KB
+  rl_fold_12_test_returns.csv                        3.3 KB
+  rl_fold_13_qqq_returns.csv                         2.6 KB
+  rl_fold_13_test_returns.csv                        3.3 KB
+  rl_fold_14_qqq_returns.csv                         2.6 KB
+  rl_fold_14_test_returns.csv                        3.3 KB
+  rl_fold_15_qqq_returns.csv                         2.4 KB
+  rl_fold_15_test_returns.csv                        3.1 KB
+  rl_fold_1_qqq_returns.csv                          2.5 KB
+  rl_fold_1_test_returns.csv                         3.2 KB
+  rl_fold_2_qqq_returns.csv                          2.7 KB
+  rl_fold_2_test_returns.csv                         3.4 KB
+  rl_fold_3_qqq_returns.csv                          2.5 KB
+  rl_fold_3_test_returns.csv                         3.2 KB
+  rl_fold_4_qqq_returns.csv                          2.5 KB
+  rl_fold_4_test_returns.csv                         3.2 KB
+  rl_fold_5_qqq_returns.csv                          2.5 KB
+  rl_fold_5_test_returns.csv                         3.3 KB
+  rl_fold_6_qqq_returns.csv                          2.7 KB
+  rl_fold_6_test_returns.csv                         3.4 KB
+  rl_fold_7_qqq_returns.csv                          2.5 KB
+  rl_fold_7_test_returns.csv                         3.2 KB
+  rl_fold_8_qqq_returns.csv                          2.6 KB
+  rl_fold_8_test_returns.csv                         3.3 KB
+  rl_fold_9_qqq_returns.csv                          2.5 KB
+  rl_fold_9_test_returns.csv                         3.2 KB
+  rl_fold_log.csv                                    2.6 KB
+  rl_performance_metrics.csv                         0.3 KB
+  rl_wfo_config.json                                 0.4 KB
+  wfo_checkpoint.json                               10.3 KB
+  wfo_folds_plot.html                             4760.1 KB
