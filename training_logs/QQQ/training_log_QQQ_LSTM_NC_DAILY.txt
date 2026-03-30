@@ -1,0 +1,1011 @@
+PyTorch: 2.7.1+cu128
+CUDA: NVIDIA L4
+============================================================
+DATA PIPELINE — RL Portfolio (DAILY REBALANCING)
+============================================================
+
+[1/5] Loading raw data...
+  Risk-free rate loaded from: ../Data/Outputs/Data/risk_free_data.csv
+  Prices: (5836, 194)
+  Mask:   (5836, 194)
+  QQQ:    (5836, 1)
+  VIX:    (5836, 1)
+
+[2/5] Cleaning & aligning (daily)...
+  Tickers:       194
+  Trading days:  5836
+  Date range:    2003-01-02 → 2026-03-13
+  Close coverage: 100.0% mean, 100.0% min
+
+[3/5] Building per-asset features (13 features)...
+  Features per asset:  13
+  Feature names:       ['bb_pctb', 'beta_qqq', 'dist_high_20', 'macd_hist', 'mean_rev_20', 'raw_ret_20d', 'ret_1d', 'ret_20d', 'ret_5d', 'ret_60d', 'rsi_14', 'rvol_20d', 'rvol_5d']
+  Total columns:       2522
+
+[4/5] Building global features (9 features)...
+  Global features: ['vix_level', 'vix_change_5d', 'market_ret_1d', 'market_rvol_5d', 'dow', 'market_breadth', 'qqq_ret_5d', 'qqq_ret_20d', 'cross_disp']
+
+[5/5] Applying warmup period (60 days)...
+  Valid range:    2003-03-31 → 2026-03-13
+  Valid days:     5776
+  Per-asset NaN:  58.604%
+  Global NaN:     0.000%
+  Avg risk-free:  1.67% annualized
+
+============================================================
+PIPELINE COMPLETE (DAILY MODE)
+============================================================
+Total folds: 16
+First test: 2009-04-02 → 2010-04-01
+Last test:  2024-04-02 → 2025-04-01
+OOS: 2009-04-02 → 2025-04-01
+
+Daily Run: 3 benchmark-relative configs | 50 epochs | gradient_steps=2
+  WFO: 60mo train / 12mo val / 12mo test / 12mo step
+  Reward: benchmark_relative | TC: 2.0bps | Lookback: 60
+  Annualization: 252
+
+======================================================================
+WALK-FORWARD RL TRAINING (SLIDING WINDOW)
+======================================================================
+  WFO: train=60m (sliding), val=12m, test=12m, step=12m, embargo=0d
+  Folds: 16
+  OOS test: 2009-04-02 → 2025-04-01
+  HP configs: 3
+  Lookback: 60 | Annualization: 252
+  Reward: benchmark_relative | Turnover penalty: 0.003
+  Policy mode: Flat Dirichlet
+======================================================================
+  Fold plot saved to ../Results_Daily/wfo_folds_plot.html
+
+======================================================================
+WALKING FORWARD — 16 folds
+======================================================================
+
+  Fold  1/16 | RETRAIN (initial)
+
+  HP Selection on fold 1:
+    Train: 2003-03-31 → 2008-03-28 (1258d)
+    Val:   2008-04-02 → 2009-04-01 (253d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.2065 AbsR: +69.4% Cash: 0% TO: 56.9% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=17.73 | 35.7s
+    Ep  1 | Train IR2: 0.5473 AbsR: +116.7% Cash: 0% TO: 26.6% | Val Sh: -0.910 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=34.83 | 55.7s
+    Ep  2 | Train IR2: 0.5056 AbsR: +119.4% Cash: 0% TO: 26.2% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.49 cg=96.19 | 54.9s
+    Ep  3 | Train IR2: 0.5120 AbsR: +118.2% Cash: 0% TO: 25.7% | Val Sh: -0.909 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=0.33 cg=193.37 | 55.5s
+    Ep  4 | Train IR2: 0.4803 AbsR: +111.8% Cash: 0% TO: 25.3% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.19 cg=160.27 | 55.3s
+    Ep  5 | Train IR2: 0.4783 AbsR: +110.7% Cash: 0% TO: 25.5% | Val Sh: -0.907 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=98.03 | 56.4s
+    Ep  6 | Train IR2: 0.4734 AbsR: +115.1% Cash: 0% TO: 25.8% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.37 cg=109.24 | 56.2s
+    Ep  7 | Train IR2: 0.6066 AbsR: +137.7% Cash: 0% TO: 26.2% | Val Sh: -0.910 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=94.30 | 56.4s
+    Ep  8 | Train IR2: 0.6047 AbsR: +131.1% Cash: 0% TO: 26.4% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.70 cg=109.41 | 56.0s
+    Ep  9 | Train IR2: 0.6074 AbsR: +131.7% Cash: 0% TO: 26.2% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=112.93 | 55.6s
+    Ep 10 | Train IR2: 0.5987 AbsR: +134.0% Cash: 0% TO: 26.0% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.70 cg=132.29 | 55.6s
+    Ep 11 | Train IR2: 0.4911 AbsR: +122.3% Cash: 0% TO: 26.4% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=103.52 | 55.4s
+    Ep 12 | Train IR2: 0.5834 AbsR: +129.4% Cash: 0% TO: 26.6% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=117.10 | 55.6s
+    Ep 13 | Train IR2: 0.5538 AbsR: +124.7% Cash: 0% TO: 26.5% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=100.26 | 55.7s
+    Ep 14 | Train IR2: 0.8413 AbsR: +160.1% Cash: 0% TO: 26.3% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.17 cg=112.14 | 55.4s
+    Ep 15 | Train IR2: 0.7247 AbsR: +149.6% Cash: 0% TO: 26.2% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=194.74 | 55.7s
+    Ep 16 | Train IR2: 0.7151 AbsR: +140.4% Cash: 0% TO: 26.3% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.35 cg=112.29 | 56.0s
+    Ep 17 | Train IR2: 0.6214 AbsR: +127.3% Cash: 0% TO: 26.5% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=214.49 | 55.6s
+    Ep 18 | Train IR2: 0.4961 AbsR: +118.2% Cash: 0% TO: 26.5% | Val Sh: -0.907 ARC: -37.4% AbsR: -36.8% | α: 0.200 | ag=1.00 cg=167.43 | 56.0s
+    Ep 19 | Train IR2: 0.5308 AbsR: +118.4% Cash: 0% TO: 26.5% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.56 cg=120.93 | 56.1s
+    Ep 20 | Train IR2: 0.4692 AbsR: +118.4% Cash: 0% TO: 26.6% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.61 cg=226.34 | 56.0s
+    Ep 21 | Train IR2: 0.4835 AbsR: +113.7% Cash: 0% TO: 26.8% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=180.18 | 55.5s
+    Ep 22 | Train IR2: 0.6042 AbsR: +132.1% Cash: 0% TO: 26.7% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=164.91 | 55.7s
+    Ep 23 | Train IR2: 0.6309 AbsR: +130.3% Cash: 0% TO: 26.8% | Val Sh: -0.911 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=0.45 cg=144.91 | 55.5s
+    Ep 24 | Train IR2: 0.5129 AbsR: +116.9% Cash: 0% TO: 26.6% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=148.81 | 55.7s
+    Ep 25 | Train IR2: 0.8154 AbsR: +153.4% Cash: 0% TO: 26.6% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=118.92 | 56.2s
+    Ep 26 | Train IR2: 0.4921 AbsR: +113.9% Cash: 0% TO: 26.6% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=124.31 | 56.2s
+    Ep 27 | Train IR2: 0.5759 AbsR: +131.4% Cash: 0% TO: 26.6% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.52 cg=206.36 | 56.6s
+    Early stop at epoch 27 (best: 18)
+    → ✓ LEARNED | max Train IR2: 0.8413
+    → Med-Train Sharpe: 0.935 (60 months) | Max-Val Sharpe: 3.054 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.2752 AbsR: +110.3% Cash: 0% TO: 57.7% | Val Sh: -1.335 ARC: -45.6% AbsR: -45.1% | α: 0.200 | ag=1.00 cg=19.58 | 32.8s
+    Ep  1 | Train IR2: 0.3351 AbsR: +126.3% Cash: 0% TO: 27.6% | Val Sh: -1.337 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=0.47 cg=24.55 | 51.5s
+    Ep  2 | Train IR2: 0.2627 AbsR: +113.5% Cash: 0% TO: 26.6% | Val Sh: -1.330 ARC: -45.5% AbsR: -45.1% | α: 0.200 | ag=0.20 cg=173.74 | 51.2s
+    Ep  3 | Train IR2: 0.4100 AbsR: +137.0% Cash: 0% TO: 25.7% | Val Sh: -1.333 ARC: -45.6% AbsR: -45.1% | α: 0.200 | ag=0.84 cg=103.18 | 50.8s
+    Ep  4 | Train IR2: 0.4330 AbsR: +145.8% Cash: 0% TO: 26.9% | Val Sh: -1.335 ARC: -45.6% AbsR: -45.2% | α: 0.200 | ag=0.74 cg=101.08 | 51.0s
+    Ep  5 | Train IR2: 0.4229 AbsR: +137.2% Cash: 0% TO: 27.0% | Val Sh: -1.338 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=0.42 cg=58.11 | 50.4s
+    Ep  6 | Train IR2: 0.3929 AbsR: +140.1% Cash: 0% TO: 27.5% | Val Sh: -1.334 ARC: -45.6% AbsR: -45.1% | α: 0.200 | ag=1.00 cg=173.52 | 50.5s
+    Ep  7 | Train IR2: 0.2336 AbsR: +94.5% Cash: 0% TO: 27.4% | Val Sh: -1.333 ARC: -45.6% AbsR: -45.1% | α: 0.200 | ag=0.49 cg=100.16 | 50.1s
+    Ep  8 | Train IR2: 0.2647 AbsR: +106.7% Cash: 0% TO: 27.4% | Val Sh: -1.335 ARC: -45.6% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=162.31 | 50.3s
+    Ep  9 | Train IR2: 0.4847 AbsR: +143.2% Cash: 0% TO: 27.2% | Val Sh: -1.337 ARC: -45.6% AbsR: -45.2% | α: 0.200 | ag=0.58 cg=113.30 | 50.2s
+    Ep 10 | Train IR2: 0.9728 AbsR: +232.0% Cash: 0% TO: 27.2% | Val Sh: -1.340 ARC: -45.7% AbsR: -45.3% | α: 0.200 | ag=1.00 cg=378.13 | 50.1s
+    Ep 11 | Train IR2: 0.3057 AbsR: +117.5% Cash: 0% TO: 27.6% | Val Sh: -1.343 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=1.00 cg=121.16 | 50.4s
+    Ep 12 | Train IR2: 0.5148 AbsR: +164.8% Cash: 0% TO: 27.3% | Val Sh: -1.339 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=99.75 | 50.6s
+    Ep 13 | Train IR2: 0.4115 AbsR: +137.1% Cash: 0% TO: 27.9% | Val Sh: -1.339 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=116.75 | 50.1s
+    Ep 14 | Train IR2: 0.3211 AbsR: +118.1% Cash: 0% TO: 27.8% | Val Sh: -1.339 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=194.21 | 50.2s
+    Ep 15 | Train IR2: 0.3819 AbsR: +131.2% Cash: 0% TO: 27.7% | Val Sh: -1.338 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=0.53 cg=121.76 | 51.0s
+    Ep 16 | Train IR2: 0.3934 AbsR: +133.2% Cash: 0% TO: 27.8% | Val Sh: -1.342 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=0.75 cg=206.99 | 51.4s
+    Ep 17 | Train IR2: 0.3741 AbsR: +124.0% Cash: 0% TO: 28.0% | Val Sh: -1.341 ARC: -45.7% AbsR: -45.3% | α: 0.200 | ag=0.41 cg=132.27 | 50.6s
+    Ep 18 | Train IR2: 0.3773 AbsR: +128.1% Cash: 0% TO: 27.8% | Val Sh: -1.342 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=0.56 cg=122.34 | 51.0s
+    Ep 19 | Train IR2: 0.5973 AbsR: +165.8% Cash: 0% TO: 27.7% | Val Sh: -1.336 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=137.35 | 51.0s
+    Ep 20 | Train IR2: 0.3117 AbsR: +113.6% Cash: 0% TO: 27.8% | Val Sh: -1.339 ARC: -45.7% AbsR: -45.3% | α: 0.200 | ag=0.80 cg=335.40 | 51.3s
+    Ep 21 | Train IR2: 0.4383 AbsR: +141.5% Cash: 0% TO: 28.0% | Val Sh: -1.341 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=1.00 cg=361.09 | 51.0s
+    Ep 22 | Train IR2: 0.5539 AbsR: +157.3% Cash: 0% TO: 28.3% | Val Sh: -1.342 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=0.33 cg=117.28 | 50.7s
+    Ep 23 | Train IR2: 0.4579 AbsR: +146.6% Cash: 0% TO: 27.9% | Val Sh: -1.342 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=1.00 cg=147.70 | 51.2s
+    Ep 24 | Train IR2: 0.5076 AbsR: +154.6% Cash: 0% TO: 28.1% | Val Sh: -1.344 ARC: -45.8% AbsR: -45.4% | α: 0.200 | ag=1.00 cg=201.72 | 51.1s
+    Ep 25 | Train IR2: 0.2559 AbsR: +106.0% Cash: 0% TO: 27.9% | Val Sh: -1.340 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=120.99 | 50.4s
+    Ep 26 | Train IR2: 0.3677 AbsR: +134.2% Cash: 0% TO: 27.7% | Val Sh: -1.341 ARC: -45.8% AbsR: -45.3% | α: 0.200 | ag=1.00 cg=127.85 | 50.5s
+    Ep 27 | Train IR2: 0.4257 AbsR: +138.9% Cash: 0% TO: 27.8% | Val Sh: -1.339 ARC: -45.7% AbsR: -45.2% | α: 0.200 | ag=1.00 cg=222.68 | 50.4s
+    Early stop at epoch 27 (best: 2)
+    → ✓ LEARNED | max Train IR2: 0.9728
+    → Med-Train Sharpe: 1.037 (60 months) | Max-Val Sharpe: 2.452 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.4012 AbsR: +102.1% Cash: 0% TO: 57.3% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.42 cg=44.40 | 58.7s
+    Ep  1 | Train IR2: 0.4176 AbsR: +103.9% Cash: 0% TO: 26.9% | Val Sh: -0.909 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=0.62 cg=21.53 | 93.1s
+    Ep  2 | Train IR2: 0.5009 AbsR: +117.2% Cash: 0% TO: 26.0% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=0.80 cg=136.11 | 92.2s
+    Ep  3 | Train IR2: 0.5429 AbsR: +125.6% Cash: 0% TO: 26.4% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=50.54 | 92.1s
+    Ep  4 | Train IR2: 0.7501 AbsR: +152.8% Cash: 0% TO: 26.9% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.53 cg=130.44 | 91.9s
+    Ep  5 | Train IR2: 0.4891 AbsR: +121.5% Cash: 0% TO: 27.0% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=62.59 | 91.8s
+    Ep  6 | Train IR2: 0.5423 AbsR: +128.7% Cash: 0% TO: 26.8% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=121.60 | 92.3s
+    Ep  7 | Train IR2: 0.7292 AbsR: +149.7% Cash: 0% TO: 26.8% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=86.93 | 91.8s
+    Ep  8 | Train IR2: 0.5190 AbsR: +121.6% Cash: 0% TO: 26.9% | Val Sh: -0.910 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=0.89 cg=124.74 | 91.9s
+    Ep  9 | Train IR2: 0.5865 AbsR: +122.6% Cash: 0% TO: 26.7% | Val Sh: -0.911 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=98.32 | 92.1s
+    Ep 10 | Train IR2: 0.9507 AbsR: +167.0% Cash: 0% TO: 27.0% | Val Sh: -0.910 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=75.05 | 91.5s
+    Ep 11 | Train IR2: 0.6761 AbsR: +138.0% Cash: 0% TO: 26.6% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.79 cg=87.12 | 91.5s
+    Ep 12 | Train IR2: 0.5613 AbsR: +126.0% Cash: 0% TO: 27.0% | Val Sh: -0.912 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=66.78 | 91.6s
+    Ep 13 | Train IR2: 0.5432 AbsR: +119.3% Cash: 0% TO: 27.0% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.49 cg=97.69 | 91.8s
+    Ep 14 | Train IR2: 0.5928 AbsR: +124.0% Cash: 0% TO: 27.0% | Val Sh: -0.910 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=97.94 | 92.3s
+    Ep 15 | Train IR2: 0.5652 AbsR: +128.6% Cash: 0% TO: 26.9% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=88.22 | 92.5s
+    Ep 16 | Train IR2: 0.5012 AbsR: +119.5% Cash: 0% TO: 26.9% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.26 cg=97.87 | 91.9s
+    Ep 17 | Train IR2: 0.5088 AbsR: +115.0% Cash: 0% TO: 26.9% | Val Sh: -0.910 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=95.51 | 92.0s
+    Ep 18 | Train IR2: 0.4134 AbsR: +108.1% Cash: 0% TO: 26.9% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.25 cg=119.70 | 92.3s
+    Ep 19 | Train IR2: 0.5786 AbsR: +130.5% Cash: 0% TO: 26.7% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=114.06 | 92.4s
+    Ep 20 | Train IR2: 0.6283 AbsR: +131.9% Cash: 0% TO: 26.7% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.38 cg=117.27 | 92.2s
+    Ep 21 | Train IR2: 0.5186 AbsR: +116.0% Cash: 0% TO: 26.5% | Val Sh: -0.908 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=129.72 | 92.3s
+    Ep 22 | Train IR2: 0.4769 AbsR: +110.4% Cash: 0% TO: 27.1% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=108.59 | 92.4s
+    Ep 23 | Train IR2: 0.5312 AbsR: +116.7% Cash: 0% TO: 27.2% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=0.16 cg=101.57 | 92.4s
+    Ep 24 | Train IR2: 0.7203 AbsR: +151.6% Cash: 0% TO: 27.2% | Val Sh: -0.910 ARC: -37.5% AbsR: -36.9% | α: 0.200 | ag=0.25 cg=86.39 | 91.9s
+    Ep 25 | Train IR2: 0.7230 AbsR: +140.3% Cash: 0% TO: 27.7% | Val Sh: -0.909 ARC: -37.4% AbsR: -36.9% | α: 0.200 | ag=1.00 cg=112.66 | 91.9s
+    Ep 26 | Train IR2: 0.4953 AbsR: +122.1% Cash: 0% TO: 27.6% | Val Sh: -0.910 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=150.76 | 92.4s
+    Ep 27 | Train IR2: 0.6271 AbsR: +129.1% Cash: 0% TO: 27.6% | Val Sh: -0.912 ARC: -37.5% AbsR: -37.0% | α: 0.200 | ag=1.00 cg=145.64 | 92.3s
+    Early stop at epoch 27 (best: 19)
+    → ✓ LEARNED | max Train IR2: 0.9507
+    → Med-Train Sharpe: 0.933 (60 months) | Max-Val Sharpe: 3.054 (12 months)
+
+  ★ Selected: 'bmk_nopen_med_k20' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.933 | Max-Val: 3.054 | Val Sharpe: -0.9095 | IR2: 0.0000
+    Test: 2009-04-02→2010-04-01 → RL ARC: +71.6% AbsR: +72.1% | QQQ ARC: +52.4%
+  Fold  2/16 | CARRY (Sharpe: 2.201) → RL ARC: +22.2% | QQQ ARC: +19.2%
+  Fold  3/16 | CARRY (Sharpe: 1.008) → RL ARC: +18.8% | QQQ ARC: +19.4%
+  Fold  4/16 | CARRY (Sharpe: 0.854) → RL ARC: +5.3% | QQQ ARC: +2.4%
+
+  Fold  5/16 | RETRAIN (mandatory (>3 folds since retrain))
+
+  HP Selection on fold 5:
+    Train: 2007-04-02 → 2012-03-30 (1261d)
+    Val:   2012-04-02 → 2013-04-01 (249d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.0156 AbsR: +29.8% Cash: 0% TO: 57.4% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.76 cg=14.55 | 23.0s
+    Ep  1 | Train IR2: 0.0821 AbsR: +72.6% Cash: 0% TO: 27.7% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.24 cg=36.90 | 36.6s
+    Ep  2 | Train IR2: 0.0438 AbsR: +49.9% Cash: 0% TO: 27.5% | Val Sh: 0.330 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.36 cg=71.79 | 36.4s
+    Ep  3 | Train IR2: 0.0717 AbsR: +65.9% Cash: 0% TO: 27.6% | Val Sh: 0.330 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.68 cg=92.09 | 36.4s
+    Ep  4 | Train IR2: 0.0732 AbsR: +66.0% Cash: 0% TO: 27.0% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.20 cg=120.63 | 36.3s
+    Ep  5 | Train IR2: 0.0416 AbsR: +49.1% Cash: 0% TO: 27.2% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.07 cg=112.53 | 36.3s
+    Ep  6 | Train IR2: 0.0603 AbsR: +60.8% Cash: 0% TO: 26.8% | Val Sh: 0.335 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.17 cg=103.27 | 37.2s
+    Ep  7 | Train IR2: 0.0557 AbsR: +56.2% Cash: 0% TO: 26.8% | Val Sh: 0.334 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.19 cg=120.27 | 36.7s
+    Ep  8 | Train IR2: 0.0575 AbsR: +58.6% Cash: 0% TO: 26.9% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.40 cg=123.17 | 36.4s
+    Ep  9 | Train IR2: 0.0755 AbsR: +68.0% Cash: 0% TO: 27.1% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.96 cg=109.17 | 36.3s
+    Ep 10 | Train IR2: 0.0718 AbsR: +65.8% Cash: 0% TO: 26.9% | Val Sh: 0.334 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.30 cg=115.47 | 36.4s
+    Ep 11 | Train IR2: 0.0576 AbsR: +58.2% Cash: 0% TO: 26.9% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.30 cg=122.39 | 36.3s
+    Ep 12 | Train IR2: 0.0723 AbsR: +67.3% Cash: 0% TO: 26.8% | Val Sh: 0.330 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.41 cg=107.42 | 36.3s
+    Ep 13 | Train IR2: 0.0524 AbsR: +55.6% Cash: 0% TO: 26.8% | Val Sh: 0.335 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.66 cg=101.55 | 36.3s
+    Ep 14 | Train IR2: 0.0936 AbsR: +75.6% Cash: 0% TO: 26.8% | Val Sh: 0.336 ARC: +5.4% AbsR: +4.1% | α: 0.200 | ag=0.23 cg=98.92 | 36.2s
+    Ep 15 | Train IR2: 0.0792 AbsR: +68.2% Cash: 0% TO: 27.0% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.18 cg=107.39 | 36.1s
+    Ep 16 | Train IR2: 0.0388 AbsR: +46.0% Cash: 0% TO: 27.3% | Val Sh: 0.336 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.54 cg=101.89 | 36.5s
+    Ep 17 | Train IR2: 0.0588 AbsR: +58.1% Cash: 0% TO: 27.1% | Val Sh: 0.335 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.18 cg=96.72 | 36.4s
+    Ep 18 | Train IR2: 0.0851 AbsR: +73.2% Cash: 0% TO: 27.2% | Val Sh: 0.335 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.31 cg=104.30 | 36.3s
+    Ep 19 | Train IR2: 0.0835 AbsR: +71.2% Cash: 0% TO: 27.1% | Val Sh: 0.330 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.25 cg=102.42 | 36.4s
+    Ep 20 | Train IR2: 0.0875 AbsR: +76.2% Cash: 0% TO: 27.1% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.13 cg=106.15 | 36.4s
+    Ep 21 | Train IR2: 0.0835 AbsR: +71.8% Cash: 0% TO: 27.0% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.25 cg=95.48 | 36.5s
+    Ep 22 | Train IR2: 0.0726 AbsR: +66.5% Cash: 0% TO: 27.0% | Val Sh: 0.329 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.25 cg=96.62 | 36.4s
+    Ep 23 | Train IR2: 0.0611 AbsR: +59.2% Cash: 0% TO: 27.1% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.25 cg=93.11 | 36.5s
+    Ep 24 | Train IR2: 0.0770 AbsR: +68.7% Cash: 0% TO: 26.9% | Val Sh: 0.330 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.31 cg=84.56 | 36.3s
+    Ep 25 | Train IR2: 0.0832 AbsR: +71.7% Cash: 0% TO: 27.2% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.39 cg=87.68 | 36.5s
+    Ep 26 | Train IR2: 0.0916 AbsR: +75.5% Cash: 0% TO: 27.3% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.24 cg=80.88 | 36.4s
+    Ep 27 | Train IR2: 0.0962 AbsR: +76.8% Cash: 0% TO: 27.3% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.30 cg=88.25 | 36.3s
+    Early stop at epoch 27 (best: 14)
+    → ✓ LEARNED | max Train IR2: 0.0962
+    → Med-Train Sharpe: 1.091 (60 months) | Max-Val Sharpe: 4.785 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.0061 AbsR: +19.1% Cash: 0% TO: 58.5% | Val Sh: 0.140 ARC: +2.0% AbsR: +0.9% | α: 0.200 | ag=0.11 cg=52.52 | 19.3s
+    Ep  1 | Train IR2: 0.0404 AbsR: +52.9% Cash: 0% TO: 27.6% | Val Sh: 0.147 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.64 cg=112.66 | 30.3s
+    Ep  2 | Train IR2: 0.0390 AbsR: +50.4% Cash: 0% TO: 26.7% | Val Sh: 0.151 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.58 cg=134.16 | 31.1s
+    Ep  3 | Train IR2: 0.0486 AbsR: +56.6% Cash: 0% TO: 26.7% | Val Sh: 0.148 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.73 cg=166.37 | 30.5s
+    Ep  4 | Train IR2: 0.0193 AbsR: +35.1% Cash: 0% TO: 26.9% | Val Sh: 0.148 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.63 cg=169.13 | 30.2s
+    Ep  5 | Train IR2: 0.0205 AbsR: +35.3% Cash: 0% TO: 26.5% | Val Sh: 0.154 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.58 cg=191.06 | 30.2s
+    Ep  6 | Train IR2: 0.0391 AbsR: +51.9% Cash: 0% TO: 26.5% | Val Sh: 0.153 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.37 cg=159.64 | 30.1s
+    Ep  7 | Train IR2: 0.0545 AbsR: +63.8% Cash: 0% TO: 26.1% | Val Sh: 0.153 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.32 cg=146.49 | 30.6s
+    Ep  8 | Train IR2: 0.0233 AbsR: +38.3% Cash: 0% TO: 26.0% | Val Sh: 0.133 ARC: +1.9% AbsR: +0.8% | α: 0.200 | ag=0.65 cg=156.94 | 30.6s
+    Ep  9 | Train IR2: 0.0384 AbsR: +51.2% Cash: 0% TO: 26.2% | Val Sh: 0.149 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.33 cg=144.22 | 30.1s
+    Ep 10 | Train IR2: 0.0346 AbsR: +48.2% Cash: 0% TO: 26.0% | Val Sh: 0.145 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.41 cg=136.76 | 30.1s
+    Ep 11 | Train IR2: 0.0488 AbsR: +58.3% Cash: 0% TO: 25.9% | Val Sh: 0.155 ARC: +2.3% AbsR: +1.2% | α: 0.200 | ag=0.28 cg=136.93 | 30.1s
+    Ep 12 | Train IR2: 0.0379 AbsR: +50.5% Cash: 0% TO: 26.2% | Val Sh: 0.143 ARC: +2.0% AbsR: +0.9% | α: 0.200 | ag=0.42 cg=141.33 | 30.3s
+    Ep 13 | Train IR2: 0.0222 AbsR: +36.7% Cash: 0% TO: 26.2% | Val Sh: 0.145 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.27 cg=130.78 | 30.5s
+    Ep 14 | Train IR2: 0.0488 AbsR: +58.6% Cash: 0% TO: 26.1% | Val Sh: 0.156 ARC: +2.3% AbsR: +1.2% | α: 0.200 | ag=0.26 cg=120.05 | 30.7s
+    Ep 15 | Train IR2: 0.0340 AbsR: +47.5% Cash: 0% TO: 26.2% | Val Sh: 0.154 ARC: +2.3% AbsR: +1.1% | α: 0.200 | ag=0.26 cg=119.93 | 30.4s
+    Ep 16 | Train IR2: 0.0275 AbsR: +41.5% Cash: 0% TO: 26.2% | Val Sh: 0.144 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.42 cg=115.38 | 30.5s
+    Ep 17 | Train IR2: 0.0468 AbsR: +56.4% Cash: 0% TO: 26.5% | Val Sh: 0.144 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.25 cg=109.27 | 30.6s
+    Ep 18 | Train IR2: 0.0258 AbsR: +40.3% Cash: 0% TO: 27.0% | Val Sh: 0.143 ARC: +2.0% AbsR: +0.9% | α: 0.200 | ag=0.32 cg=120.70 | 30.6s
+    Ep 19 | Train IR2: 0.0465 AbsR: +58.0% Cash: 0% TO: 27.0% | Val Sh: 0.146 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.32 cg=105.63 | 30.7s
+    Ep 20 | Train IR2: 0.0435 AbsR: +55.4% Cash: 0% TO: 27.3% | Val Sh: 0.135 ARC: +1.9% AbsR: +0.8% | α: 0.200 | ag=0.47 cg=110.45 | 30.9s
+    Ep 21 | Train IR2: 0.0274 AbsR: +42.7% Cash: 0% TO: 27.6% | Val Sh: 0.147 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.36 cg=115.42 | 30.8s
+    Ep 22 | Train IR2: 0.0352 AbsR: +49.3% Cash: 0% TO: 27.9% | Val Sh: 0.133 ARC: +1.9% AbsR: +0.8% | α: 0.200 | ag=0.28 cg=95.50 | 30.9s
+    Ep 23 | Train IR2: 0.0450 AbsR: +55.7% Cash: 0% TO: 27.7% | Val Sh: 0.137 ARC: +1.9% AbsR: +0.8% | α: 0.200 | ag=0.32 cg=97.60 | 30.8s
+    Ep 24 | Train IR2: 0.0658 AbsR: +69.5% Cash: 0% TO: 27.7% | Val Sh: 0.141 ARC: +2.0% AbsR: +0.9% | α: 0.200 | ag=0.28 cg=99.83 | 31.1s
+    Ep 25 | Train IR2: 0.0358 AbsR: +48.7% Cash: 0% TO: 28.1% | Val Sh: 0.141 ARC: +2.0% AbsR: +0.9% | α: 0.200 | ag=0.22 cg=94.03 | 32.1s
+    Ep 26 | Train IR2: 0.0308 AbsR: +45.9% Cash: 0% TO: 27.7% | Val Sh: 0.150 ARC: +2.2% AbsR: +1.1% | α: 0.200 | ag=0.44 cg=93.70 | 31.7s
+    Ep 27 | Train IR2: 0.0286 AbsR: +43.6% Cash: 0% TO: 27.7% | Val Sh: 0.146 ARC: +2.1% AbsR: +1.0% | α: 0.200 | ag=0.39 cg=91.14 | 31.6s
+    Early stop at epoch 27 (best: 14)
+    → ✓ LEARNED | max Train IR2: 0.0658
+    → Med-Train Sharpe: 0.791 (60 months) | Max-Val Sharpe: 4.899 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.0822 AbsR: +73.4% Cash: 0% TO: 57.4% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.14 cg=17.68 | 47.9s
+    Ep  1 | Train IR2: 0.0840 AbsR: +72.6% Cash: 0% TO: 27.4% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.62 cg=30.56 | 77.0s
+    Ep  2 | Train IR2: 0.0732 AbsR: +67.2% Cash: 0% TO: 27.5% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.15 cg=49.40 | 77.1s
+    Ep  3 | Train IR2: 0.0731 AbsR: +67.1% Cash: 0% TO: 27.5% | Val Sh: 0.334 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.66 cg=70.14 | 77.2s
+    Ep  4 | Train IR2: 0.0747 AbsR: +66.5% Cash: 0% TO: 27.6% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.20 cg=78.61 | 77.3s
+    Ep  5 | Train IR2: 0.0786 AbsR: +70.0% Cash: 0% TO: 27.6% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.30 cg=108.35 | 77.4s
+    Ep  6 | Train IR2: 0.0935 AbsR: +76.2% Cash: 0% TO: 27.7% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.48 cg=97.62 | 77.3s
+    Ep  7 | Train IR2: 0.0657 AbsR: +62.6% Cash: 0% TO: 27.5% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.63 cg=109.19 | 77.3s
+    Ep  8 | Train IR2: 0.0649 AbsR: +63.2% Cash: 0% TO: 27.5% | Val Sh: 0.331 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.19 cg=99.63 | 77.2s
+    Ep  9 | Train IR2: 0.0751 AbsR: +67.0% Cash: 0% TO: 27.7% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.19 cg=104.59 | 77.3s
+    Ep 10 | Train IR2: 0.0722 AbsR: +66.3% Cash: 0% TO: 27.5% | Val Sh: 0.331 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.15 cg=88.90 | 77.3s
+    Ep 11 | Train IR2: 0.0887 AbsR: +74.2% Cash: 0% TO: 27.7% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.08 cg=85.56 | 77.2s
+    Ep 12 | Train IR2: 0.1479 AbsR: +98.7% Cash: 0% TO: 27.4% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.23 cg=85.78 | 77.2s
+    Ep 13 | Train IR2: 0.1017 AbsR: +79.1% Cash: 0% TO: 27.5% | Val Sh: 0.329 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.07 cg=77.60 | 77.3s
+    Ep 14 | Train IR2: 0.0751 AbsR: +67.9% Cash: 0% TO: 27.2% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.33 cg=80.93 | 77.3s
+    Ep 15 | Train IR2: 0.0653 AbsR: +62.1% Cash: 0% TO: 27.4% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.09 cg=80.81 | 77.4s
+    Ep 16 | Train IR2: 0.0431 AbsR: +49.1% Cash: 0% TO: 27.4% | Val Sh: 0.331 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.45 cg=84.09 | 77.2s
+    Ep 17 | Train IR2: 0.0913 AbsR: +73.8% Cash: 0% TO: 27.5% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.17 cg=82.01 | 77.2s
+    Ep 18 | Train IR2: 0.0665 AbsR: +63.1% Cash: 0% TO: 27.4% | Val Sh: 0.331 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.11 cg=79.00 | 77.3s
+    Ep 19 | Train IR2: 0.0387 AbsR: +47.3% Cash: 0% TO: 27.5% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.10 cg=80.35 | 77.3s
+    Ep 20 | Train IR2: 0.0598 AbsR: +59.2% Cash: 0% TO: 27.3% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.10 cg=77.86 | 77.3s
+    Ep 21 | Train IR2: 0.0594 AbsR: +58.9% Cash: 0% TO: 27.5% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.07 cg=76.01 | 77.3s
+    Ep 22 | Train IR2: 0.0845 AbsR: +72.6% Cash: 0% TO: 27.5% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.51 cg=76.65 | 77.3s
+    Ep 23 | Train IR2: 0.0779 AbsR: +68.5% Cash: 0% TO: 27.4% | Val Sh: 0.333 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.09 cg=77.66 | 77.3s
+    Ep 24 | Train IR2: 0.0799 AbsR: +72.1% Cash: 0% TO: 27.5% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.68 cg=74.27 | 77.3s
+    Ep 25 | Train IR2: 0.1214 AbsR: +91.7% Cash: 0% TO: 27.5% | Val Sh: 0.330 ARC: +5.2% AbsR: +4.0% | α: 0.200 | ag=0.12 cg=78.61 | 77.2s
+    Ep 26 | Train IR2: 0.0908 AbsR: +74.5% Cash: 0% TO: 27.3% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.1% | α: 0.200 | ag=0.14 cg=77.80 | 77.3s
+    Ep 27 | Train IR2: 0.0731 AbsR: +66.4% Cash: 0% TO: 27.7% | Val Sh: 0.332 ARC: +5.3% AbsR: +4.0% | α: 0.200 | ag=0.24 cg=73.54 | 77.3s
+    Early stop at epoch 27 (best: 3)
+    → ✓ LEARNED | max Train IR2: 0.1479
+    → Med-Train Sharpe: 1.092 (60 months) | Max-Val Sharpe: 4.783 (12 months)
+
+  ★ Selected: 'bmk_nopen_k10' [Tier-2 (both positive, best max-val)]
+    Med-Train: 0.791 | Max-Val: 4.899 | Val Sharpe: 0.1553 | IR2: 0.0184
+    Test: 2013-04-02→2014-04-01 → RL ARC: +39.8% AbsR: +43.2% | QQQ ARC: +28.9%
+  Fold  6/16 | CARRY (Sharpe: 1.917) → RL ARC: +13.3% | QQQ ARC: +19.4%
+  Fold  7/16 | CARRY (Sharpe: 0.689) → RL ARC: +6.6% | QQQ ARC: +5.0%
+
+  Fold  8/16 | RETRAIN (Sharpe 0.437 < 0.568)
+
+  HP Selection on fold 8:
+    Train: 2010-03-31 → 2015-03-30 (1258d)
+    Val:   2015-04-02 → 2016-04-01 (252d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 1.1647 AbsR: +155.8% Cash: 0% TO: 58.0% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.25 cg=14.54 | 22.6s
+    Ep  1 | Train IR2: 1.0335 AbsR: +139.1% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.18 cg=33.45 | 36.3s
+    Ep  2 | Train IR2: 0.6885 AbsR: +123.2% Cash: 0% TO: 27.7% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.49 cg=54.05 | 36.5s
+    Ep  3 | Train IR2: 0.7048 AbsR: +125.4% Cash: 0% TO: 27.7% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.06 cg=70.69 | 37.3s
+    Ep  4 | Train IR2: 1.1299 AbsR: +166.0% Cash: 0% TO: 27.9% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.32 cg=66.95 | 37.0s
+    Ep  5 | Train IR2: 0.9501 AbsR: +145.4% Cash: 0% TO: 28.0% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.14 cg=76.69 | 37.1s
+    Ep  6 | Train IR2: 0.9996 AbsR: +147.8% Cash: 0% TO: 27.8% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.14 cg=85.53 | 36.5s
+    Ep  7 | Train IR2: 1.0706 AbsR: +157.0% Cash: 0% TO: 27.7% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.25 cg=82.06 | 36.4s
+    Ep  8 | Train IR2: 0.9860 AbsR: +152.2% Cash: 0% TO: 28.0% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.12 cg=74.60 | 36.1s
+    Ep  9 | Train IR2: 1.2031 AbsR: +158.9% Cash: 0% TO: 28.0% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.53 cg=82.65 | 36.3s
+    Ep 10 | Train IR2: 1.1192 AbsR: +154.0% Cash: 0% TO: 27.9% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.15 cg=83.33 | 36.2s
+    Ep 11 | Train IR2: 1.4065 AbsR: +179.1% Cash: 0% TO: 28.1% | Val Sh: 0.017 ARC: -2.5% AbsR: -1.7% | α: 0.200 | ag=0.51 cg=94.71 | 36.1s
+    Ep 12 | Train IR2: 1.0850 AbsR: +153.8% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.11 cg=86.34 | 36.4s
+    Ep 13 | Train IR2: 0.8649 AbsR: +141.4% Cash: 0% TO: 27.8% | Val Sh: 0.017 ARC: -2.5% AbsR: -1.7% | α: 0.200 | ag=0.26 cg=86.93 | 36.2s
+    Ep 14 | Train IR2: 1.0586 AbsR: +152.3% Cash: 0% TO: 27.9% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.19 cg=80.25 | 36.1s
+    Ep 15 | Train IR2: 0.9607 AbsR: +146.5% Cash: 0% TO: 28.0% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.23 cg=102.35 | 36.0s
+    Ep 16 | Train IR2: 0.9122 AbsR: +138.3% Cash: 0% TO: 28.0% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.50 cg=87.27 | 36.2s
+    Ep 17 | Train IR2: 1.2393 AbsR: +164.2% Cash: 0% TO: 27.9% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.10 cg=103.77 | 36.6s
+    Ep 18 | Train IR2: 0.9439 AbsR: +143.7% Cash: 0% TO: 27.8% | Val Sh: 0.011 ARC: -2.7% AbsR: -1.8% | α: 0.200 | ag=0.28 cg=80.81 | 36.3s
+    Ep 19 | Train IR2: 0.9195 AbsR: +143.1% Cash: 0% TO: 27.9% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.27 cg=85.88 | 36.4s
+    Ep 20 | Train IR2: 1.1567 AbsR: +167.5% Cash: 0% TO: 27.6% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.10 cg=88.87 | 36.3s
+    Ep 21 | Train IR2: 0.9480 AbsR: +149.0% Cash: 0% TO: 27.9% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.49 cg=95.76 | 36.3s
+    Ep 22 | Train IR2: 0.8095 AbsR: +137.0% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.17 cg=90.67 | 36.7s
+    Ep 23 | Train IR2: 0.9243 AbsR: +148.1% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.20 cg=77.35 | 37.4s
+    Ep 24 | Train IR2: 0.9721 AbsR: +154.2% Cash: 0% TO: 27.9% | Val Sh: 0.011 ARC: -2.7% AbsR: -1.8% | α: 0.200 | ag=0.47 cg=67.59 | 36.6s
+    Ep 25 | Train IR2: 0.7765 AbsR: +137.6% Cash: 0% TO: 28.0% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.15 cg=84.98 | 36.8s
+    Ep 26 | Train IR2: 1.0245 AbsR: +158.5% Cash: 0% TO: 28.1% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.18 cg=76.15 | 36.6s
+    Ep 27 | Train IR2: 0.7087 AbsR: +128.8% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.48 cg=79.24 | 36.4s
+    Early stop at epoch 27 (best: 11)
+    → ✓ LEARNED | max Train IR2: 1.4065
+    → Med-Train Sharpe: 1.156 (60 months) | Max-Val Sharpe: 6.536 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.2276 AbsR: +79.3% Cash: 0% TO: 58.2% | Val Sh: 0.446 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.66 cg=57.89 | 19.3s
+    Ep  1 | Train IR2: 0.7700 AbsR: +147.2% Cash: 0% TO: 25.7% | Val Sh: 0.455 ARC: +7.0% AbsR: +7.9% | α: 0.200 | ag=1.00 cg=116.59 | 30.2s
+    Ep  2 | Train IR2: 0.6464 AbsR: +149.6% Cash: 0% TO: 23.5% | Val Sh: 0.460 ARC: +7.2% AbsR: +8.1% | α: 0.200 | ag=1.00 cg=140.48 | 30.1s
+    Ep  3 | Train IR2: 0.6204 AbsR: +139.6% Cash: 0% TO: 24.3% | Val Sh: 0.452 ARC: +7.0% AbsR: +7.9% | α: 0.200 | ag=0.77 cg=144.76 | 30.1s
+    Ep  4 | Train IR2: 0.8155 AbsR: +169.1% Cash: 0% TO: 25.2% | Val Sh: 0.444 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.54 cg=147.76 | 30.1s
+    Ep  5 | Train IR2: 0.8269 AbsR: +157.1% Cash: 0% TO: 25.6% | Val Sh: 0.467 ARC: +7.3% AbsR: +8.2% | α: 0.200 | ag=0.55 cg=138.15 | 30.3s
+    Ep  6 | Train IR2: 0.7271 AbsR: +152.6% Cash: 0% TO: 24.7% | Val Sh: 0.454 ARC: +7.0% AbsR: +7.9% | α: 0.200 | ag=0.64 cg=150.21 | 30.3s
+    Ep  7 | Train IR2: 0.8580 AbsR: +165.5% Cash: 0% TO: 25.2% | Val Sh: 0.444 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.50 cg=136.97 | 30.7s
+    Ep  8 | Train IR2: 0.8143 AbsR: +168.3% Cash: 0% TO: 25.3% | Val Sh: 0.436 ARC: +6.6% AbsR: +7.5% | α: 0.200 | ag=1.00 cg=134.39 | 30.6s
+    Ep  9 | Train IR2: 0.7655 AbsR: +155.7% Cash: 0% TO: 25.2% | Val Sh: 0.448 ARC: +6.9% AbsR: +7.8% | α: 0.200 | ag=0.40 cg=164.99 | 30.6s
+    Ep 10 | Train IR2: 0.6386 AbsR: +138.6% Cash: 0% TO: 25.3% | Val Sh: 0.448 ARC: +6.9% AbsR: +7.8% | α: 0.200 | ag=0.42 cg=184.03 | 30.9s
+    Ep 11 | Train IR2: 0.8271 AbsR: +177.1% Cash: 0% TO: 25.3% | Val Sh: 0.447 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.74 cg=139.95 | 31.1s
+    Ep 12 | Train IR2: 0.6049 AbsR: +126.9% Cash: 0% TO: 25.5% | Val Sh: 0.446 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.54 cg=146.05 | 30.7s
+    Ep 13 | Train IR2: 0.6569 AbsR: +145.6% Cash: 0% TO: 25.3% | Val Sh: 0.433 ARC: +6.5% AbsR: +7.4% | α: 0.200 | ag=0.36 cg=158.12 | 30.8s
+    Ep 14 | Train IR2: 0.6149 AbsR: +140.0% Cash: 0% TO: 25.8% | Val Sh: 0.442 ARC: +6.7% AbsR: +7.6% | α: 0.200 | ag=0.34 cg=165.09 | 30.3s
+    Ep 15 | Train IR2: 0.6330 AbsR: +144.4% Cash: 0% TO: 26.2% | Val Sh: 0.442 ARC: +6.7% AbsR: +7.6% | α: 0.200 | ag=0.41 cg=141.83 | 30.7s
+    Ep 16 | Train IR2: 0.6113 AbsR: +136.7% Cash: 0% TO: 26.4% | Val Sh: 0.448 ARC: +6.9% AbsR: +7.8% | α: 0.200 | ag=0.33 cg=134.24 | 30.5s
+    Ep 17 | Train IR2: 1.1690 AbsR: +198.5% Cash: 0% TO: 26.6% | Val Sh: 0.448 ARC: +6.9% AbsR: +7.8% | α: 0.200 | ag=0.27 cg=128.83 | 30.4s
+    Ep 18 | Train IR2: 0.5484 AbsR: +128.7% Cash: 0% TO: 27.0% | Val Sh: 0.446 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.24 cg=123.74 | 30.6s
+    Ep 19 | Train IR2: 0.9892 AbsR: +188.0% Cash: 0% TO: 26.9% | Val Sh: 0.449 ARC: +6.9% AbsR: +7.8% | α: 0.200 | ag=0.30 cg=130.71 | 30.8s
+    Ep 20 | Train IR2: 0.5965 AbsR: +133.3% Cash: 0% TO: 27.3% | Val Sh: 0.443 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.28 cg=117.15 | 30.6s
+    Ep 21 | Train IR2: 0.6551 AbsR: +144.3% Cash: 0% TO: 27.4% | Val Sh: 0.444 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.33 cg=117.74 | 30.6s
+    Ep 22 | Train IR2: 0.8228 AbsR: +162.9% Cash: 0% TO: 27.3% | Val Sh: 0.444 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.36 cg=113.67 | 30.7s
+    Ep 23 | Train IR2: 0.7132 AbsR: +146.2% Cash: 0% TO: 27.9% | Val Sh: 0.444 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.21 cg=112.67 | 30.4s
+    Ep 24 | Train IR2: 0.6057 AbsR: +139.1% Cash: 0% TO: 28.1% | Val Sh: 0.445 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.31 cg=117.78 | 30.8s
+    Ep 25 | Train IR2: 0.6961 AbsR: +150.8% Cash: 0% TO: 27.9% | Val Sh: 0.445 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.26 cg=96.87 | 30.7s
+    Ep 26 | Train IR2: 0.6661 AbsR: +150.7% Cash: 0% TO: 28.0% | Val Sh: 0.445 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.29 cg=98.56 | 30.2s
+    Ep 27 | Train IR2: 0.6281 AbsR: +138.4% Cash: 0% TO: 28.2% | Val Sh: 0.446 ARC: +6.8% AbsR: +7.7% | α: 0.200 | ag=0.45 cg=98.32 | 30.4s
+    Early stop at epoch 27 (best: 5)
+    → ✓ LEARNED | max Train IR2: 1.1690
+    → Med-Train Sharpe: 1.040 (60 months) | Max-Val Sharpe: 7.017 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 1.1924 AbsR: +168.1% Cash: 0% TO: 58.7% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.72 cg=14.48 | 47.4s
+    Ep  1 | Train IR2: 1.5161 AbsR: +188.0% Cash: 0% TO: 27.8% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.21 cg=28.60 | 76.7s
+    Ep  2 | Train IR2: 1.2931 AbsR: +172.3% Cash: 0% TO: 27.6% | Val Sh: 0.011 ARC: -2.7% AbsR: -1.8% | α: 0.200 | ag=0.50 cg=54.01 | 77.0s
+    Ep  3 | Train IR2: 1.1489 AbsR: +166.4% Cash: 0% TO: 27.6% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.19 cg=57.06 | 77.0s
+    Ep  4 | Train IR2: 1.0519 AbsR: +150.7% Cash: 0% TO: 27.9% | Val Sh: 0.012 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.11 cg=68.55 | 76.9s
+    Ep  5 | Train IR2: 0.9149 AbsR: +139.7% Cash: 0% TO: 27.8% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.16 cg=71.55 | 77.0s
+    Ep  6 | Train IR2: 0.8863 AbsR: +145.2% Cash: 0% TO: 27.8% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.19 cg=77.73 | 76.9s
+    Ep  7 | Train IR2: 1.2137 AbsR: +181.1% Cash: 0% TO: 27.6% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.41 cg=86.39 | 77.0s
+    Ep  8 | Train IR2: 0.9687 AbsR: +159.7% Cash: 0% TO: 27.8% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.42 cg=70.91 | 77.0s
+    Ep  9 | Train IR2: 1.5759 AbsR: +181.1% Cash: 0% TO: 27.9% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.27 cg=79.13 | 77.0s
+    Ep 10 | Train IR2: 0.8643 AbsR: +141.7% Cash: 0% TO: 27.9% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.56 cg=84.05 | 76.9s
+    Ep 11 | Train IR2: 1.4390 AbsR: +187.6% Cash: 0% TO: 27.6% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.24 cg=74.66 | 77.0s
+    Ep 12 | Train IR2: 0.9900 AbsR: +152.1% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.08 cg=75.80 | 77.0s
+    Ep 13 | Train IR2: 1.1238 AbsR: +158.9% Cash: 0% TO: 27.8% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.12 cg=70.33 | 77.1s
+    Ep 14 | Train IR2: 1.0871 AbsR: +159.1% Cash: 0% TO: 27.7% | Val Sh: 0.017 ARC: -2.5% AbsR: -1.7% | α: 0.200 | ag=0.40 cg=73.66 | 77.1s
+    Ep 15 | Train IR2: 1.1012 AbsR: +158.9% Cash: 0% TO: 27.9% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.23 cg=77.62 | 77.0s
+    Ep 16 | Train IR2: 1.1226 AbsR: +156.4% Cash: 0% TO: 27.9% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.10 cg=77.31 | 77.1s
+    Ep 17 | Train IR2: 1.1509 AbsR: +156.7% Cash: 0% TO: 27.8% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.19 cg=79.56 | 77.1s
+    Ep 18 | Train IR2: 1.0170 AbsR: +149.6% Cash: 0% TO: 27.8% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.41 cg=69.25 | 77.1s
+    Ep 19 | Train IR2: 0.8587 AbsR: +145.0% Cash: 0% TO: 27.8% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.21 cg=73.91 | 77.1s
+    Ep 20 | Train IR2: 0.9245 AbsR: +150.8% Cash: 0% TO: 28.2% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.12 cg=71.36 | 77.1s
+    Ep 21 | Train IR2: 1.1019 AbsR: +146.1% Cash: 0% TO: 27.9% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.45 cg=73.19 | 77.0s
+    Ep 22 | Train IR2: 0.8801 AbsR: +141.5% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.44 cg=73.08 | 77.0s
+    Ep 23 | Train IR2: 0.8621 AbsR: +137.3% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.12 cg=70.04 | 77.1s
+    Ep 24 | Train IR2: 1.2458 AbsR: +164.3% Cash: 0% TO: 27.9% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.21 cg=73.90 | 77.1s
+    Ep 25 | Train IR2: 0.8029 AbsR: +134.4% Cash: 0% TO: 28.0% | Val Sh: 0.013 ARC: -2.6% AbsR: -1.8% | α: 0.200 | ag=0.59 cg=69.88 | 77.1s
+    Ep 26 | Train IR2: 0.8999 AbsR: +139.2% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.36 cg=63.64 | 77.1s
+    Ep 27 | Train IR2: 1.2057 AbsR: +161.6% Cash: 0% TO: 27.9% | Val Sh: 0.017 ARC: -2.5% AbsR: -1.7% | α: 0.200 | ag=0.19 cg=62.20 | 77.1s
+    Ep 28 | Train IR2: 0.8892 AbsR: +139.2% Cash: 0% TO: 27.9% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.17 cg=66.65 | 77.1s
+    Ep 29 | Train IR2: 1.1136 AbsR: +157.1% Cash: 0% TO: 27.9% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.26 cg=69.99 | 77.1s
+    Ep 30 | Train IR2: 1.0741 AbsR: +164.5% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.48 cg=67.16 | 77.1s
+    Ep 31 | Train IR2: 1.1759 AbsR: +154.8% Cash: 0% TO: 27.8% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.09 cg=67.25 | 77.1s
+    Ep 32 | Train IR2: 1.0226 AbsR: +147.5% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.23 cg=64.14 | 77.2s
+    Ep 33 | Train IR2: 1.0777 AbsR: +152.8% Cash: 0% TO: 28.0% | Val Sh: 0.014 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.08 cg=64.04 | 77.1s
+    Ep 34 | Train IR2: 1.1517 AbsR: +170.9% Cash: 0% TO: 27.9% | Val Sh: 0.015 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.07 cg=63.50 | 77.2s
+    Ep 35 | Train IR2: 0.9363 AbsR: +153.3% Cash: 0% TO: 28.0% | Val Sh: 0.016 ARC: -2.6% AbsR: -1.7% | α: 0.200 | ag=0.39 cg=70.20 | 77.1s
+    Early stop at epoch 35 (best: 27)
+    → ✓ LEARNED | max Train IR2: 1.5759
+    → Med-Train Sharpe: 1.153 (60 months) | Max-Val Sharpe: 6.520 (12 months)
+
+  ★ Selected: 'bmk_nopen_k10' [Tier-2 (both positive, best max-val)]
+    Med-Train: 1.040 | Max-Val: 7.017 | Val Sharpe: 0.4678 | IR2: 0.1467
+    Test: 2016-04-04→2017-03-31 → RL ARC: +48.4% AbsR: +47.1% | QQQ ARC: +21.7%
+  Fold  9/16 | CARRY (Sharpe: 2.340) → RL ARC: +20.2% | QQQ ARC: +20.1%
+  Fold 10/16 | CARRY (Sharpe: 1.097) → RL ARC: -3.8% | QQQ ARC: +16.5%
+
+  Fold 11/16 | RETRAIN (Sharpe -0.047 < 0)
+
+  HP Selection on fold 11:
+    Train: 2013-04-01 → 2018-03-29 (1260d)
+    Val:   2018-04-02 → 2019-04-01 (252d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.6818 AbsR: +113.3% Cash: 0% TO: 59.0% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.16 cg=15.02 | 22.9s
+    Ep  1 | Train IR2: 1.2614 AbsR: +162.7% Cash: 0% TO: 28.4% | Val Sh: 0.469 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.22 cg=33.37 | 36.2s
+    Ep  2 | Train IR2: 1.1613 AbsR: +154.7% Cash: 0% TO: 28.4% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.40 cg=64.05 | 36.1s
+    Ep  3 | Train IR2: 0.9616 AbsR: +135.5% Cash: 0% TO: 28.5% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.31 cg=77.07 | 36.2s
+    Ep  4 | Train IR2: 1.2380 AbsR: +163.0% Cash: 0% TO: 28.6% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=86.89 | 36.2s
+    Ep  5 | Train IR2: 1.1322 AbsR: +156.0% Cash: 0% TO: 28.5% | Val Sh: 0.468 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.25 cg=86.94 | 36.1s
+    Ep  6 | Train IR2: 1.2041 AbsR: +162.1% Cash: 0% TO: 28.6% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.09 cg=80.59 | 36.2s
+    Ep  7 | Train IR2: 1.0147 AbsR: +156.5% Cash: 0% TO: 28.2% | Val Sh: 0.469 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.11 cg=78.19 | 35.9s
+    Ep  8 | Train IR2: 1.2732 AbsR: +157.9% Cash: 0% TO: 28.1% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.13 cg=93.60 | 35.9s
+    Ep  9 | Train IR2: 1.4441 AbsR: +172.1% Cash: 0% TO: 28.0% | Val Sh: 0.471 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.15 cg=103.78 | 35.9s
+    Ep 10 | Train IR2: 1.4678 AbsR: +181.6% Cash: 0% TO: 27.9% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.12 cg=98.28 | 35.9s
+    Ep 11 | Train IR2: 0.8620 AbsR: +144.4% Cash: 0% TO: 28.0% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.16 cg=104.79 | 35.9s
+    Ep 12 | Train IR2: 1.2119 AbsR: +159.0% Cash: 0% TO: 28.0% | Val Sh: 0.473 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.13 cg=90.01 | 36.0s
+    Ep 13 | Train IR2: 1.0427 AbsR: +150.0% Cash: 0% TO: 28.1% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.15 cg=86.90 | 36.0s
+    Ep 14 | Train IR2: 1.0583 AbsR: +141.4% Cash: 0% TO: 28.0% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.36 cg=87.23 | 36.2s
+    Ep 15 | Train IR2: 0.9196 AbsR: +145.2% Cash: 0% TO: 27.8% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.19 cg=92.89 | 36.3s
+    Ep 16 | Train IR2: 0.6013 AbsR: +105.7% Cash: 0% TO: 28.1% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.35 cg=88.24 | 36.7s
+    Ep 17 | Train IR2: 0.9153 AbsR: +139.0% Cash: 0% TO: 28.2% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.19 cg=74.89 | 37.0s
+    Ep 18 | Train IR2: 0.8645 AbsR: +124.6% Cash: 0% TO: 28.0% | Val Sh: 0.473 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.15 cg=87.37 | 36.6s
+    Ep 19 | Train IR2: 1.0863 AbsR: +146.6% Cash: 0% TO: 28.2% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.15 cg=74.47 | 36.1s
+    Ep 20 | Train IR2: 1.1183 AbsR: +146.2% Cash: 0% TO: 28.2% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.13 cg=79.63 | 36.1s
+    Ep 21 | Train IR2: 1.0144 AbsR: +137.3% Cash: 0% TO: 28.0% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.14 cg=76.31 | 36.3s
+    Ep 22 | Train IR2: 0.9227 AbsR: +146.3% Cash: 0% TO: 28.3% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.22 cg=79.04 | 36.1s
+    Ep 23 | Train IR2: 1.6233 AbsR: +185.2% Cash: 0% TO: 28.4% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.11 cg=77.37 | 36.2s
+    Ep 24 | Train IR2: 1.0671 AbsR: +147.6% Cash: 0% TO: 28.3% | Val Sh: 0.469 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.10 cg=75.88 | 36.3s
+    Ep 25 | Train IR2: 1.3511 AbsR: +173.4% Cash: 0% TO: 28.1% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.18 cg=70.85 | 36.1s
+    Ep 26 | Train IR2: 1.0850 AbsR: +153.2% Cash: 0% TO: 28.1% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.10 cg=68.82 | 36.2s
+    Ep 27 | Train IR2: 1.1806 AbsR: +148.2% Cash: 0% TO: 28.3% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.14 cg=69.66 | 36.3s
+    Early stop at epoch 27 (best: 12)
+    → ✓ LEARNED | max Train IR2: 1.6233
+    → Med-Train Sharpe: 1.046 (60 months) | Max-Val Sharpe: 6.147 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 1.1534 AbsR: +169.4% Cash: 0% TO: 57.0% | Val Sh: -0.054 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.10 cg=57.76 | 19.2s
+    Ep  1 | Train IR2: 2.6028 AbsR: +277.2% Cash: 0% TO: 27.9% | Val Sh: -0.057 ARC: -4.0% AbsR: -3.2% | α: 0.200 | ag=0.38 cg=104.11 | 30.4s
+    Ep  2 | Train IR2: 2.8225 AbsR: +291.5% Cash: 0% TO: 27.5% | Val Sh: -0.054 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.23 cg=99.06 | 30.2s
+    Ep  3 | Train IR2: 1.8716 AbsR: +233.9% Cash: 0% TO: 27.5% | Val Sh: -0.055 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.35 cg=102.38 | 30.2s
+    Ep  4 | Train IR2: 1.7828 AbsR: +213.7% Cash: 0% TO: 27.6% | Val Sh: -0.049 ARC: -3.9% AbsR: -3.0% | α: 0.200 | ag=0.31 cg=108.53 | 30.2s
+    Ep  5 | Train IR2: 1.9202 AbsR: +235.0% Cash: 0% TO: 27.0% | Val Sh: -0.059 ARC: -4.1% AbsR: -3.2% | α: 0.200 | ag=0.59 cg=115.51 | 30.1s
+    Ep  6 | Train IR2: 2.1722 AbsR: +234.1% Cash: 0% TO: 27.1% | Val Sh: -0.052 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.35 cg=110.59 | 30.1s
+    Ep  7 | Train IR2: 2.7533 AbsR: +286.5% Cash: 0% TO: 26.8% | Val Sh: -0.051 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.32 cg=120.94 | 30.3s
+    Ep  8 | Train IR2: 2.2485 AbsR: +251.1% Cash: 0% TO: 26.5% | Val Sh: -0.053 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.44 cg=109.79 | 30.2s
+    Ep  9 | Train IR2: 2.0908 AbsR: +233.3% Cash: 0% TO: 26.2% | Val Sh: -0.046 ARC: -3.8% AbsR: -2.9% | α: 0.200 | ag=0.26 cg=143.17 | 30.1s
+    Ep 10 | Train IR2: 1.7491 AbsR: +227.9% Cash: 0% TO: 25.9% | Val Sh: -0.050 ARC: -3.9% AbsR: -3.0% | α: 0.200 | ag=0.45 cg=131.69 | 30.3s
+    Ep 11 | Train IR2: 1.8408 AbsR: +220.1% Cash: 0% TO: 26.5% | Val Sh: -0.046 ARC: -3.8% AbsR: -3.0% | α: 0.200 | ag=0.47 cg=113.32 | 30.4s
+    Ep 12 | Train IR2: 2.2628 AbsR: +266.1% Cash: 0% TO: 26.2% | Val Sh: -0.054 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.33 cg=130.43 | 30.5s
+    Ep 13 | Train IR2: 1.9830 AbsR: +235.4% Cash: 0% TO: 26.4% | Val Sh: -0.053 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.31 cg=122.71 | 30.3s
+    Ep 14 | Train IR2: 1.7650 AbsR: +210.3% Cash: 0% TO: 26.2% | Val Sh: -0.047 ARC: -3.8% AbsR: -3.0% | α: 0.200 | ag=0.23 cg=116.88 | 30.2s
+    Ep 15 | Train IR2: 2.1673 AbsR: +253.5% Cash: 0% TO: 26.5% | Val Sh: -0.045 ARC: -3.8% AbsR: -2.9% | α: 0.200 | ag=0.42 cg=110.92 | 30.2s
+    Ep 16 | Train IR2: 2.2210 AbsR: +252.2% Cash: 0% TO: 26.7% | Val Sh: -0.056 ARC: -4.0% AbsR: -3.2% | α: 0.200 | ag=0.53 cg=106.45 | 30.4s
+    Ep 17 | Train IR2: 2.2042 AbsR: +266.3% Cash: 0% TO: 26.6% | Val Sh: -0.058 ARC: -4.0% AbsR: -3.2% | α: 0.200 | ag=0.32 cg=120.91 | 30.2s
+    Ep 18 | Train IR2: 1.7576 AbsR: +215.3% Cash: 0% TO: 27.0% | Val Sh: -0.054 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.22 cg=118.78 | 30.1s
+    Ep 19 | Train IR2: 1.9100 AbsR: +236.6% Cash: 0% TO: 27.6% | Val Sh: -0.055 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.20 cg=102.81 | 30.2s
+    Ep 20 | Train IR2: 2.0751 AbsR: +245.4% Cash: 0% TO: 27.3% | Val Sh: -0.050 ARC: -3.9% AbsR: -3.0% | α: 0.200 | ag=0.41 cg=94.32 | 30.0s
+    Ep 21 | Train IR2: 2.3895 AbsR: +250.7% Cash: 0% TO: 27.3% | Val Sh: -0.043 ARC: -3.8% AbsR: -2.9% | α: 0.200 | ag=0.22 cg=82.97 | 30.3s
+    Ep 22 | Train IR2: 1.7710 AbsR: +225.1% Cash: 0% TO: 27.6% | Val Sh: -0.048 ARC: -3.9% AbsR: -3.0% | α: 0.200 | ag=0.28 cg=79.29 | 30.7s
+    Ep 23 | Train IR2: 2.0861 AbsR: +238.5% Cash: 0% TO: 27.6% | Val Sh: -0.051 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.41 cg=78.72 | 30.3s
+    Ep 24 | Train IR2: 2.1742 AbsR: +263.3% Cash: 0% TO: 27.9% | Val Sh: -0.054 ARC: -4.0% AbsR: -3.1% | α: 0.200 | ag=0.16 cg=82.22 | 30.9s
+    Ep 25 | Train IR2: 2.1445 AbsR: +243.6% Cash: 0% TO: 27.9% | Val Sh: -0.051 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.29 cg=76.71 | 30.6s
+    Ep 26 | Train IR2: 1.8488 AbsR: +220.8% Cash: 0% TO: 27.8% | Val Sh: -0.048 ARC: -3.9% AbsR: -3.0% | α: 0.200 | ag=0.51 cg=80.77 | 30.4s
+    Ep 27 | Train IR2: 1.9441 AbsR: +219.7% Cash: 0% TO: 28.0% | Val Sh: -0.053 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.28 cg=80.43 | 30.4s
+    Ep 28 | Train IR2: 2.1909 AbsR: +251.8% Cash: 0% TO: 28.1% | Val Sh: -0.057 ARC: -4.0% AbsR: -3.2% | α: 0.200 | ag=0.20 cg=82.42 | 30.5s
+    Ep 29 | Train IR2: 2.4450 AbsR: +270.9% Cash: 0% TO: 28.1% | Val Sh: -0.051 ARC: -3.9% AbsR: -3.1% | α: 0.200 | ag=0.18 cg=79.52 | 30.7s
+    Early stop at epoch 29 (best: 21)
+    → ✓ LEARNED | max Train IR2: 2.8225
+    → Med-Train Sharpe: 1.175 (60 months) | Max-Val Sharpe: 6.126 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.8163 AbsR: +121.7% Cash: 0% TO: 58.8% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.07 cg=12.71 | 47.4s
+    Ep  1 | Train IR2: 1.1914 AbsR: +167.3% Cash: 0% TO: 28.7% | Val Sh: 0.469 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.39 cg=25.18 | 76.9s
+    Ep  2 | Train IR2: 0.8338 AbsR: +129.1% Cash: 0% TO: 28.7% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.21 cg=51.68 | 76.9s
+    Ep  3 | Train IR2: 0.8433 AbsR: +137.4% Cash: 0% TO: 28.8% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.10 cg=57.41 | 77.0s
+    Ep  4 | Train IR2: 1.0908 AbsR: +155.8% Cash: 0% TO: 28.6% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=61.66 | 76.8s
+    Ep  5 | Train IR2: 0.9615 AbsR: +146.6% Cash: 0% TO: 28.4% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.18 cg=73.03 | 77.0s
+    Ep  6 | Train IR2: 1.0925 AbsR: +144.8% Cash: 0% TO: 28.6% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.29 cg=76.16 | 76.9s
+    Ep  7 | Train IR2: 0.8629 AbsR: +135.4% Cash: 0% TO: 28.5% | Val Sh: 0.469 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.23 cg=80.92 | 77.0s
+    Ep  8 | Train IR2: 1.1003 AbsR: +156.8% Cash: 0% TO: 28.5% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.10 cg=86.89 | 77.0s
+    Ep  9 | Train IR2: 1.4395 AbsR: +161.6% Cash: 0% TO: 28.3% | Val Sh: 0.473 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.05 cg=95.05 | 76.9s
+    Ep 10 | Train IR2: 1.2370 AbsR: +162.3% Cash: 0% TO: 28.0% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.07 cg=88.74 | 77.0s
+    Ep 11 | Train IR2: 1.0399 AbsR: +148.2% Cash: 0% TO: 28.3% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=83.78 | 77.0s
+    Ep 12 | Train IR2: 1.2242 AbsR: +163.7% Cash: 0% TO: 28.2% | Val Sh: 0.472 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=79.98 | 77.0s
+    Ep 13 | Train IR2: 1.0892 AbsR: +156.5% Cash: 0% TO: 28.3% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=84.54 | 77.0s
+    Ep 14 | Train IR2: 1.1960 AbsR: +143.2% Cash: 0% TO: 28.1% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.14 cg=84.19 | 76.9s
+    Ep 15 | Train IR2: 1.2979 AbsR: +166.8% Cash: 0% TO: 27.9% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.11 cg=72.10 | 77.1s
+    Ep 16 | Train IR2: 1.2652 AbsR: +154.3% Cash: 0% TO: 28.0% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.23 cg=68.04 | 77.2s
+    Ep 17 | Train IR2: 0.9468 AbsR: +137.3% Cash: 0% TO: 27.9% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.20 cg=66.84 | 77.1s
+    Ep 18 | Train IR2: 0.8170 AbsR: +128.2% Cash: 0% TO: 28.1% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.25 cg=70.11 | 77.1s
+    Ep 19 | Train IR2: 1.3204 AbsR: +162.1% Cash: 0% TO: 28.0% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.10 cg=72.93 | 77.1s
+    Ep 20 | Train IR2: 0.8043 AbsR: +135.1% Cash: 0% TO: 28.3% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.38 cg=73.40 | 77.1s
+    Ep 21 | Train IR2: 0.8965 AbsR: +142.7% Cash: 0% TO: 28.1% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.17 cg=67.11 | 77.1s
+    Ep 22 | Train IR2: 1.0488 AbsR: +148.8% Cash: 0% TO: 28.3% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.12 cg=62.89 | 77.1s
+    Ep 23 | Train IR2: 1.0400 AbsR: +144.8% Cash: 0% TO: 28.1% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.14 cg=63.92 | 77.1s
+    Ep 24 | Train IR2: 0.9993 AbsR: +149.8% Cash: 0% TO: 28.1% | Val Sh: 0.470 ARC: +5.7% AbsR: +7.4% | α: 0.200 | ag=0.49 cg=65.09 | 77.1s
+    Ep 25 | Train IR2: 1.5636 AbsR: +180.6% Cash: 0% TO: 28.0% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.09 cg=64.11 | 77.1s
+    Ep 26 | Train IR2: 1.3047 AbsR: +167.3% Cash: 0% TO: 27.9% | Val Sh: 0.471 ARC: +5.7% AbsR: +7.5% | α: 0.200 | ag=0.27 cg=64.93 | 77.1s
+    Ep 27 | Train IR2: 1.1677 AbsR: +167.4% Cash: 0% TO: 28.1% | Val Sh: 0.472 ARC: +5.8% AbsR: +7.5% | α: 0.200 | ag=0.08 cg=64.39 | 77.1s
+    Early stop at epoch 27 (best: 9)
+    → ✓ LEARNED | max Train IR2: 1.5636
+    → Med-Train Sharpe: 1.043 (60 months) | Max-Val Sharpe: 6.157 (12 months)
+
+  ★ Selected: 'bmk_nopen_med_k20' [Tier-2 (both positive, best max-val)]
+    Med-Train: 1.043 | Max-Val: 6.157 | Val Sharpe: 0.4724 | IR2: 0.0673
+    Test: 2019-04-02→2020-04-01 → RL ARC: +0.8% AbsR: -2.8% | QQQ ARC: +5.1%
+
+  Fold 12/16 | RETRAIN (Sharpe 0.077 < 0.339)
+
+  HP Selection on fold 12:
+    Train: 2014-03-31 → 2019-03-29 (1259d)
+    Val:   2019-04-02 → 2020-04-01 (253d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.2292 AbsR: +66.8% Cash: 0% TO: 58.7% | Val Sh: 0.080 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.28 cg=19.61 | 22.7s
+    Ep  1 | Train IR2: 0.4345 AbsR: +98.1% Cash: 0% TO: 28.7% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.51 cg=34.98 | 36.1s
+    Ep  2 | Train IR2: 0.2527 AbsR: +72.4% Cash: 0% TO: 28.7% | Val Sh: 0.080 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.29 cg=63.62 | 36.4s
+    Ep  3 | Train IR2: 0.3176 AbsR: +81.9% Cash: 0% TO: 28.4% | Val Sh: 0.080 ARC: +0.9% AbsR: -2.7% | α: 0.200 | ag=0.62 cg=70.13 | 36.1s
+    Ep  4 | Train IR2: 0.3838 AbsR: +90.4% Cash: 0% TO: 28.6% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.18 cg=80.08 | 36.3s
+    Ep  5 | Train IR2: 0.4406 AbsR: +98.7% Cash: 0% TO: 28.5% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.23 cg=88.72 | 36.8s
+    Ep  6 | Train IR2: 0.3068 AbsR: +78.5% Cash: 0% TO: 28.4% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.15 cg=83.18 | 36.1s
+    Ep  7 | Train IR2: 0.3369 AbsR: +84.2% Cash: 0% TO: 28.4% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.60 cg=96.88 | 36.3s
+    Ep  8 | Train IR2: 0.2455 AbsR: +73.6% Cash: 0% TO: 28.2% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.34 cg=96.25 | 36.1s
+    Ep  9 | Train IR2: 0.3642 AbsR: +87.5% Cash: 0% TO: 28.1% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.44 cg=92.02 | 36.2s
+    Ep 10 | Train IR2: 0.4430 AbsR: +96.5% Cash: 0% TO: 28.3% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.23 cg=96.89 | 36.1s
+    Ep 11 | Train IR2: 0.4147 AbsR: +96.6% Cash: 0% TO: 28.3% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.23 cg=92.42 | 36.1s
+    Ep 12 | Train IR2: 0.2805 AbsR: +74.1% Cash: 0% TO: 28.3% | Val Sh: 0.080 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.27 cg=89.90 | 36.1s
+    Ep 13 | Train IR2: 0.2117 AbsR: +63.8% Cash: 0% TO: 28.2% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.20 cg=91.33 | 36.1s
+    Ep 14 | Train IR2: 0.2692 AbsR: +73.7% Cash: 0% TO: 28.4% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.26 cg=90.75 | 36.2s
+    Ep 15 | Train IR2: 0.3904 AbsR: +91.8% Cash: 0% TO: 28.3% | Val Sh: 0.080 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.14 cg=90.18 | 36.1s
+    Ep 16 | Train IR2: 0.3102 AbsR: +78.8% Cash: 0% TO: 28.5% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.18 cg=87.83 | 36.2s
+    Ep 17 | Train IR2: 0.4136 AbsR: +92.7% Cash: 0% TO: 28.5% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.47 cg=83.96 | 36.1s
+    Ep 18 | Train IR2: 0.4661 AbsR: +103.1% Cash: 0% TO: 28.3% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.09 cg=80.64 | 36.3s
+    Ep 19 | Train IR2: 0.3260 AbsR: +82.7% Cash: 0% TO: 28.3% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.07 cg=72.23 | 36.2s
+    Ep 20 | Train IR2: 0.3642 AbsR: +90.0% Cash: 0% TO: 28.7% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.21 cg=85.84 | 36.1s
+    Ep 21 | Train IR2: 0.3511 AbsR: +83.7% Cash: 0% TO: 28.6% | Val Sh: 0.080 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.06 cg=82.54 | 36.1s
+    Ep 22 | Train IR2: 0.4066 AbsR: +92.7% Cash: 0% TO: 28.7% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.09 cg=88.53 | 36.3s
+    Ep 23 | Train IR2: 0.3786 AbsR: +91.1% Cash: 0% TO: 28.5% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.22 cg=81.09 | 36.2s
+    Ep 24 | Train IR2: 0.2604 AbsR: +74.1% Cash: 0% TO: 28.7% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.22 cg=82.59 | 36.2s
+    Ep 25 | Train IR2: 0.3619 AbsR: +84.7% Cash: 0% TO: 28.8% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.15 cg=78.49 | 36.3s
+    Ep 26 | Train IR2: 0.3764 AbsR: +90.8% Cash: 0% TO: 28.6% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.15 cg=79.88 | 36.1s
+    Ep 27 | Train IR2: 0.3152 AbsR: +81.5% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.37 cg=85.29 | 36.0s
+    Early stop at epoch 27 (best: 3)
+    → ✓ LEARNED | max Train IR2: 0.4661
+    → Med-Train Sharpe: 1.038 (60 months) | Max-Val Sharpe: 7.413 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.4631 AbsR: +116.1% Cash: 0% TO: 58.3% | Val Sh: 0.199 ARC: +4.3% AbsR: +0.9% | α: 0.200 | ag=0.22 cg=65.83 | 19.0s
+    Ep  1 | Train IR2: 0.4439 AbsR: +111.2% Cash: 0% TO: 30.8% | Val Sh: 0.193 ARC: +4.1% AbsR: +0.7% | α: 0.200 | ag=0.28 cg=109.13 | 30.3s
+    Ep  2 | Train IR2: 0.6449 AbsR: +142.1% Cash: 0% TO: 30.1% | Val Sh: 0.196 ARC: +4.3% AbsR: +0.8% | α: 0.200 | ag=1.00 cg=134.31 | 30.4s
+    Ep  3 | Train IR2: 0.3578 AbsR: +104.2% Cash: 0% TO: 28.9% | Val Sh: 0.193 ARC: +4.1% AbsR: +0.7% | α: 0.200 | ag=0.73 cg=123.84 | 30.1s
+    Ep  4 | Train IR2: 0.4104 AbsR: +108.4% Cash: 0% TO: 28.8% | Val Sh: 0.194 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.91 cg=125.29 | 30.2s
+    Ep  5 | Train IR2: 0.4152 AbsR: +109.8% Cash: 0% TO: 28.6% | Val Sh: 0.193 ARC: +4.1% AbsR: +0.7% | α: 0.200 | ag=0.42 cg=131.39 | 30.3s
+    Ep  6 | Train IR2: 0.3853 AbsR: +104.6% Cash: 0% TO: 27.9% | Val Sh: 0.195 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=1.00 cg=136.26 | 30.0s
+    Ep  7 | Train IR2: 0.6197 AbsR: +140.2% Cash: 0% TO: 28.2% | Val Sh: 0.195 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.26 cg=137.78 | 30.9s
+    Ep  8 | Train IR2: 0.3036 AbsR: +90.4% Cash: 0% TO: 27.8% | Val Sh: 0.196 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.96 cg=139.24 | 30.4s
+    Ep  9 | Train IR2: 0.3436 AbsR: +97.6% Cash: 0% TO: 27.4% | Val Sh: 0.195 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.47 cg=104.56 | 30.8s
+    Ep 10 | Train IR2: 0.2654 AbsR: +84.0% Cash: 0% TO: 27.3% | Val Sh: 0.195 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.47 cg=103.63 | 30.6s
+    Ep 11 | Train IR2: 0.5219 AbsR: +126.5% Cash: 0% TO: 27.7% | Val Sh: 0.199 ARC: +4.3% AbsR: +0.9% | α: 0.200 | ag=0.35 cg=111.99 | 30.7s
+    Ep 12 | Train IR2: 0.3749 AbsR: +106.0% Cash: 0% TO: 28.0% | Val Sh: 0.194 ARC: +4.2% AbsR: +0.7% | α: 0.200 | ag=0.33 cg=104.79 | 30.7s
+    Ep 13 | Train IR2: 0.3517 AbsR: +100.9% Cash: 0% TO: 27.9% | Val Sh: 0.193 ARC: +4.1% AbsR: +0.7% | α: 0.200 | ag=0.45 cg=100.05 | 30.5s
+    Ep 14 | Train IR2: 0.4674 AbsR: +115.4% Cash: 0% TO: 28.6% | Val Sh: 0.199 ARC: +4.3% AbsR: +0.9% | α: 0.200 | ag=0.29 cg=89.93 | 30.2s
+    Ep 15 | Train IR2: 0.5438 AbsR: +126.1% Cash: 0% TO: 28.3% | Val Sh: 0.193 ARC: +4.2% AbsR: +0.7% | α: 0.200 | ag=0.63 cg=84.98 | 30.4s
+    Ep 16 | Train IR2: 0.5206 AbsR: +127.2% Cash: 0% TO: 28.5% | Val Sh: 0.202 ARC: +4.5% AbsR: +1.0% | α: 0.200 | ag=0.29 cg=91.15 | 30.7s
+    Ep 17 | Train IR2: 0.4665 AbsR: +122.6% Cash: 0% TO: 29.1% | Val Sh: 0.194 ARC: +4.2% AbsR: +0.8% | α: 0.200 | ag=0.60 cg=85.10 | 30.6s
+    Ep 18 | Train IR2: 0.4580 AbsR: +113.8% Cash: 0% TO: 29.1% | Val Sh: 0.204 ARC: +4.5% AbsR: +1.1% | α: 0.200 | ag=0.42 cg=88.74 | 31.0s
+    Ep 19 | Train IR2: 0.3755 AbsR: +107.4% Cash: 0% TO: 29.2% | Val Sh: 0.202 ARC: +4.5% AbsR: +1.0% | α: 0.200 | ag=0.21 cg=81.84 | 30.8s
+    Ep 20 | Train IR2: 0.5691 AbsR: +130.2% Cash: 0% TO: 29.2% | Val Sh: 0.199 ARC: +4.3% AbsR: +0.9% | α: 0.200 | ag=0.30 cg=81.35 | 30.4s
+    Ep 21 | Train IR2: 0.4055 AbsR: +109.2% Cash: 0% TO: 29.3% | Val Sh: 0.200 ARC: +4.4% AbsR: +0.9% | α: 0.200 | ag=0.23 cg=76.19 | 30.3s
+    Ep 22 | Train IR2: 0.3857 AbsR: +110.7% Cash: 0% TO: 29.3% | Val Sh: 0.197 ARC: +4.3% AbsR: +0.8% | α: 0.200 | ag=0.36 cg=78.03 | 30.4s
+    Ep 23 | Train IR2: 0.4488 AbsR: +114.7% Cash: 0% TO: 29.8% | Val Sh: 0.202 ARC: +4.4% AbsR: +1.0% | α: 0.200 | ag=0.22 cg=75.22 | 30.5s
+    Ep 24 | Train IR2: 0.5054 AbsR: +130.4% Cash: 0% TO: 29.1% | Val Sh: 0.196 ARC: +4.3% AbsR: +0.8% | α: 0.200 | ag=0.32 cg=76.78 | 30.5s
+    Ep 25 | Train IR2: 0.4862 AbsR: +121.7% Cash: 0% TO: 29.4% | Val Sh: 0.193 ARC: +4.1% AbsR: +0.7% | α: 0.200 | ag=0.47 cg=72.52 | 30.4s
+    Ep 26 | Train IR2: 0.3399 AbsR: +94.8% Cash: 0% TO: 29.2% | Val Sh: 0.197 ARC: +4.3% AbsR: +0.9% | α: 0.200 | ag=0.42 cg=78.94 | 30.8s
+    Ep 27 | Train IR2: 0.5781 AbsR: +131.8% Cash: 0% TO: 29.1% | Val Sh: 0.196 ARC: +4.3% AbsR: +0.8% | α: 0.200 | ag=0.69 cg=75.96 | 30.6s
+    Early stop at epoch 27 (best: 18)
+    → ✓ LEARNED | max Train IR2: 0.6449
+    → Med-Train Sharpe: 1.011 (60 months) | Max-Val Sharpe: 7.862 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.2342 AbsR: +69.4% Cash: 0% TO: 58.7% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.29 cg=17.01 | 47.4s
+    Ep  1 | Train IR2: 0.3267 AbsR: +85.2% Cash: 0% TO: 28.9% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.50 cg=30.58 | 76.8s
+    Ep  2 | Train IR2: 0.2469 AbsR: +71.6% Cash: 0% TO: 29.0% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.14 cg=45.11 | 76.9s
+    Ep  3 | Train IR2: 0.4314 AbsR: +96.8% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.09 cg=48.58 | 76.8s
+    Ep  4 | Train IR2: 0.3091 AbsR: +81.2% Cash: 0% TO: 28.8% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.24 cg=52.16 | 76.9s
+    Ep  5 | Train IR2: 0.3003 AbsR: +79.8% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.87 cg=63.43 | 76.9s
+    Ep  6 | Train IR2: 0.2922 AbsR: +78.4% Cash: 0% TO: 28.8% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.11 cg=74.63 | 76.9s
+    Ep  7 | Train IR2: 0.4041 AbsR: +93.0% Cash: 0% TO: 28.8% | Val Sh: 0.076 ARC: +0.7% AbsR: -2.8% | α: 0.200 | ag=0.55 cg=77.95 | 77.1s
+    Ep  8 | Train IR2: 0.3836 AbsR: +89.9% Cash: 0% TO: 28.5% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.22 cg=75.16 | 77.1s
+    Ep  9 | Train IR2: 0.2952 AbsR: +79.4% Cash: 0% TO: 28.5% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.12 cg=76.03 | 77.1s
+    Ep 10 | Train IR2: 0.3133 AbsR: +78.6% Cash: 0% TO: 28.4% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.31 cg=68.99 | 77.1s
+    Ep 11 | Train IR2: 0.4169 AbsR: +98.1% Cash: 0% TO: 28.7% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.40 cg=69.53 | 77.1s
+    Ep 12 | Train IR2: 0.2593 AbsR: +70.9% Cash: 0% TO: 28.4% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.23 cg=68.39 | 77.2s
+    Ep 13 | Train IR2: 0.3322 AbsR: +86.0% Cash: 0% TO: 28.8% | Val Sh: 0.077 ARC: +0.7% AbsR: -2.8% | α: 0.200 | ag=0.21 cg=67.02 | 77.1s
+    Ep 14 | Train IR2: 0.3722 AbsR: +88.4% Cash: 0% TO: 28.4% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.67 cg=67.38 | 77.2s
+    Ep 15 | Train IR2: 0.3288 AbsR: +82.7% Cash: 0% TO: 28.5% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.27 cg=62.94 | 77.1s
+    Ep 16 | Train IR2: 0.3397 AbsR: +83.1% Cash: 0% TO: 28.7% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.11 cg=68.07 | 77.1s
+    Ep 17 | Train IR2: 0.3567 AbsR: +85.5% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.14 cg=65.61 | 77.1s
+    Ep 18 | Train IR2: 0.3860 AbsR: +92.9% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.09 cg=67.85 | 77.2s
+    Ep 19 | Train IR2: 0.2732 AbsR: +76.8% Cash: 0% TO: 28.9% | Val Sh: 0.077 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.26 cg=62.59 | 77.1s
+    Ep 20 | Train IR2: 0.2925 AbsR: +80.0% Cash: 0% TO: 28.6% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.07 cg=62.19 | 77.2s
+    Ep 21 | Train IR2: 0.2593 AbsR: +72.5% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.25 cg=62.86 | 77.1s
+    Ep 22 | Train IR2: 0.3024 AbsR: +82.0% Cash: 0% TO: 28.9% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.24 cg=61.31 | 77.1s
+    Ep 23 | Train IR2: 0.4092 AbsR: +96.5% Cash: 0% TO: 28.8% | Val Sh: 0.079 ARC: +0.8% AbsR: -2.7% | α: 0.200 | ag=0.17 cg=57.20 | 77.1s
+    Ep 24 | Train IR2: 0.3972 AbsR: +88.3% Cash: 0% TO: 28.6% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.31 cg=56.04 | 77.1s
+    Ep 25 | Train IR2: 0.4690 AbsR: +102.7% Cash: 0% TO: 28.9% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.05 cg=57.14 | 77.2s
+    Ep 26 | Train IR2: 0.2864 AbsR: +74.8% Cash: 0% TO: 29.0% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.06 cg=57.34 | 77.2s
+    Ep 27 | Train IR2: 0.2844 AbsR: +75.5% Cash: 0% TO: 28.8% | Val Sh: 0.078 ARC: +0.8% AbsR: -2.8% | α: 0.200 | ag=0.49 cg=55.11 | 77.1s
+    Early stop at epoch 27 (best: 4)
+    → ✓ LEARNED | max Train IR2: 0.4690
+    → Med-Train Sharpe: 1.040 (60 months) | Max-Val Sharpe: 7.398 (12 months)
+
+  ★ Selected: 'bmk_nopen_k10' [Tier-2 (both positive, best max-val)]
+    Med-Train: 1.011 | Max-Val: 7.862 | Val Sharpe: 0.2011 | IR2: 0.0191
+    Test: 2020-04-02→2021-04-01 → RL ARC: +116.2% AbsR: +124.0% | QQQ ARC: +72.4%
+  Fold 13/16 | CARRY (Sharpe: 2.318) → RL ARC: -10.5% | QQQ ARC: +10.0%
+
+  Fold 14/16 | RETRAIN (Sharpe -0.282 < 0)
+
+  HP Selection on fold 14:
+    Train: 2016-03-31 → 2021-03-30 (1259d)
+    Val:   2021-04-05 → 2022-04-01 (253d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.5713 AbsR: +159.2% Cash: 0% TO: 59.3% | Val Sh: 0.065 ARC: -0.8% AbsR: -1.1% | α: 0.200 | ag=0.15 cg=14.35 | 22.9s
+    Ep  1 | Train IR2: 0.9159 AbsR: +211.2% Cash: 0% TO: 28.8% | Val Sh: 0.071 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.36 cg=38.99 | 36.3s
+    Ep  2 | Train IR2: 0.8091 AbsR: +199.4% Cash: 0% TO: 28.8% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.39 cg=60.05 | 36.4s
+    Ep  3 | Train IR2: 0.7644 AbsR: +197.8% Cash: 0% TO: 28.5% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.60 cg=83.29 | 36.3s
+    Ep  4 | Train IR2: 0.6417 AbsR: +173.4% Cash: 0% TO: 28.6% | Val Sh: 0.069 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.23 cg=98.46 | 36.2s
+    Ep  5 | Train IR2: 0.7579 AbsR: +187.7% Cash: 0% TO: 28.5% | Val Sh: 0.067 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.26 cg=111.05 | 36.3s
+    Ep  6 | Train IR2: 0.8217 AbsR: +201.2% Cash: 0% TO: 28.3% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.53 cg=139.99 | 36.3s
+    Ep  7 | Train IR2: 0.6827 AbsR: +182.7% Cash: 0% TO: 28.5% | Val Sh: 0.063 ARC: -0.8% AbsR: -1.1% | α: 0.200 | ag=0.15 cg=128.64 | 36.2s
+    Ep  8 | Train IR2: 0.7723 AbsR: +193.8% Cash: 0% TO: 28.6% | Val Sh: 0.066 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.12 cg=118.15 | 36.0s
+    Ep  9 | Train IR2: 0.7852 AbsR: +200.3% Cash: 0% TO: 28.5% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.23 cg=127.81 | 36.1s
+    Ep 10 | Train IR2: 0.7666 AbsR: +197.5% Cash: 0% TO: 28.5% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=125.24 | 36.1s
+    Ep 11 | Train IR2: 0.9141 AbsR: +213.6% Cash: 0% TO: 28.6% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.12 cg=115.62 | 36.3s
+    Ep 12 | Train IR2: 0.7591 AbsR: +191.4% Cash: 0% TO: 28.2% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=111.73 | 36.4s
+    Ep 13 | Train IR2: 0.8176 AbsR: +197.9% Cash: 0% TO: 28.3% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.15 cg=109.49 | 36.2s
+    Ep 14 | Train IR2: 0.7921 AbsR: +199.8% Cash: 0% TO: 28.6% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.09 cg=105.91 | 36.1s
+    Ep 15 | Train IR2: 0.6032 AbsR: +167.1% Cash: 0% TO: 28.4% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.17 cg=109.03 | 36.1s
+    Ep 16 | Train IR2: 0.8088 AbsR: +202.2% Cash: 0% TO: 28.3% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.18 cg=117.48 | 36.4s
+    Ep 17 | Train IR2: 0.8626 AbsR: +215.0% Cash: 0% TO: 28.4% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.25 cg=109.77 | 36.4s
+    Ep 18 | Train IR2: 0.8930 AbsR: +208.2% Cash: 0% TO: 28.4% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.13 cg=95.32 | 36.4s
+    Ep 19 | Train IR2: 0.8123 AbsR: +199.6% Cash: 0% TO: 28.4% | Val Sh: 0.072 ARC: -0.6% AbsR: -0.9% | α: 0.200 | ag=0.14 cg=95.18 | 36.4s
+    Ep 20 | Train IR2: 0.8446 AbsR: +209.3% Cash: 0% TO: 28.4% | Val Sh: 0.069 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=92.45 | 36.4s
+    Ep 21 | Train IR2: 0.7100 AbsR: +185.4% Cash: 0% TO: 28.4% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.15 cg=91.21 | 36.5s
+    Ep 22 | Train IR2: 0.8745 AbsR: +217.8% Cash: 0% TO: 28.6% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.20 cg=108.11 | 36.7s
+    Ep 23 | Train IR2: 0.7064 AbsR: +184.7% Cash: 0% TO: 28.5% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=89.28 | 36.6s
+    Ep 24 | Train IR2: 0.9247 AbsR: +227.1% Cash: 0% TO: 28.4% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.16 cg=92.99 | 36.7s
+    Ep 25 | Train IR2: 0.7902 AbsR: +194.9% Cash: 0% TO: 28.6% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.13 cg=82.47 | 36.9s
+    Ep 26 | Train IR2: 0.8702 AbsR: +205.1% Cash: 0% TO: 28.5% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.18 cg=76.21 | 36.5s
+    Ep 27 | Train IR2: 0.8228 AbsR: +207.2% Cash: 0% TO: 28.4% | Val Sh: 0.071 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.11 cg=86.95 | 36.5s
+    Early stop at epoch 27 (best: 19)
+    → ✓ LEARNED | max Train IR2: 0.9247
+    → Med-Train Sharpe: 1.995 (60 months) | Max-Val Sharpe: 6.669 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.7924 AbsR: +233.6% Cash: 0% TO: 59.2% | Val Sh: -0.299 ARC: -10.9% AbsR: -11.1% | α: 0.200 | ag=0.57 cg=70.79 | 19.1s
+    Ep  1 | Train IR2: 1.1170 AbsR: +283.2% Cash: 0% TO: 30.5% | Val Sh: -0.282 ARC: -10.4% AbsR: -10.7% | α: 0.200 | ag=0.35 cg=149.16 | 30.2s
+    Ep  2 | Train IR2: 0.8451 AbsR: +250.6% Cash: 0% TO: 31.1% | Val Sh: -0.299 ARC: -10.9% AbsR: -11.2% | α: 0.200 | ag=0.29 cg=181.85 | 30.2s
+    Ep  3 | Train IR2: 1.0928 AbsR: +304.0% Cash: 0% TO: 31.4% | Val Sh: -0.290 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.48 cg=189.07 | 30.2s
+    Ep  4 | Train IR2: 1.3127 AbsR: +335.2% Cash: 0% TO: 31.3% | Val Sh: -0.315 ARC: -11.2% AbsR: -11.5% | α: 0.200 | ag=0.34 cg=163.85 | 30.4s
+    Ep  5 | Train IR2: 0.7190 AbsR: +227.7% Cash: 0% TO: 30.8% | Val Sh: -0.299 ARC: -10.8% AbsR: -11.1% | α: 0.200 | ag=0.41 cg=164.02 | 30.2s
+    Ep  6 | Train IR2: 0.8040 AbsR: +223.2% Cash: 0% TO: 29.7% | Val Sh: -0.296 ARC: -10.8% AbsR: -11.1% | α: 0.200 | ag=0.34 cg=161.98 | 30.3s
+    Ep  7 | Train IR2: 1.0562 AbsR: +288.3% Cash: 0% TO: 30.3% | Val Sh: -0.294 ARC: -10.7% AbsR: -11.0% | α: 0.200 | ag=0.29 cg=173.60 | 30.3s
+    Ep  8 | Train IR2: 0.9679 AbsR: +276.7% Cash: 0% TO: 30.2% | Val Sh: -0.304 ARC: -11.0% AbsR: -11.3% | α: 0.200 | ag=0.60 cg=149.82 | 30.3s
+    Ep  9 | Train IR2: 1.1651 AbsR: +293.4% Cash: 0% TO: 29.9% | Val Sh: -0.298 ARC: -10.8% AbsR: -11.1% | α: 0.200 | ag=0.28 cg=133.56 | 30.0s
+    Ep 10 | Train IR2: 0.9976 AbsR: +275.4% Cash: 0% TO: 29.7% | Val Sh: -0.292 ARC: -10.7% AbsR: -11.0% | α: 0.200 | ag=0.26 cg=133.81 | 30.0s
+    Ep 11 | Train IR2: 0.8063 AbsR: +248.6% Cash: 0% TO: 29.7% | Val Sh: -0.291 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.29 cg=130.88 | 30.1s
+    Ep 12 | Train IR2: 0.8943 AbsR: +258.6% Cash: 0% TO: 29.6% | Val Sh: -0.296 ARC: -10.8% AbsR: -11.1% | α: 0.200 | ag=0.32 cg=116.00 | 30.0s
+    Ep 13 | Train IR2: 1.3280 AbsR: +344.6% Cash: 0% TO: 29.7% | Val Sh: -0.307 ARC: -11.0% AbsR: -11.3% | α: 0.200 | ag=0.33 cg=122.39 | 30.1s
+    Ep 14 | Train IR2: 1.0308 AbsR: +290.5% Cash: 0% TO: 29.8% | Val Sh: -0.299 ARC: -10.9% AbsR: -11.2% | α: 0.200 | ag=0.39 cg=109.23 | 30.1s
+    Ep 15 | Train IR2: 1.2517 AbsR: +319.1% Cash: 0% TO: 29.7% | Val Sh: -0.289 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.88 cg=134.75 | 30.2s
+    Ep 16 | Train IR2: 0.8385 AbsR: +231.7% Cash: 0% TO: 29.8% | Val Sh: -0.289 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.53 cg=100.19 | 30.2s
+    Ep 17 | Train IR2: 0.8363 AbsR: +245.0% Cash: 0% TO: 30.1% | Val Sh: -0.289 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.38 cg=99.96 | 30.2s
+    Ep 18 | Train IR2: 1.2137 AbsR: +318.9% Cash: 0% TO: 29.6% | Val Sh: -0.292 ARC: -10.7% AbsR: -11.0% | α: 0.200 | ag=0.34 cg=114.61 | 30.5s
+    Ep 19 | Train IR2: 1.2061 AbsR: +300.6% Cash: 0% TO: 29.7% | Val Sh: -0.287 ARC: -10.5% AbsR: -10.8% | α: 0.200 | ag=0.32 cg=100.99 | 31.1s
+    Ep 20 | Train IR2: 0.8969 AbsR: +257.3% Cash: 0% TO: 29.8% | Val Sh: -0.290 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.37 cg=97.85 | 31.1s
+    Ep 21 | Train IR2: 1.3801 AbsR: +342.8% Cash: 0% TO: 29.9% | Val Sh: -0.286 ARC: -10.5% AbsR: -10.8% | α: 0.200 | ag=0.43 cg=100.66 | 31.1s
+    Ep 22 | Train IR2: 1.1592 AbsR: +303.7% Cash: 0% TO: 29.9% | Val Sh: -0.286 ARC: -10.5% AbsR: -10.8% | α: 0.200 | ag=0.42 cg=98.41 | 31.1s
+    Ep 23 | Train IR2: 0.9109 AbsR: +263.5% Cash: 0% TO: 30.3% | Val Sh: -0.289 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.33 cg=87.37 | 31.1s
+    Ep 24 | Train IR2: 0.9732 AbsR: +261.4% Cash: 0% TO: 30.2% | Val Sh: -0.286 ARC: -10.5% AbsR: -10.8% | α: 0.200 | ag=0.49 cg=91.78 | 30.4s
+    Ep 25 | Train IR2: 0.9071 AbsR: +259.2% Cash: 0% TO: 30.5% | Val Sh: -0.294 ARC: -10.7% AbsR: -11.0% | α: 0.200 | ag=0.22 cg=95.31 | 30.4s
+    Ep 26 | Train IR2: 1.2130 AbsR: +305.6% Cash: 0% TO: 30.3% | Val Sh: -0.286 ARC: -10.5% AbsR: -10.8% | α: 0.200 | ag=0.27 cg=85.50 | 30.5s
+    Ep 27 | Train IR2: 1.0192 AbsR: +270.6% Cash: 0% TO: 30.2% | Val Sh: -0.289 ARC: -10.6% AbsR: -10.9% | α: 0.200 | ag=0.29 cg=90.66 | 30.3s
+    Early stop at epoch 27 (best: 1)
+    → ✓ LEARNED | max Train IR2: 1.3801
+    → Med-Train Sharpe: 1.186 (60 months) | Max-Val Sharpe: 5.631 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.6555 AbsR: +169.1% Cash: 0% TO: 58.8% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.20 cg=13.37 | 47.4s
+    Ep  1 | Train IR2: 0.7914 AbsR: +197.4% Cash: 0% TO: 28.6% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.14 cg=38.03 | 76.8s
+    Ep  2 | Train IR2: 0.8981 AbsR: +214.8% Cash: 0% TO: 28.6% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.31 cg=48.70 | 76.9s
+    Ep  3 | Train IR2: 0.8812 AbsR: +209.0% Cash: 0% TO: 28.5% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.15 cg=53.04 | 76.8s
+    Ep  4 | Train IR2: 0.7523 AbsR: +195.2% Cash: 0% TO: 28.1% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.18 cg=54.91 | 76.9s
+    Ep  5 | Train IR2: 0.9675 AbsR: +232.2% Cash: 0% TO: 28.3% | Val Sh: 0.066 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.49 cg=71.96 | 76.9s
+    Ep  6 | Train IR2: 0.8691 AbsR: +216.1% Cash: 0% TO: 28.3% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.60 cg=75.08 | 76.9s
+    Ep  7 | Train IR2: 0.9727 AbsR: +227.0% Cash: 0% TO: 28.2% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=76.99 | 76.9s
+    Ep  8 | Train IR2: 0.7373 AbsR: +192.2% Cash: 0% TO: 28.3% | Val Sh: 0.067 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.14 cg=90.69 | 76.9s
+    Ep  9 | Train IR2: 0.8600 AbsR: +209.7% Cash: 0% TO: 28.3% | Val Sh: 0.066 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.24 cg=89.65 | 76.9s
+    Ep 10 | Train IR2: 0.9611 AbsR: +237.9% Cash: 0% TO: 28.4% | Val Sh: 0.069 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.11 cg=80.52 | 76.9s
+    Ep 11 | Train IR2: 0.5868 AbsR: +162.3% Cash: 0% TO: 28.8% | Val Sh: 0.067 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.23 cg=80.63 | 76.9s
+    Ep 12 | Train IR2: 0.8590 AbsR: +208.1% Cash: 0% TO: 28.6% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.23 cg=80.77 | 76.9s
+    Ep 13 | Train IR2: 0.6432 AbsR: +173.4% Cash: 0% TO: 28.6% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.08 cg=82.41 | 76.9s
+    Ep 14 | Train IR2: 0.8889 AbsR: +213.0% Cash: 0% TO: 28.5% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.13 cg=82.16 | 77.0s
+    Ep 15 | Train IR2: 0.9174 AbsR: +220.8% Cash: 0% TO: 28.5% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.07 cg=73.51 | 77.1s
+    Ep 16 | Train IR2: 0.9408 AbsR: +224.6% Cash: 0% TO: 28.6% | Val Sh: 0.068 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.12 cg=76.54 | 77.0s
+    Ep 17 | Train IR2: 0.7506 AbsR: +186.6% Cash: 0% TO: 28.5% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.17 cg=73.06 | 77.0s
+    Ep 18 | Train IR2: 0.8409 AbsR: +205.4% Cash: 0% TO: 28.6% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.15 cg=66.17 | 77.0s
+    Ep 19 | Train IR2: 0.8105 AbsR: +197.5% Cash: 0% TO: 28.6% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.10 cg=70.19 | 77.1s
+    Ep 20 | Train IR2: 0.7267 AbsR: +189.0% Cash: 0% TO: 28.8% | Val Sh: 0.065 ARC: -0.8% AbsR: -1.1% | α: 0.200 | ag=0.15 cg=70.72 | 77.1s
+    Ep 21 | Train IR2: 0.9203 AbsR: +216.3% Cash: 0% TO: 28.9% | Val Sh: 0.067 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.10 cg=70.82 | 77.1s
+    Ep 22 | Train IR2: 0.8237 AbsR: +207.9% Cash: 0% TO: 28.7% | Val Sh: 0.070 ARC: -0.6% AbsR: -1.0% | α: 0.200 | ag=0.48 cg=66.10 | 77.0s
+    Ep 23 | Train IR2: 1.0665 AbsR: +249.5% Cash: 0% TO: 28.6% | Val Sh: 0.067 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.20 cg=64.47 | 77.0s
+    Ep 24 | Train IR2: 0.9249 AbsR: +222.5% Cash: 0% TO: 28.6% | Val Sh: 0.066 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.08 cg=57.89 | 77.1s
+    Ep 25 | Train IR2: 0.8292 AbsR: +204.3% Cash: 0% TO: 28.6% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.24 cg=66.75 | 77.0s
+    Ep 26 | Train IR2: 0.6670 AbsR: +178.3% Cash: 0% TO: 29.1% | Val Sh: 0.069 ARC: -0.7% AbsR: -1.0% | α: 0.200 | ag=0.21 cg=62.32 | 77.0s
+    Ep 27 | Train IR2: 0.8791 AbsR: +209.7% Cash: 0% TO: 28.8% | Val Sh: 0.065 ARC: -0.7% AbsR: -1.1% | α: 0.200 | ag=0.56 cg=60.79 | 77.0s
+    Early stop at epoch 27 (best: 18)
+    → ✓ LEARNED | max Train IR2: 1.0665
+    → Med-Train Sharpe: 1.996 (60 months) | Max-Val Sharpe: 6.669 (12 months)
+
+  ★ Selected: 'bmk_nopen_k20' [Tier-2 (both positive, best max-val)]
+    Med-Train: 1.995 | Max-Val: 6.669 | Val Sharpe: 0.0718 | IR2: 0.0000
+    Test: 2022-04-04→2023-03-31 → RL ARC: -4.8% AbsR: -3.0% | QQQ ARC: -14.0%
+
+  Fold 15/16 | RETRAIN (Sharpe -0.021 < 0)
+
+  HP Selection on fold 15:
+    Train: 2017-03-31 → 2022-03-30 (1259d)
+    Val:   2022-04-04 → 2023-03-31 (250d)
+
+    --- Config: bmk_nopen_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.4841 AbsR: +142.9% Cash: 0% TO: 58.5% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.21 cg=13.51 | 22.8s
+    Ep  1 | Train IR2: 0.4393 AbsR: +130.3% Cash: 0% TO: 28.9% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.32 cg=42.86 | 36.4s
+    Ep  2 | Train IR2: 0.4027 AbsR: +120.3% Cash: 0% TO: 28.7% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.12 cg=60.92 | 36.3s
+    Ep  3 | Train IR2: 0.5096 AbsR: +143.8% Cash: 0% TO: 28.7% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.21 cg=94.18 | 36.5s
+    Ep  4 | Train IR2: 0.5313 AbsR: +150.6% Cash: 0% TO: 28.4% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.52 cg=93.29 | 36.6s
+    Ep  5 | Train IR2: 0.4236 AbsR: +128.6% Cash: 0% TO: 28.7% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.30 cg=135.54 | 36.8s
+    Ep  6 | Train IR2: 0.4679 AbsR: +136.5% Cash: 0% TO: 28.4% | Val Sh: -0.022 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.51 cg=136.19 | 36.6s
+    Ep  7 | Train IR2: 0.5437 AbsR: +155.5% Cash: 0% TO: 28.4% | Val Sh: -0.021 ARC: -4.8% AbsR: -2.9% | α: 0.200 | ag=0.13 cg=118.27 | 36.4s
+    Ep  8 | Train IR2: 0.3948 AbsR: +126.4% Cash: 0% TO: 28.5% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.23 cg=128.63 | 36.4s
+    Ep  9 | Train IR2: 0.5907 AbsR: +155.0% Cash: 0% TO: 28.9% | Val Sh: -0.023 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.19 cg=114.30 | 36.3s
+    Ep 10 | Train IR2: 0.4415 AbsR: +137.4% Cash: 0% TO: 28.7% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.63 cg=113.70 | 36.3s
+    Ep 11 | Train IR2: 0.5636 AbsR: +153.2% Cash: 0% TO: 28.4% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.41 cg=123.15 | 36.2s
+    Ep 12 | Train IR2: 0.5060 AbsR: +144.6% Cash: 0% TO: 28.6% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.15 cg=103.85 | 36.3s
+    Ep 13 | Train IR2: 0.4443 AbsR: +134.1% Cash: 0% TO: 28.8% | Val Sh: -0.021 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.15 cg=92.36 | 36.4s
+    Ep 14 | Train IR2: 0.4433 AbsR: +133.1% Cash: 0% TO: 28.7% | Val Sh: -0.023 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.24 cg=106.65 | 36.3s
+    Ep 15 | Train IR2: 0.4676 AbsR: +136.9% Cash: 0% TO: 28.6% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.18 cg=112.93 | 36.3s
+    Ep 16 | Train IR2: 0.7129 AbsR: +182.2% Cash: 0% TO: 28.3% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.24 cg=102.53 | 36.4s
+    Ep 17 | Train IR2: 0.4650 AbsR: +140.0% Cash: 0% TO: 28.5% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.19 cg=95.29 | 36.4s
+    Ep 18 | Train IR2: 0.4690 AbsR: +137.9% Cash: 0% TO: 28.6% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.36 cg=89.06 | 36.5s
+    Ep 19 | Train IR2: 0.5644 AbsR: +155.8% Cash: 0% TO: 28.4% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.30 cg=93.95 | 36.5s
+    Ep 20 | Train IR2: 0.3457 AbsR: +114.7% Cash: 0% TO: 28.8% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.18 cg=92.47 | 36.3s
+    Ep 21 | Train IR2: 0.4161 AbsR: +126.9% Cash: 0% TO: 28.7% | Val Sh: -0.021 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.17 cg=83.70 | 36.5s
+    Ep 22 | Train IR2: 0.3272 AbsR: +110.5% Cash: 0% TO: 28.7% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.52 cg=81.43 | 36.3s
+    Ep 23 | Train IR2: 0.4780 AbsR: +139.4% Cash: 0% TO: 28.7% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.29 cg=73.51 | 36.4s
+    Ep 24 | Train IR2: 0.6530 AbsR: +170.9% Cash: 0% TO: 28.7% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.24 cg=76.52 | 36.4s
+    Ep 25 | Train IR2: 0.3754 AbsR: +119.4% Cash: 0% TO: 28.5% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.20 cg=78.02 | 36.4s
+    Ep 26 | Train IR2: 0.4333 AbsR: +125.8% Cash: 0% TO: 28.5% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.15 cg=78.79 | 36.4s
+    Ep 27 | Train IR2: 0.4908 AbsR: +141.5% Cash: 0% TO: 28.5% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.13 cg=78.93 | 36.4s
+    Ep 28 | Train IR2: 0.5572 AbsR: +153.4% Cash: 0% TO: 28.7% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.11 cg=77.67 | 36.5s
+    Ep 29 | Train IR2: 0.5896 AbsR: +163.0% Cash: 0% TO: 28.5% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.11 cg=72.66 | 36.4s
+    Ep 30 | Train IR2: 0.5144 AbsR: +148.1% Cash: 0% TO: 28.5% | Val Sh: -0.021 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.35 cg=77.52 | 36.5s
+    Ep 31 | Train IR2: 0.4547 AbsR: +135.4% Cash: 0% TO: 28.7% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.40 cg=69.75 | 36.3s
+    Early stop at epoch 31 (best: 23)
+    → ✓ LEARNED | max Train IR2: 0.7129
+    → Med-Train Sharpe: 1.535 (60 months) | Max-Val Sharpe: 4.363 (12 months)
+
+    --- Config: bmk_nopen_k10 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=64 L=1 d=0.0)
+    Ep  0 | Train IR2: 0.1808 AbsR: +84.3% Cash: 0% TO: 59.9% | Val Sh: -0.568 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.16 cg=58.32 | 19.2s
+    Ep  1 | Train IR2: 0.3955 AbsR: +151.7% Cash: 0% TO: 29.1% | Val Sh: -0.564 ARC: -16.2% AbsR: -14.3% | α: 0.200 | ag=0.59 cg=91.65 | 30.4s
+    Ep  2 | Train IR2: 0.3443 AbsR: +135.5% Cash: 0% TO: 27.3% | Val Sh: -0.572 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.79 cg=163.86 | 30.2s
+    Ep  3 | Train IR2: 0.3671 AbsR: +136.6% Cash: 0% TO: 26.7% | Val Sh: -0.590 ARC: -16.7% AbsR: -14.8% | α: 0.200 | ag=0.72 cg=176.35 | 30.2s
+    Ep  4 | Train IR2: 0.4908 AbsR: +173.4% Cash: 0% TO: 27.2% | Val Sh: -0.582 ARC: -16.5% AbsR: -14.7% | α: 0.200 | ag=0.44 cg=186.42 | 30.2s
+    Ep  5 | Train IR2: 0.3175 AbsR: +131.4% Cash: 0% TO: 27.8% | Val Sh: -0.568 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.55 cg=193.44 | 30.2s
+    Ep  6 | Train IR2: 0.3320 AbsR: +135.7% Cash: 0% TO: 27.6% | Val Sh: -0.566 ARC: -16.2% AbsR: -14.4% | α: 0.200 | ag=0.39 cg=173.72 | 30.3s
+    Ep  7 | Train IR2: 0.3061 AbsR: +128.3% Cash: 0% TO: 27.5% | Val Sh: -0.572 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.37 cg=186.89 | 30.0s
+    Ep  8 | Train IR2: 0.3520 AbsR: +144.1% Cash: 0% TO: 27.4% | Val Sh: -0.581 ARC: -16.5% AbsR: -14.6% | α: 0.200 | ag=0.58 cg=178.94 | 30.0s
+    Ep  9 | Train IR2: 0.3631 AbsR: +142.3% Cash: 0% TO: 28.1% | Val Sh: -0.561 ARC: -16.1% AbsR: -14.3% | α: 0.200 | ag=0.45 cg=157.15 | 29.7s
+    Ep 10 | Train IR2: 0.4967 AbsR: +172.0% Cash: 0% TO: 28.0% | Val Sh: -0.569 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.76 cg=165.06 | 29.8s
+    Ep 11 | Train IR2: 0.3988 AbsR: +146.1% Cash: 0% TO: 27.2% | Val Sh: -0.567 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.52 cg=141.28 | 29.9s
+    Ep 12 | Train IR2: 0.4162 AbsR: +155.6% Cash: 0% TO: 26.7% | Val Sh: -0.566 ARC: -16.2% AbsR: -14.4% | α: 0.200 | ag=1.00 cg=132.82 | 30.1s
+    Ep 13 | Train IR2: 0.4164 AbsR: +151.8% Cash: 0% TO: 27.7% | Val Sh: -0.564 ARC: -16.2% AbsR: -14.3% | α: 0.200 | ag=0.65 cg=136.39 | 30.9s
+    Ep 14 | Train IR2: 0.3604 AbsR: +138.0% Cash: 0% TO: 27.6% | Val Sh: -0.566 ARC: -16.2% AbsR: -14.4% | α: 0.200 | ag=0.71 cg=125.84 | 30.9s
+    Ep 15 | Train IR2: 0.4063 AbsR: +159.0% Cash: 0% TO: 27.4% | Val Sh: -0.561 ARC: -16.1% AbsR: -14.3% | α: 0.200 | ag=0.53 cg=134.27 | 31.0s
+    Ep 16 | Train IR2: 0.4364 AbsR: +166.8% Cash: 0% TO: 27.1% | Val Sh: -0.556 ARC: -16.0% AbsR: -14.1% | α: 0.200 | ag=1.00 cg=129.03 | 31.3s
+    Ep 17 | Train IR2: 0.5042 AbsR: +185.5% Cash: 0% TO: 28.1% | Val Sh: -0.565 ARC: -16.2% AbsR: -14.3% | α: 0.200 | ag=0.49 cg=118.90 | 31.3s
+    Ep 18 | Train IR2: 0.2993 AbsR: +123.9% Cash: 0% TO: 28.3% | Val Sh: -0.570 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.60 cg=107.76 | 30.7s
+    Ep 19 | Train IR2: 0.3820 AbsR: +152.5% Cash: 0% TO: 28.6% | Val Sh: -0.565 ARC: -16.2% AbsR: -14.3% | α: 0.200 | ag=0.90 cg=110.27 | 30.6s
+    Ep 20 | Train IR2: 0.6200 AbsR: +201.4% Cash: 0% TO: 28.2% | Val Sh: -0.562 ARC: -16.2% AbsR: -14.3% | α: 0.200 | ag=0.53 cg=108.77 | 30.5s
+    Ep 21 | Train IR2: 0.4466 AbsR: +167.0% Cash: 0% TO: 28.4% | Val Sh: -0.578 ARC: -16.4% AbsR: -14.6% | α: 0.200 | ag=0.67 cg=97.32 | 30.4s
+    Ep 22 | Train IR2: 0.4861 AbsR: +168.3% Cash: 0% TO: 29.0% | Val Sh: -0.573 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.66 cg=92.06 | 30.6s
+    Ep 23 | Train IR2: 0.3995 AbsR: +158.8% Cash: 0% TO: 28.5% | Val Sh: -0.573 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.65 cg=99.92 | 30.5s
+    Ep 24 | Train IR2: 0.4137 AbsR: +157.2% Cash: 0% TO: 29.0% | Val Sh: -0.575 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.39 cg=107.36 | 30.5s
+    Ep 25 | Train IR2: 0.3520 AbsR: +133.9% Cash: 0% TO: 28.9% | Val Sh: -0.574 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.58 cg=89.43 | 30.6s
+    Ep 26 | Train IR2: 0.5043 AbsR: +177.5% Cash: 0% TO: 28.9% | Val Sh: -0.572 ARC: -16.4% AbsR: -14.5% | α: 0.200 | ag=0.67 cg=85.92 | 31.0s
+    Ep 27 | Train IR2: 0.3969 AbsR: +155.2% Cash: 0% TO: 28.8% | Val Sh: -0.568 ARC: -16.3% AbsR: -14.4% | α: 0.200 | ag=0.70 cg=95.43 | 31.0s
+    Early stop at epoch 27 (best: 16)
+    → ✓ LEARNED | max Train IR2: 0.6200
+    → Med-Train Sharpe: 1.031 (60 months) | Max-Val Sharpe: 3.374 (12 months)
+
+    --- Config: bmk_nopen_med_k20 ---
+  SAC Agent using device: cuda (mode: flat, LSTM h=128 L=1 d=0.1)
+    Ep  0 | Train IR2: 0.3015 AbsR: +100.5% Cash: 0% TO: 59.0% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.05 cg=12.15 | 47.5s
+    Ep  1 | Train IR2: 0.5509 AbsR: +152.3% Cash: 0% TO: 28.9% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.08 cg=33.90 | 76.9s
+    Ep  2 | Train IR2: 0.5188 AbsR: +147.6% Cash: 0% TO: 28.8% | Val Sh: -0.021 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.28 cg=41.97 | 76.9s
+    Ep  3 | Train IR2: 0.4234 AbsR: +128.0% Cash: 0% TO: 28.7% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.49 cg=46.51 | 76.8s
+    Ep  4 | Train IR2: 0.5870 AbsR: +161.9% Cash: 0% TO: 28.6% | Val Sh: -0.013 ARC: -4.6% AbsR: -2.8% | α: 0.200 | ag=0.13 cg=67.35 | 76.9s
+    Ep  5 | Train IR2: 0.5872 AbsR: +165.8% Cash: 0% TO: 28.5% | Val Sh: -0.015 ARC: -4.6% AbsR: -2.8% | α: 0.200 | ag=0.12 cg=75.35 | 76.9s
+    Ep  6 | Train IR2: 0.4993 AbsR: +145.0% Cash: 0% TO: 28.6% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.20 cg=82.76 | 76.9s
+    Ep  7 | Train IR2: 0.5507 AbsR: +156.1% Cash: 0% TO: 28.4% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.38 cg=84.79 | 77.0s
+    Ep  8 | Train IR2: 0.5291 AbsR: +146.5% Cash: 0% TO: 28.5% | Val Sh: -0.022 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.18 cg=82.79 | 77.0s
+    Ep  9 | Train IR2: 0.5215 AbsR: +144.4% Cash: 0% TO: 28.8% | Val Sh: -0.022 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.26 cg=76.35 | 76.9s
+    Ep 10 | Train IR2: 0.5250 AbsR: +147.7% Cash: 0% TO: 28.8% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.15 cg=84.54 | 77.0s
+    Ep 11 | Train IR2: 0.6235 AbsR: +168.0% Cash: 0% TO: 28.5% | Val Sh: -0.021 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.18 cg=72.10 | 76.8s
+    Ep 12 | Train IR2: 0.4695 AbsR: +139.5% Cash: 0% TO: 28.7% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.19 cg=70.97 | 77.0s
+    Ep 13 | Train IR2: 0.4715 AbsR: +134.3% Cash: 0% TO: 28.8% | Val Sh: -0.021 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.24 cg=74.97 | 77.1s
+    Ep 14 | Train IR2: 0.4123 AbsR: +129.3% Cash: 0% TO: 28.7% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.12 cg=66.36 | 77.0s
+    Ep 15 | Train IR2: 0.4502 AbsR: +140.0% Cash: 0% TO: 28.8% | Val Sh: -0.021 ARC: -4.8% AbsR: -2.9% | α: 0.200 | ag=0.19 cg=62.14 | 77.1s
+    Ep 16 | Train IR2: 0.5069 AbsR: +145.1% Cash: 0% TO: 28.8% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.12 cg=67.63 | 77.1s
+    Ep 17 | Train IR2: 0.5128 AbsR: +138.1% Cash: 0% TO: 28.9% | Val Sh: -0.022 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.20 cg=66.48 | 77.1s
+    Ep 18 | Train IR2: 0.5744 AbsR: +160.3% Cash: 0% TO: 28.7% | Val Sh: -0.021 ARC: -4.8% AbsR: -2.9% | α: 0.200 | ag=0.11 cg=62.53 | 77.1s
+    Ep 19 | Train IR2: 0.5374 AbsR: +146.5% Cash: 0% TO: 28.7% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.11 cg=64.25 | 77.1s
+    Ep 20 | Train IR2: 0.4757 AbsR: +140.7% Cash: 0% TO: 28.8% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.15 cg=65.03 | 77.2s
+    Ep 21 | Train IR2: 0.3494 AbsR: +112.4% Cash: 0% TO: 28.6% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.34 cg=59.31 | 77.2s
+    Ep 22 | Train IR2: 0.4155 AbsR: +124.7% Cash: 0% TO: 28.9% | Val Sh: -0.020 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.08 cg=64.00 | 77.1s
+    Ep 23 | Train IR2: 0.6056 AbsR: +166.4% Cash: 0% TO: 28.9% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.22 cg=66.47 | 77.1s
+    Ep 24 | Train IR2: 0.5335 AbsR: +149.2% Cash: 0% TO: 29.0% | Val Sh: -0.019 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.52 cg=63.94 | 77.1s
+    Ep 25 | Train IR2: 0.4385 AbsR: +132.1% Cash: 0% TO: 28.9% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.27 cg=66.74 | 77.1s
+    Ep 26 | Train IR2: 0.3888 AbsR: +121.1% Cash: 0% TO: 28.7% | Val Sh: -0.018 ARC: -4.7% AbsR: -2.9% | α: 0.200 | ag=0.19 cg=60.20 | 77.1s
+    Ep 27 | Train IR2: 0.5829 AbsR: +152.8% Cash: 0% TO: 28.8% | Val Sh: -0.022 ARC: -4.8% AbsR: -3.0% | α: 0.200 | ag=0.32 cg=61.09 | 77.1s
+    Early stop at epoch 27 (best: 4)
+    → ✓ LEARNED | max Train IR2: 0.6235
+    → Med-Train Sharpe: 1.533 (60 months) | Max-Val Sharpe: 4.366 (12 months)
+
+  ★ Selected: 'bmk_nopen_med_k20' [Tier-2 (both positive, best max-val)]
+    Med-Train: 1.533 | Max-Val: 4.366 | Val Sharpe: -0.0133 | IR2: 0.0000
+    Test: 2023-04-03→2024-04-01 → RL ARC: +26.6% AbsR: +27.5% | QQQ ARC: +40.0%
+  Fold 16/16 | CARRY (Sharpe: 1.234) → RL ARC: -7.8% | QQQ ARC: +7.0%
+
+======================================================================
+STITCHING TEST RETURNS
+======================================================================
+
+  OOS: 2009-04-03 → 2025-04-01
+  Days: 4009, Retrains: 7/16
+
+  METRIC                              RL          QQQ
+  ---------------------------------------------------
+  Absolute Return (%)          1666.4094    1535.0802
+  ARC (%)                        19.6968      19.1360
+  ASD (%)                        24.1976      20.4143
+  Max Drawdown (%)               41.2319      36.4276
+  MLD (years)                     2.5952       1.9643
+  IR1                             0.8140       0.9374
+  IR2                             0.3889       0.4924
+  Sharpe                          0.8678       0.9631
+  Sortino                         1.1299       1.2389
+  Calmar                          0.4777       0.5253
+  N Days                       4009.0000    4009.0000
+  Avg Daily Turnover (%)         16.3257          N/A
+
+  All saved to ../Results_Daily
+
+
+Total time: 506.3 minutes (8.4 hours)
+============================================================
+OUT-OF-SAMPLE PERFORMANCE (Daily, 2.0bps)
+============================================================
+          Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+RL Agent            1666.4094  19.6968  24.1976           41.2319       2.5952  0.8140  0.3889  0.8678   1.1299  0.4777  4009.0                 16.3257
+QQQ                 1535.0802  19.1360  20.4143           36.4276       1.9643  0.9374  0.4924  0.9631   1.2389  0.5253  4009.0                     NaN
+Retrains: 7 / 16 folds
+    fold_id train_start   train_end   val_start     val_end  test_start    test_end  n_train  n_test  retrained    selected_config  val_ir2  val_sharpe  test_ir2  test_arc  qqq_test_arc  test_mdd  test_sharpe  test_sortino  test_n_trades  test_total_tc  test_cash
+0         1  2003-03-31  2008-03-28  2008-04-02  2009-04-01  2009-04-02  2010-04-01     1258     252       True  bmk_nopen_med_k20   0.0000     -0.9090   15.2581     71.57         52.39     12.75       2.2047        3.0806            239         0.6836        0.0
+1         2  2004-03-31  2009-03-30  2009-04-02  2010-04-01  2010-04-05  2011-04-01     1258     253      False  bmk_nopen_med_k20  15.2685      2.2007    1.4343     22.15         19.20     14.91       1.0101        1.4191            235         0.7061        0.0
+2         3  2005-03-31  2010-03-30  2010-04-05  2011-04-01  2011-04-04  2012-03-30     1259     251      False  bmk_nopen_med_k20   1.4347      1.0082    0.8704     18.80         19.40     17.92       0.8569        1.1788            228         0.6299        0.0
+3         4  2006-03-31  2011-03-30  2011-04-04  2012-03-30  2012-04-02  2013-04-01     1259     249      False  bmk_nopen_med_k20   0.8686      0.8545    0.1303      5.25          2.41     13.29       0.3314        0.4982            219         0.5903        0.0
+4         5  2007-04-02  2012-03-30  2012-04-02  2013-04-01  2013-04-02  2014-04-01     1261     253       True      bmk_nopen_k10   0.0184      0.1562    7.9979     39.80         28.87     10.05       1.9234        2.7863            223         0.7110        0.0
+5         6  2008-03-31  2013-03-28  2013-04-02  2014-04-01  2014-04-02  2015-04-01     1259     252      False      bmk_nopen_k10   7.9720      1.9166    0.7823     13.35         19.38     11.76       0.6848        0.9108            213         0.8209        0.0
+6         7  2009-03-31  2014-03-28  2014-04-02  2015-04-01  2015-04-02  2016-04-01     1258     252      False      bmk_nopen_k10   0.8002      0.6894    0.1192      6.64          5.00     16.58       0.4393        0.5803            219         0.8099        0.0
+7         8  2010-03-31  2015-03-30  2015-04-02  2016-04-01  2016-04-04  2017-03-31     1258     252       True      bmk_nopen_k10   0.1467      0.4685   21.8599     48.43         21.73      6.24       2.3418        3.3227            240         0.8827        0.0
+8         9  2011-03-31  2016-03-30  2016-04-04  2017-03-31  2017-04-03  2018-03-29     1257     250      False      bmk_nopen_k10  21.9557      2.3400    1.4830     20.15         20.06     12.88       1.1010        1.2925            239         0.8509        0.0
+9        10  2012-04-02  2017-03-30  2017-04-03  2018-03-29  2018-04-02  2019-04-01     1257     252      False      bmk_nopen_k10   1.4782      1.0969    0.0000     -3.80         16.53     27.12      -0.0442       -0.0576            249         1.2052        0.0
+10       11  2013-04-01  2018-03-29  2018-04-02  2019-04-01  2019-04-02  2020-04-01     1260     253       True  bmk_nopen_med_k20   0.0673      0.4724    0.0006      0.76          5.07     29.41       0.0775        0.0882            238         0.8134        0.0
+11       12  2014-03-31  2019-03-29  2019-04-02  2020-04-01  2020-04-02  2021-04-01     1259     252       True      bmk_nopen_k10   0.0191      0.2000   16.0472    116.20         72.39     22.06       2.3177        3.3013            248         0.9000        0.0
+12       13  2015-03-31  2020-03-30  2020-04-02  2021-04-01  2021-04-05  2022-04-01     1259     253      False      bmk_nopen_k10  16.1499      2.3176    0.0000    -10.50         10.00     32.86      -0.2857       -0.3921            241         1.0785        0.0
+13       14  2016-03-31  2021-03-30  2021-04-05  2022-04-01  2022-04-04  2023-03-31     1259     250       True      bmk_nopen_k20   0.0000      0.0720    0.0000     -4.76        -13.97     17.94      -0.0212       -0.0319            237         0.7679        0.0
+14       15  2017-03-31  2022-03-30  2022-04-04  2023-03-31  2023-04-03  2024-04-01     1259     250       True  bmk_nopen_med_k20   0.0000     -0.0132    1.9555     26.58         39.99     16.59       1.2372        1.8754            243         0.8752        0.0
+15       16  2018-04-02  2023-03-30  2023-04-03  2024-04-01  2024-04-02  2025-04-01     1259     251      False  bmk_nopen_med_k20   1.9528      1.2343    0.0000     -7.83          6.98     22.17      -0.1376       -0.1651            242         0.7647        0.0
+
+Running baselines on OOS period: 2009-04-03 → 2025-04-01
+
+======================================================================
+RUNNING ALL BASELINES
+  Period: 2009-04-03 → 2025-04-01
+  Transaction cost: 2.0 bps one-way
+  Annualization: 252
+  Results dir: /home/kamilkashif/Master_Thesis_DRL/Results_Daily
+======================================================================
+
+  ▶ QQQ Buy-and-Hold... Done — IR2: 0.5183, ARC: 19.3%, MDD: 35.1%
+
+  ▶ Equal-Weight Monthly... Done — IR2: 0.4934, ARC: 18.1%, MDD: 32.5%
+
+  ▶ Inverse Volatility... Done — IR2: 0.5789, ARC: 18.6%, MDD: 31.7%
+
+  ▶ Momentum Top-20%... Done — IR2: 0.1759, ARC: 12.3%, MDD: 39.5%
+
+  ▶ Supervised + MVO... Done — IR2: 0.4076, ARC: 17.3%, MDD: 33.8%
+
+  Saved: ../Results_Daily/equity_curves_oos.csv
+  Saved: ../Results_Daily/daily_returns_oos.csv
+  Saved: ../Results_Daily/turnover_oos.csv
+  Saved: ../Results_Daily/performance_metrics_oos.csv
+
+==================================================================================================================================
+STRATEGY                     ARC%    ASD%    MDD%    MLD     IR1     IR2  Sharpe  Sortino  Calmar     TO%
+==================================================================================================================================
+  Inverse Volatility        18.6   18.9   31.7  1.54  0.985 0.5789  1.000   1.287  0.587   4.46
+  QQQ Buy-and-Hold          19.3   20.4   35.1  1.96  0.944 0.5183  0.969   1.246  0.549   0.00
+  Equal-Weight Monthly      18.1   20.5   32.5  2.07  0.886 0.4934  0.919   1.199  0.557   0.33
+  Supervised + MVO          17.3   21.8   33.8  1.97  0.795 0.4076  0.844   1.141  0.512  45.48
+  Momentum Top-20%          12.3   21.6   39.5  2.24  0.567 0.1759  0.646   0.868  0.310  36.16
+==================================================================================================================================
+  (Sorted by IR2 — primary optimization target)
+
+================================================================================
+COMBINED COMPARISON — Daily (2.0bps)
+================================================================================
+                      Absolute Return (%)  ARC (%)  ASD (%)  Max Drawdown (%)  MLD (years)     IR1     IR2  Sharpe  Sortino  Calmar  N Days  Avg Daily Turnover (%)
+Inverse Volatility              1433.6116  18.6182  18.8943           31.6937       1.5357  0.9854  0.5789  1.0002   1.2866  0.5874  4023.0                  4.4550
+QQQ Buy-and-Hold                1581.8667  19.2740  20.4105           35.1187       1.9603  0.9443  0.5183  0.9689   1.2462  0.5488  4023.0                  0.0000
+Equal-Weight Monthly            1338.2323  18.1310  20.4705           32.5498       2.0714  0.8857  0.4934  0.9187   1.1990  0.5570  4023.0                  0.3263
+Supervised + MVO                1189.6993  17.3431  21.8089           33.8392       1.9722  0.7952  0.4076  0.8438   1.1414  0.5125  4023.0                 45.4830
+RL Agent                        1666.4094  19.6968  24.1976           41.2319       2.5952  0.8140  0.3889  0.8678   1.1299  0.4777  4009.0                 16.3257
+Momentum Top-20%                 540.5232  12.2710  21.6492           39.5457       2.2421  0.5668  0.1759  0.6461   0.8680  0.3103  4023.0                 36.1592
+
+RL files in ../Results_Daily/:
+  agent_checkpoint.pt                             7030.4 KB
+  agent_final.pt                                  7028.6 KB
+  rl_daily_returns_oos.csv                         211.3 KB
+  rl_equity_oos.csv                                187.4 KB
+  rl_fold_10_qqq_returns.csv                         8.0 KB
+  rl_fold_10_test_returns.csv                        8.0 KB
+  rl_fold_11_qqq_returns.csv                         8.0 KB
+  rl_fold_11_test_returns.csv                        8.0 KB
+  rl_fold_12_qqq_returns.csv                         7.9 KB
+  rl_fold_12_test_returns.csv                        7.9 KB
+  rl_fold_13_qqq_returns.csv                         8.0 KB
+  rl_fold_13_test_returns.csv                        8.0 KB
+  rl_fold_14_qqq_returns.csv                         7.9 KB
+  rl_fold_14_test_returns.csv                        7.9 KB
+  rl_fold_15_qqq_returns.csv                         7.9 KB
+  rl_fold_15_test_returns.csv                        7.9 KB
+  rl_fold_16_qqq_returns.csv                         7.9 KB
+  rl_fold_16_test_returns.csv                        7.9 KB
+  rl_fold_1_qqq_returns.csv                          7.9 KB
+  rl_fold_1_test_returns.csv                         7.9 KB
+  rl_fold_2_qqq_returns.csv                          8.0 KB
+  rl_fold_2_test_returns.csv                         8.0 KB
+  rl_fold_3_qqq_returns.csv                          7.9 KB
+  rl_fold_3_test_returns.csv                         8.0 KB
+  rl_fold_4_qqq_returns.csv                          7.9 KB
+  rl_fold_4_test_returns.csv                         7.9 KB
+  rl_fold_5_qqq_returns.csv                          8.0 KB
+  rl_fold_5_test_returns.csv                         8.0 KB
+  rl_fold_6_qqq_returns.csv                          8.0 KB
+  rl_fold_6_test_returns.csv                         8.0 KB
+  rl_fold_7_qqq_returns.csv                          8.0 KB
+  rl_fold_7_test_returns.csv                         8.0 KB
+  rl_fold_8_qqq_returns.csv                          8.0 KB
+  rl_fold_8_test_returns.csv                         8.0 KB
+  rl_fold_9_qqq_returns.csv                          8.0 KB
+  rl_fold_9_test_returns.csv                         7.9 KB
+  rl_fold_log.csv                                    2.8 KB
+  rl_performance_metrics.csv                         0.3 KB
+  rl_wfo_config.json                                 0.4 KB
+  wfo_checkpoint.json                               11.1 KB
+  wfo_folds_plot.html                             4761.3 KB

@@ -1,0 +1,364 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+OEM MEMBERSHIP SCAN-READY REPORT
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+--- PERIOD: 2003-09-01 ---
+ADD:
++ TIT IM Equity
+DEL:
+- TI IM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2003-10-01 ---
+ADD:
++ IBE SQ Equity
+DEL:
+- HVM GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2004-08-01 ---
+ADD:
++ SAP GY Equity
+DEL:
+- AVE FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2004-10-01 ---
+ADD:
++ ACA FP Equity
+DEL:
+- VOW GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2005-07-01 ---
+ADD:
++ AIBG ID Equity
+DEL:
+- TIM IM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2005-08-01 ---
+ADD:
++ RNO FP Equity
+DEL:
+- RDA NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2007-02-01 ---
+ADD:
++ ISP IM Equity
+DEL:
+- SPI IM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2007-10-01 ---
+ADD:
++ DG FP Equity
++ MTP FP Equity
++ SU FP Equity
+DEL:
+- AD NA Equity
+- AIBG ID Equity
+- LG FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2007-11-01 ---
+ADD:
++ DB1 GY Equity
++ VOW GY Equity
+DEL:
+- 3577044Z NA Equity
+- ELE SQ Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2008-08-01 ---
+ADD:
++ ENGI FP Equity
+DEL:
+- SZE FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2008-10-01 ---
+ADD:
++ ALO FP Equity
+DEL:
+- ALU FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2009-02-01 ---
+ADD:
++ AGS BB Equity
++ MT NA Equity
+DEL:
+- FORA NA Equity
+- MTP FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2009-10-01 ---
+ADD:
++ ABI BB Equity
++ CRH ID Equity
+DEL:
+- AGS BB Equity
+- RNO FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2010-03-01 ---
+ADD:
++ UL FP Equity
+DEL:
+- VOW GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2010-10-01 ---
+ADD:
++ BMW GY Equity
+DEL:
+- AGN NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2011-08-01 ---
+ADD:
++ 63DU GY Equity
+DEL:
+- DB1 GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2011-10-01 ---
+ADD:
++ ITX SQ Equity
++ VOW3 GY Equity
+DEL:
+- ACA FP Equity
+- ALO FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2012-03-01 ---
+ADD:
++ DB1 GY Equity
+DEL:
+- 63DU GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2012-07-01 ---
+ADD:
++ ASML NA Equity
++ EL FP Equity
+DEL:
+- DB1 GY Equity
+- TIT IM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2013-03-01 ---
+ADD:
++ UL NA Equity
+DEL:
+- UL FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2013-04-01 ---
+ADD:
++ AIR FP Equity
+DEL:
+- NOKIA FH Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2013-10-01 ---
+ADD:
++ DHL GY Equity
+DEL:
+- MT NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2014-10-01 ---
+ADD:
++ NOKIA FH Equity
+DEL:
+- CRH ID Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2015-10-01 ---
+ADD:
++ FRE GY Equity
++ SAF FP Equity
+DEL:
+- REP SQ Equity
+- RWE GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2016-10-01 ---
+ADD:
++ AD NA Equity
++ ADS GY Equity
++ CRH ID Equity
+DEL:
+- CA FP Equity
+- G IM Equity
+- UCG IM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2018-07-01 ---
+ADD:
++ URW NA Equity
+DEL:
+- UL NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2018-10-01 ---
+ADD:
++ AMS SQ Equity
++ KER FP Equity
++ LINU GY Equity
+DEL:
+- DBK GY Equity
+- EOAN GY Equity
+- SGO FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2018-11-01 ---
+ADD:
++ LIN GY Equity
+DEL:
+- LINU GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2019-07-01 ---
+ADD:
++ UNAT NA Equity
+DEL:
+- 1844030D NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2019-10-01 ---
+ADD:
++ DB1 GY Equity
+DEL:
+- URW NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2020-10-01 ---
+ADD:
++ ADYEN NA Equity
++ KNEBV FH Equity
++ PRX NA Equity
++ RI FP Equity
++ VNA GY Equity
+DEL:
+- BBVA SQ Equity
+- FRE GY Equity
+- GLE FP Equity
+- ORA FP Equity
+- TEF SQ Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2020-12-01 ---
+ADD:
++ FLTR ID Equity
+DEL:
+- UNAT NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2021-04-01 ---
+ADD:
++ IFX GY Equity
+DEL:
+- NOKIA FH Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2021-10-01 ---
+ADD:
++ BBVA SQ Equity
++ STLAM IM Equity
++ UMG NA Equity
+DEL:
+- AMS SQ Equity
+- ENGI FP Equity
+- VIV FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2022-01-01 ---
+ADD:
++ RMS FP Equity
+DEL:
+- UMG NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2022-10-01 ---
+ADD:
++ NDA FH Equity
++ NOKIA FH Equity
+DEL:
+- KNEBV FH Equity
+- PHIA NA Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2023-03-01 ---
+ADD:
++ UCG IM Equity
+DEL:
+- LIN GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2023-10-01 ---
+ADD:
++ RACE IM Equity
++ SGO FP Equity
+DEL:
+- CRH ID Equity
+- VNA GY Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2024-01-01 ---
+ADD:
++ WKL NA Equity
+DEL:
+- FLTR ID Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2024-04-01 ---
+ADD:
++ BBVA SM Equity
++ IBE SM Equity
++ ITX SM Equity
++ SAN SM Equity
+DEL:
+- BBVA SQ Equity
+- IBE SQ Equity
+- ITX SQ Equity
+- SAN SQ Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2024-08-01 ---
+ADD:
++ BBVA SQ Equity
++ IBE SQ Equity
++ ITX SQ Equity
++ SAN SQ Equity
+DEL:
+- BBVA SM Equity
+- IBE SM Equity
+- ITX SM Equity
+- SAN SM Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2025-07-01 ---
+ADD:
++ RHM GY Equity
+DEL:
+- KER FP Equity
+TOTAL_COUNT: 50
+-------------------------
+--- PERIOD: 2025-10-01 ---
+ADD:
++ ARGX BB Equity
++ DBK GY Equity
++ ENR GY Equity
+DEL:
+- NOKIA FH Equity
+- RI FP Equity
+- STLAM IM Equity
+TOTAL_COUNT: 50
+-------------------------
+
+[END OF REPORT]

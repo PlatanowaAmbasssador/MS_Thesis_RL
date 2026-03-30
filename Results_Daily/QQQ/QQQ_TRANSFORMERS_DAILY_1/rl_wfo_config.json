@@ -1,0 +1,18 @@
+{
+  "train_months": 60,
+  "val_months": 12,
+  "test_months": 12,
+  "step_months": 12,
+  "embargo_days": 0,
+  "n_folds": 16,
+  "n_retrains": 6,
+  "lookback_window": 60,
+  "variance_penalty": 0.5,
+  "tc_curriculum_frac": 0.0,
+  "hp_configs": 3,
+  "window_type": "SLIDING (non-anchored)",
+  "hierarchical": false,
+  "annualization": 252,
+  "reward_type": "log_return",
+  "turnover_penalty": 0.003
+}

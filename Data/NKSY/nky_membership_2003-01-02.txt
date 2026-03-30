@@ -1,0 +1,21 @@
+NKY (Nikkei 225) baseline membership snapshot
+===============================================
+as_of_date: 2003-01-02
+n_tickers: 225
+format: Bloomberg-style identifiers (e.g. "1332 JT Equity")
+
+Purpose:
+  nky_changes begins with the first rebalance on 2004-04-01. This CSV is the t0
+  (2003-01-02) full constituent set; combined with nky_changes it reconstructs
+  daily membership from the start date.
+
+Machine-readable list:
+  nky_membership_2003-01-02.csv  (column: ticker_bloomberg)
+
+Code (this repo):
+  01_yfinance_Raw_Data.ipynb   — union(t0 CSV, tickers from nky_changes) for downloads
+  02_NKY_Membership_yfinance.ipynb — builds membership_daily from t0 + nky_changes
+
+Related:
+  nky_changes  — ADD/DEL events from 2004-04-01 onward
+  QQQ/ndx_changes — NDX membership report (NASDAQ-100), analogous layout

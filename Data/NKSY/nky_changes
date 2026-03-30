@@ -1,0 +1,523 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+OEM MEMBERSHIP SCAN-READY REPORT
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+--- PERIOD: 2004-04-01 ---
+DEL:
+- 6933 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2004-05-01 ---
+ADD:
++ 6674 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2004-10-01 ---
+ADD:
++ 2282 JT Equity
++ 4324 JT Equity
++ 9984 JT Equity
+DEL:
+- 2536 JT Equity
+- 6474 JT Equity
+- 7102 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2004-11-01 ---
+ADD:
++ 5016 JT Equity
+DEL:
+- 2552241D JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2005-04-01 ---
+ADD:
++ 4519 JT Equity
++ 4689 JT Equity
+DEL:
+- 4511 JT Equity
+- 8232 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2005-06-01 ---
+ADD:
++ 4183 JT Equity
+DEL:
+- 3102 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2005-09-01 ---
+ADD:
++ 9983 JT Equity
+DEL:
+- 8183 JT Equity
+- 8264 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2005-10-01 ---
+ADD:
++ 3382 JT Equity
++ 4568 JT Equity
++ 4795 JT Equity
++ 8303 JT Equity
++ 8795 JT Equity
+DEL:
+- 4010 JT Equity
+- 4501 JT Equity
+- 4505 JT Equity
+- 8307 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2005-11-01 ---
+ADD:
++ 4188 JT Equity
+DEL:
+- 2201 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2006-04-01 ---
+ADD:
++ 8015 JT Equity
+DEL:
+- 1601 JT Equity
+- 8003 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2006-05-01 ---
+ADD:
++ 1605 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2006-11-01 ---
+ADD:
++ 8815 JT Equity
++ 9602 JT Equity
+DEL:
+- 2001 JT Equity
+- 9605 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2007-04-01 ---
+DEL:
+- 4795 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2007-05-01 ---
+ADD:
++ 9412 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2007-10-01 ---
+ADD:
++ 3086 JT Equity
++ 3436 JT Equity
+DEL:
+- 2602 JT Equity
+- 7231 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2008-02-01 ---
+ADD:
++ 8354 JT Equity
+DEL:
+- 8603 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2008-04-01 ---
+ADD:
++ 8270 JT Equity
+DEL:
+- 2779 JT Equity
+- 8238 JT Equity
+- 8752 JT Equity
+TOTAL_COUNT: 223
+-------------------------
+--- PERIOD: 2008-05-01 ---
+ADD:
++ 3099 JT Equity
++ 8725 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2008-08-01 ---
+ADD:
++ 8628 JT Equity
+DEL:
+- 8583 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2008-10-01 ---
+ADD:
++ 5541 JT Equity
++ 6305 JT Equity
+DEL:
+- 1861 JT Equity
+- 4045 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2009-04-01 ---
+ADD:
++ 1334 JT Equity
+DEL:
+- 2202 JT Equity
+- 2261 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2009-05-01 ---
+ADD:
++ 2269 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2010-02-01 ---
+ADD:
++ 9022 JT Equity
+DEL:
+- 9205 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2010-04-01 ---
+ADD:
++ 5407 JT Equity
+DEL:
+- 5001 JT Equity
+- 5016 JT Equity
+- 8755 JT Equity
+TOTAL_COUNT: 223
+-------------------------
+--- PERIOD: 2010-05-01 ---
+ADD:
++ 5020 JT Equity
++ 8630 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2010-10-01 ---
+ADD:
++ 5214 JT Equity
++ 8804 JT Equity
+DEL:
+- 3404 JT Equity
+- 6796 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2011-04-01 ---
+ADD:
++ 6506 JT Equity
++ 7735 JT Equity
++ 8750 JT Equity
+DEL:
+- 6764 JT Equity
+- 6991 JT Equity
+- 8403 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2011-09-01 ---
+ADD:
++ 8304 JT Equity
++ 8729 JT Equity
+DEL:
+- 8404 JT Equity
+- 8606 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2011-10-01 ---
+ADD:
++ 6113 JT Equity
+DEL:
+- 9737 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2012-10-01 ---
+ADD:
++ 4043 JT Equity
+DEL:
+- 5405 JT Equity
+- 5407 JT Equity
+- 5701 JT Equity
+TOTAL_COUNT: 223
+-------------------------
+--- PERIOD: 2012-11-01 ---
+ADD:
++ 5413 JT Equity
++ 5703 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2013-04-01 ---
+DEL:
+- 3893 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2013-05-01 ---
+ADD:
++ 3863 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2013-10-01 ---
+ADD:
++ 6988 JT Equity
+DEL:
+- 8815 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2013-11-01 ---
+ADD:
++ 3289 JT Equity
+DEL:
+- 3864 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2014-04-01 ---
+DEL:
+- 1334 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2014-05-01 ---
+ADD:
++ 1333 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2015-10-01 ---
+ADD:
++ 1808 JT Equity
++ 2432 JT Equity
+DEL:
+- 3110 JT Equity
+- 8803 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2016-04-01 ---
+DEL:
+- 8332 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2016-05-01 ---
+ADD:
++ 7186 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2016-08-01 ---
+ADD:
++ 7272 JT Equity
+DEL:
+- 6753 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2016-09-01 ---
+ADD:
++ 8028 JT Equity
+DEL:
+- 8270 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2016-11-01 ---
+ADD:
++ 4755 JT Equity
+DEL:
+- 4041 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2017-02-01 ---
+ADD:
++ 4578 JT Equity
+DEL:
+- 6767 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2017-08-01 ---
+ADD:
++ 6724 JT Equity
+DEL:
+- 6502 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2017-11-01 ---
+ADD:
++ 6098 JT Equity
++ 6178 JT Equity
+DEL:
+- 3865 JT Equity
+- 6508 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2018-10-01 ---
+ADD:
++ 4751 JT Equity
+DEL:
+- 5715 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2019-01-01 ---
+ADD:
++ 4631 JT Equity
+DEL:
+- 5413 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2019-04-01 ---
+ADD:
++ 5019 JT Equity
++ 6645 JT Equity
+DEL:
+- 5002 JT Equity
+- 6773 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2019-08-01 ---
+ADD:
++ 7832 JT Equity
+DEL:
+- 6366 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2019-10-01 ---
+ADD:
++ 2413 JT Equity
+DEL:
+- 9681 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2020-08-01 ---
+ADD:
++ 8697 JT Equity
+DEL:
+- 8729 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2020-10-01 ---
+ADD:
++ 9434 JT Equity
+DEL:
+- 4272 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2020-11-01 ---
+ADD:
++ 3659 JT Equity
+DEL:
+- 8028 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2021-01-01 ---
+ADD:
++ 6753 JT Equity
+DEL:
+- 9437 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2021-10-01 ---
+ADD:
++ 6861 JT Equity
++ 6981 JT Equity
++ 7974 JT Equity
+DEL:
+- 3105 JT Equity
+- 5901 JT Equity
+- 9412 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2022-01-01 ---
+DEL:
+- 9062 JT Equity
+TOTAL_COUNT: 224
+-------------------------
+--- PERIOD: 2022-02-01 ---
+ADD:
++ 9147 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2022-05-01 ---
+ADD:
++ 8591 JT Equity
+DEL:
+- 8303 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2022-10-01 ---
+ADD:
++ 6594 JT Equity
+DEL:
+- 8355 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2022-11-01 ---
+ADD:
++ 5831 JT Equity
++ 6273 JT Equity
++ 7741 JT Equity
+DEL:
+- 1333 JT Equity
+- 3103 JT Equity
+- 6703 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2023-05-01 ---
+ADD:
++ 4661 JT Equity
++ 6723 JT Equity
++ 9201 JT Equity
+DEL:
+- 3101 JT Equity
+- 5703 JT Equity
+- 5707 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2023-11-01 ---
+ADD:
++ 4385 JT Equity
++ 6920 JT Equity
++ 9843 JT Equity
+DEL:
+- 5202 JT Equity
+- 7003 JT Equity
+- 8628 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2024-04-01 ---
+ADD:
++ 3092 JT Equity
++ 6146 JT Equity
++ 6526 JT Equity
+DEL:
+- 2531 JT Equity
+- 5232 JT Equity
+- 5541 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2024-10-01 ---
+ADD:
++ 4307 JT Equity
++ 7453 JT Equity
+DEL:
+- 3863 JT Equity
+- 4631 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2025-04-01 ---
+ADD:
++ 6532 JT Equity
+DEL:
+- 9301 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2025-08-01 ---
+ADD:
++ 6963 JT Equity
+DEL:
+- 9613 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2025-10-01 ---
+ADD:
++ 3697 JT Equity
+DEL:
+- 7762 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+--- PERIOD: 2025-12-01 ---
+ADD:
++ 4062 JT Equity
+DEL:
+- 6594 JT Equity
+TOTAL_COUNT: 225
+-------------------------
+
+[END OF REPORT]
