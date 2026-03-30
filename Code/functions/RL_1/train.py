@@ -324,14 +324,17 @@ def train_agent(agent, dataset, train_start, train_end, val_start, val_end,
 # =============================================================================
 # HP CONFIGS — 6 configs: LSTM architecture variation (Daily Run)
 # =============================================================================
-# HP CONFIGS — Transformer encoder comparison (daily)
+# HP CONFIGS — 3 configs for daily (v3 — runtime-feasible)
 # =============================================================================
-# Transformer temporal encoder replaces LSTM for per-asset sequence modeling.
-# Uses CLS token + positional encoding + TransformerEncoder layers.
-# Ref: Zhang et al. 2020 (SARL), Xu et al. 2021, Ye et al. 2020
+# v3 fixes:
+#   - 3 configs only (deep was 180-250s/epoch = 10 day total runtime)
+#   - auto_alpha=False, alpha fixed at 0.2 (alpha hit 7.389 clamp in v1+v2)
+#   - lr_critic=5e-4 (1e-3 caused critic grad explosion)
+#   - buffer_capacity=20000 (memory)
 #
-# 3 configs: 2 Transformer variants + 1 LSTM baseline for in-run comparison
-# embed_dim=64 throughout (matches cross-sectional attention dim)
+# Rationale for fixed alpha: Dirichlet entropy is ~+3 nats for K=21.
+# target_ent=-21*ent_mult is always deeply negative → alpha diverges.
+# Fixed alpha=0.2 is the SAC default and worked in Run 9 later folds.
 
 _SHARED_DAILY = {
     "lr_critic": 5e-4, "lr_alpha": 3e-4,
@@ -346,24 +349,21 @@ _SHARED_DAILY = {
 }
 
 DEFAULT_HP_CONFIGS = [
-    # A) Transformer 2-layer, k20 (main experiment)
-    {"name": "tf_2L_k20",
-     "encoder_type": "transformer",
-     "lstm_hidden": 64, "lstm_layers": 2, "dropout": 0.1,
-     "lr_actor": 1e-4, "batch_size": 128, "top_k": 20,
-     **_SHARED_DAILY},
-
-    # B) Transformer 2-layer, k30
-    {"name": "tf_2L_k30",
-     "encoder_type": "transformer",
-     "lstm_hidden": 64, "lstm_layers": 2, "dropout": 0.1,
-     "lr_actor": 1e-4, "batch_size": 128, "top_k": 30,
-     **_SHARED_DAILY},
-
-    # C) LSTM baseline (same as flat run for direct comparison)
-    {"name": "lstm_k20",
-     "encoder_type": "lstm",
+    # A) Small LSTM, k20 (~57s/epoch)
+    {"name": "small_k20",
      "lstm_hidden": 64, "lstm_layers": 1, "dropout": 0.0,
+     "lr_actor": 3e-4, "batch_size": 128, "top_k": 20,
+     **_SHARED_DAILY},
+
+    # B) Small LSTM, k30 (~69s/epoch)
+    {"name": "small_k30",
+     "lstm_hidden": 64, "lstm_layers": 1, "dropout": 0.0,
+     "lr_actor": 3e-4, "batch_size": 128, "top_k": 30,
+     **_SHARED_DAILY},
+
+    # C) Medium LSTM, k20 (~98s/epoch)
+    {"name": "medium_k20",
+     "lstm_hidden": 128, "lstm_layers": 1, "dropout": 0.1,
      "lr_actor": 3e-4, "batch_size": 128, "top_k": 20,
      **_SHARED_DAILY},
 ]

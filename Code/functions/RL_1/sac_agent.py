@@ -108,9 +108,8 @@ class SACAgent:
         "max_equity": 0.98,
         "ent_multiplier": 0.8,
         "dropout": 0.0,
-        "lstm_layers": 1,
-        "encoder_type": "lstm",            # ← "lstm" or "transformer"
-        "weight_smooth_beta": 1.0,
+        "lstm_layers": 1,                 # ← Daily: varies 1-2 across configs
+        "weight_smooth_beta": 1.0,        # ← NEW: 1.0=no smoothing, 0.3=smooth
     }
 
     def __init__(self, config=None):
@@ -127,9 +126,8 @@ class SACAgent:
         else:
             self.device = torch.device(c["device"])
         mode = "hierarchical" if c["hierarchical"] else "flat"
-        enc = c.get("encoder_type", "lstm").upper()
-        enc_info = f"{enc} h={c['lstm_hidden']} L={c.get('lstm_layers',1)} d={c.get('dropout',0)}"
-        print(f"  SAC Agent using device: {self.device} (mode: {mode}, {enc_info})")
+        lstm_info = f"LSTM h={c['lstm_hidden']} L={c.get('lstm_layers',1)} d={c.get('dropout',0)}"
+        print(f"  SAC Agent using device: {self.device} (mode: {mode}, {lstm_info})")
 
         self.actor = DirichletActor(
             n_asset_features=c["n_asset_features"], n_global_features=c["n_global_features"],
@@ -140,7 +138,6 @@ class SACAgent:
             min_equity=c["min_equity"], max_equity=c["max_equity"],
             dropout=c.get("dropout", 0.0),
             lstm_layers=c.get("lstm_layers", 1),
-            encoder_type=c.get("encoder_type", "lstm"),
         ).to(self.device)
 
         self.critic = Critic(
@@ -149,7 +146,6 @@ class SACAgent:
             n_attn_heads=c["n_attn_heads"], critic_hidden=c["critic_hidden"],
             action_stats_dim=7, dropout=c.get("dropout", 0.0),
             lstm_layers=c.get("lstm_layers", 1),
-            encoder_type=c.get("encoder_type", "lstm"),
         ).to(self.device)
 
         self.critic_target = copy.deepcopy(self.critic).to(self.device)

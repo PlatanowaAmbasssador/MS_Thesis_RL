@@ -64,7 +64,7 @@ if wfo_info['n_folds'] > 0:
     print(f'Last test:  {wfo_info["last_fold"]["test_start"]} → {wfo_info["last_fold"]["test_end"]}')
     print(f'OOS: {wfo_info["total_test_period"][0]} → {wfo_info["total_test_period"][1]}')
 
-print(f'\nDaily Run: 3 Transformer configs | {N_EPOCHS} epochs | gradient_steps=2')
+print(f'\nDaily Run: 6 LSTM-varied configs | {N_EPOCHS} epochs | gradient_steps=2')
 print(f'  WFO: {TRAIN_MONTHS}mo train / {VAL_MONTHS}mo val / {TEST_MONTHS}mo test / {STEP_MONTHS}mo step')
 print(f'  Reward: {REWARD_TYPE} | TC: {TRANSACTION_COST_BPS}bps | Lookback: {LOOKBACK_WINDOW}')
 print(f'  Annualization: {ANNUALIZATION}')

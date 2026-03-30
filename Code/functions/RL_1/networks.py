@@ -61,69 +61,6 @@ class AssetTemporalEncoder(nn.Module):
 
 
 # =============================================================================
-# PER-ASSET TRANSFORMER TEMPORAL ENCODER
-# =============================================================================
-
-class AssetTemporalTransformer(nn.Module):
-    """
-    Transformer encoder that processes each asset's lookback window.
-    Same interface as AssetTemporalEncoder (drop-in replacement).
-    Input:  (batch, n_tradable, W, F) — W timesteps, F features per asset
-    Output: (batch, n_tradable, embed_dim) — one embedding per asset
-
-    Uses learnable positional encoding + CLS token for aggregation.
-    Ref: Zhang et al. 2020 (SARL), Xu et al. 2021 (portfolio transformer)
-    """
-
-    def __init__(self, n_features: int = 13, embed_dim: int = 64,
-                 n_heads: int = 4, n_layers: int = 2, dropout: float = 0.1,
-                 max_seq_len: int = 120):
-        super().__init__()
-        self.embed_dim = embed_dim
-
-        # Project raw features to embed_dim
-        self.input_proj = nn.Linear(n_features, embed_dim)
-
-        # Learnable positional encoding (fixed max length)
-        self.pos_encoding = nn.Parameter(torch.randn(1, max_seq_len, embed_dim) * 0.02)
-
-        # CLS token for sequence aggregation
-        self.cls_token = nn.Parameter(torch.randn(1, 1, embed_dim) * 0.02)
-
-        # Standard Transformer encoder
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=embed_dim, nhead=n_heads,
-            dim_feedforward=embed_dim * 4,
-            dropout=dropout, batch_first=True,
-            activation='gelu',
-        )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
-        self.norm = nn.LayerNorm(embed_dim)
-        self.dropout_layer = nn.Dropout(dropout)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        batch, n_assets, W, F = x.shape
-        x_flat = x.reshape(batch * n_assets, W, F)  # (B*N, W, F)
-
-        # Project to embed_dim and add positional encoding
-        h = self.input_proj(x_flat)  # (B*N, W, embed_dim)
-        h = h + self.pos_encoding[:, :W, :]
-
-        # Prepend CLS token
-        cls = self.cls_token.expand(batch * n_assets, -1, -1)  # (B*N, 1, embed_dim)
-        h = torch.cat([cls, h], dim=1)  # (B*N, 1+W, embed_dim)
-
-        # Transformer encoding
-        h = self.transformer(h)  # (B*N, 1+W, embed_dim)
-
-        # Extract CLS token output
-        cls_out = h[:, 0, :]  # (B*N, embed_dim)
-        cls_out = self.dropout_layer(cls_out)
-        embeds = cls_out.reshape(batch, n_assets, -1)
-        return self.norm(embeds)
-
-
-# =============================================================================
 # CROSS-SECTIONAL MULTI-HEAD ATTENTION (unchanged from v2)
 # =============================================================================
 
@@ -179,19 +116,12 @@ class StateProcessorV2(nn.Module):
 
     def __init__(self, n_asset_features=7, n_global_features=5,
                  lstm_hidden=64, embed_dim=64, n_attn_heads=4,
-                 dropout=0.0, lstm_layers=1, encoder_type="lstm"):
+                 dropout=0.0, lstm_layers=1):
         super().__init__()
-        if encoder_type == "transformer":
-            self.temporal_encoder = AssetTemporalTransformer(
-                n_features=n_asset_features, embed_dim=embed_dim,
-                n_heads=n_attn_heads, n_layers=lstm_layers,
-                dropout=dropout,
-            )
-        else:
-            self.temporal_encoder = AssetTemporalEncoder(
-                n_features=n_asset_features, hidden_dim=lstm_hidden,
-                embed_dim=embed_dim, dropout=dropout, n_layers=lstm_layers,
-            )
+        self.temporal_encoder = AssetTemporalEncoder(
+            n_features=n_asset_features, hidden_dim=lstm_hidden,
+            embed_dim=embed_dim, dropout=dropout, n_layers=lstm_layers,
+        )
         self.attention = CrossSectionalAttention(
             embed_dim=embed_dim, n_heads=n_attn_heads,
             n_global_features=n_global_features,
@@ -322,12 +252,12 @@ class DirichletActor(nn.Module):
                  scorer_hidden=128, min_concentration=0.01,
                  hierarchical=True, cash_head_hidden=64,
                  min_equity=0.1, max_equity=1.0, dropout=0.0,
-                 lstm_layers=1, encoder_type="lstm"):
+                 lstm_layers=1):
         super().__init__()
         self.state_processor = StateProcessorV2(
             n_asset_features, n_global_features,
             lstm_hidden, embed_dim, n_attn_heads, dropout=dropout,
-            lstm_layers=lstm_layers, encoder_type=encoder_type,
+            lstm_layers=lstm_layers,
         )
         self.embed_dim = embed_dim
         self.min_concentration = min_concentration
@@ -483,12 +413,12 @@ class Critic(nn.Module):
     def __init__(self, n_asset_features=7, n_global_features=5,
                  lstm_hidden=64, embed_dim=64, n_attn_heads=4,
                  critic_hidden=256, action_stats_dim=7, dropout=0.0,
-                 lstm_layers=1, encoder_type="lstm"):
+                 lstm_layers=1):
         super().__init__()
         self.state_processor = StateProcessorV2(
             n_asset_features, n_global_features,
             lstm_hidden, embed_dim, n_attn_heads, dropout=dropout,
-            lstm_layers=lstm_layers, encoder_type=encoder_type,
+            lstm_layers=lstm_layers,
         )
         self.action_stats_dim = action_stats_dim
         input_dim = self.state_processor.output_dim + action_stats_dim

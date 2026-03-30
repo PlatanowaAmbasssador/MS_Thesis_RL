@@ -1,0 +1,1790 @@
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NDX MEMBERSHIP SCAN-READY REPORT
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+--- PERIOD: 2001-03-01 ---
+ADD:
++ BRCD UQ Equity
+DEL:
+- SDLI UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2001-04-01 ---
+ADD:
++ 1280712D UQ Equity
+DEL:
+- BMC UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2001-06-01 ---
+ADD:
++ NVDA UQ Equity
+DEL:
+- 166783Q UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2001-11-01 ---
+ADD:
++ ADRX UQ Equity
++ GILD UQ Equity
+DEL:
+- ATHMQ UQ Equity
+- EXDSQ UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-01-01 ---
+ADD:
++ 0945329D UQ Equity
++ 1255459D UQ Equity
++ 3122066Q UQ Equity
++ APOL UQ Equity
++ CDWC UQ Equity
++ CEPH UQ Equity
++ CHTRQ UQ Equity
++ ESRX UQ Equity
++ GEN UQ Equity
++ ICOS UQ Equity
++ IDTI UQ Equity
++ PDLI UQ Equity
++ SEPR UQ Equity
++ SNPS UQ Equity
+DEL:
+- 1778808D UQ Equity
+- 1918732D UQ Equity
+- 3549162Q UQ Equity
+- ARBA UQ Equity
+- BVSN UQ Equity
+- LVLT UQ Equity
+- MCLDQ UQ Equity
+- MFNXQ UQ Equity
+- NOVL UQ Equity
+- PALM UQ Equity
+- PTC UQ Equity
+- RNWK UQ Equity
+- STCN UQ Equity
+- XOXOQ UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-04-01 ---
+ADD:
++ 1519128D US Equity
++ EA US Equity
++ GEN US Equity
++ IDTI US Equity
++ QLGC US Equity
++ RATL US Equity
++ XLNX US Equity
+DEL:
+- 1519128D UQ Equity
+- EA UQ Equity
+- GEN UQ Equity
+- IDTI UQ Equity
+- QLGC UQ Equity
+- RATL UQ Equity
+- XLNX UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-06-01 ---
+ADD:
++ BRCM US Equity
++ ERIC US Equity
++ NVDA US Equity
+DEL:
+- BRCM UQ Equity
+- ERIC UQ Equity
+- NVDA UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-07-01 ---
+ADD:
++ 0945329D US Equity
++ 0964591D US Equity
++ 1040983D US Equity
++ 1255459D US Equity
++ 1280712D US Equity
++ 1541931D US Equity
++ 1579957D US Equity
++ 1683351D US Equity
++ 1683997D US Equity
++ 1746513D US Equity
++ 1920486D US Equity
++ 2207158D US Equity
++ 2217347D US Equity
++ 2471693D US Equity
++ 2619871D US Equity
++ 3029830Q US Equity
++ 3122066Q US Equity
++ 3153670Q US Equity
++ 3437127Q US Equity
++ 519239Q US Equity
++ AAPL US Equity
++ ABGX US Equity
++ ADBE US Equity
++ ADRX US Equity
++ AMAT US Equity
++ AMCC US Equity
++ AMGN US Equity
++ AMZN US Equity
++ APOL US Equity
++ ATML US Equity
++ BBBYQ US Equity
++ BEAS US Equity
++ BGEN US Equity
++ BIIB US Equity
++ BRCD US Equity
++ CDWC US Equity
++ CEPH US Equity
++ CHKP US Equity
++ CHTRQ US Equity
++ CMCSK US Equity
++ CMVT US Equity
++ COST US Equity
++ CSCO US Equity
++ CTAS US Equity
++ CTXS US Equity
++ DISH US Equity
++ DLTR US Equity
++ EBAY US Equity
++ ESRX US Equity
++ FISV US Equity
++ FLEX US Equity
++ GENZ US Equity
++ GILD US Equity
++ GMST US Equity
++ HGSI US Equity
++ ICOS US Equity
++ INTC US Equity
++ INTU US Equity
++ KLAC US Equity
++ LLTC US Equity
++ MCHP US Equity
++ MOLX US Equity
++ MSFT US Equity
++ MWW US Equity
++ MXIM US Equity
++ NTAP US Equity
++ NXTL US Equity
++ ORCL US Equity
++ PAYX US Equity
++ PCAR US Equity
++ PDLI US Equity
++ PMCS US Equity
++ QCOM US Equity
++ RFMD US Equity
++ SANM US Equity
++ SBUX US Equity
++ SEBL US Equity
++ SEPR US Equity
++ SNPS US Equity
++ SSCCQ US Equity
++ TLAB US Equity
++ VIAV US Equity
++ VRSN US Equity
++ VTSS US Equity
++ WCOEQ US Equity
+DEL:
+- 0945329D UQ Equity
+- 0964591D UQ Equity
+- 1040983D UQ Equity
+- 1255459D UQ Equity
+- 1280712D UQ Equity
+- 1541931D UQ Equity
+- 1579957D UQ Equity
+- 1683351D UQ Equity
+- 1683997D UQ Equity
+- 1746513D UQ Equity
+- 1920486D UQ Equity
+- 2207158D UQ Equity
+- 2217347D UQ Equity
+- 2471693D UQ Equity
+- 2619871D UQ Equity
+- 3029830Q UQ Equity
+- 3122066Q UQ Equity
+- 3153670Q UQ Equity
+- 3437127Q UQ Equity
+- 519239Q UQ Equity
+- AAPL UQ Equity
+- ABGX UQ Equity
+- ADBE UQ Equity
+- ADELQ UQ Equity
+- ADRX UQ Equity
+- AMAT UQ Equity
+- AMCC UQ Equity
+- AMGN UQ Equity
+- AMZN UQ Equity
+- APOL UQ Equity
+- ATML UQ Equity
+- BBBYQ UQ Equity
+- BEAS UQ Equity
+- BGEN UQ Equity
+- BIIB UQ Equity
+- BRCD UQ Equity
+- CDWC UQ Equity
+- CEPH UQ Equity
+- CHKP UQ Equity
+- CHTRQ UQ Equity
+- CMCSK UQ Equity
+- CMVT UQ Equity
+- COST UQ Equity
+- CSCO UQ Equity
+- CTAS UQ Equity
+- CTXS UQ Equity
+- DISH UQ Equity
+- EBAY UQ Equity
+- ESRX UQ Equity
+- FISV UQ Equity
+- FLEX UQ Equity
+- GENZ UQ Equity
+- GILD UQ Equity
+- GMST UQ Equity
+- HGSI UQ Equity
+- ICOS UQ Equity
+- INTC UQ Equity
+- INTU UQ Equity
+- KLAC UQ Equity
+- LLTC UQ Equity
+- MCHP UQ Equity
+- MOLX UQ Equity
+- MSFT UQ Equity
+- MWW UQ Equity
+- MXIM UQ Equity
+- NTAP UQ Equity
+- NXTL UQ Equity
+- ORCL UQ Equity
+- PAYX UQ Equity
+- PCAR UQ Equity
+- PDLI UQ Equity
+- PMCS UQ Equity
+- QCOM UQ Equity
+- RFMD UQ Equity
+- SANM UQ Equity
+- SBUX UQ Equity
+- SEBL UQ Equity
+- SEPR UQ Equity
+- SNPS UQ Equity
+- SSCCQ UQ Equity
+- TLAB UQ Equity
+- VIAV UQ Equity
+- VRSN UQ Equity
+- VTSS UQ Equity
+- WCOEQ UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-08-01 ---
+ADD:
++ CIEN US Equity
++ JNPR US Equity
++ LNCR US Equity
++ SIAL US Equity
+DEL:
+- CIEN UQ Equity
+- IMNX UQ Equity
+- JNPR UQ Equity
+- WCOEQ US Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-10-01 ---
+ADD:
++ 0945329D UQ Equity
++ 0964591D UQ Equity
++ 1040983D UQ Equity
++ 1255459D UQ Equity
++ 1280712D UQ Equity
++ 1519128D UQ Equity
++ 1541931D UQ Equity
++ 1579957D UQ Equity
++ 1683351D UQ Equity
++ 1683997D UQ Equity
++ 1746513D UQ Equity
++ 1920486D UQ Equity
++ 2207158D UQ Equity
++ 2217347D UQ Equity
++ 2471693D UQ Equity
++ 2619871D UQ Equity
++ 3029830Q UQ Equity
++ 3122066Q UQ Equity
++ 3153670Q UQ Equity
++ 3437127Q UQ Equity
++ AAPL UQ Equity
++ ABGX UQ Equity
++ ADBE UQ Equity
++ ADRX UQ Equity
++ AMAT UQ Equity
++ AMCC UQ Equity
++ AMGN UQ Equity
++ AMZN UQ Equity
++ APOL UQ Equity
++ ATML UQ Equity
++ BBBYQ UQ Equity
++ BEAS UQ Equity
++ BGEN UQ Equity
++ BIIB UQ Equity
++ BRCD UQ Equity
++ BRCM UQ Equity
++ CDWC UQ Equity
++ CEPH UQ Equity
++ CHKP UQ Equity
++ CHTRQ UQ Equity
++ CIEN UQ Equity
++ CMCSK UQ Equity
++ CMVT UQ Equity
++ COST UQ Equity
++ CSCO UQ Equity
++ CTAS UQ Equity
++ CTXS UQ Equity
++ DISH UQ Equity
++ DLTR UQ Equity
++ EA UQ Equity
++ ESRX UQ Equity
++ FISV UQ Equity
++ FLEX UQ Equity
++ GEN UQ Equity
++ GENZ UQ Equity
++ GILD UQ Equity
++ GMST UQ Equity
++ HGSI UQ Equity
++ ICOS UQ Equity
++ IDTI UQ Equity
++ INTC UQ Equity
++ INTU UQ Equity
++ JNPR UQ Equity
++ KLAC UQ Equity
++ LLTC UQ Equity
++ LNCR UQ Equity
++ MCHP UQ Equity
++ MOLX UQ Equity
++ MSFT UQ Equity
++ MWW UQ Equity
++ MXIM UQ Equity
++ NTAP UQ Equity
++ NVDA UQ Equity
++ ORCL UQ Equity
++ PAYX UQ Equity
++ PCAR UQ Equity
++ PDLI UQ Equity
++ PMCS UQ Equity
++ QCOM UQ Equity
++ QLGC UQ Equity
++ RATL UQ Equity
++ RFMD UQ Equity
++ SANM UQ Equity
++ SBUX UQ Equity
++ SEBL UQ Equity
++ SEPR UQ Equity
++ SIAL UQ Equity
++ SNPS UQ Equity
++ SSCCQ UQ Equity
++ TLAB UQ Equity
++ VIAV UQ Equity
++ VRSN UQ Equity
++ VTSS UQ Equity
++ XLNX UQ Equity
+DEL:
+- 0945329D US Equity
+- 0964591D US Equity
+- 1040983D US Equity
+- 1255459D US Equity
+- 1280712D US Equity
+- 1519128D US Equity
+- 1541931D US Equity
+- 1579957D US Equity
+- 1683351D US Equity
+- 1683997D US Equity
+- 1746513D US Equity
+- 1920486D US Equity
+- 2207158D US Equity
+- 2217347D US Equity
+- 2471693D US Equity
+- 2619871D US Equity
+- 3029830Q US Equity
+- 3122066Q US Equity
+- 3153670Q US Equity
+- 3437127Q US Equity
+- AAPL US Equity
+- ABGX US Equity
+- ADBE US Equity
+- ADRX US Equity
+- AMAT US Equity
+- AMCC US Equity
+- AMGN US Equity
+- AMZN US Equity
+- APOL US Equity
+- ATML US Equity
+- BBBYQ US Equity
+- BEAS US Equity
+- BGEN US Equity
+- BIIB US Equity
+- BRCD US Equity
+- BRCM US Equity
+- CDWC US Equity
+- CEPH US Equity
+- CHKP US Equity
+- CHTRQ US Equity
+- CIEN US Equity
+- CMCSK US Equity
+- CMVT US Equity
+- COST US Equity
+- CSCO US Equity
+- CTAS US Equity
+- CTXS US Equity
+- DISH US Equity
+- DLTR US Equity
+- EA US Equity
+- ESRX US Equity
+- FISV US Equity
+- FLEX US Equity
+- GEN US Equity
+- GENZ US Equity
+- GILD US Equity
+- GMST US Equity
+- HGSI US Equity
+- ICOS US Equity
+- IDTI US Equity
+- INTC US Equity
+- INTU US Equity
+- JNPR US Equity
+- KLAC US Equity
+- LLTC US Equity
+- LNCR US Equity
+- MCHP US Equity
+- MOLX US Equity
+- MSFT US Equity
+- MWW US Equity
+- MXIM US Equity
+- NTAP US Equity
+- NVDA US Equity
+- ORCL US Equity
+- PAYX US Equity
+- PCAR US Equity
+- PDLI US Equity
+- PMCS US Equity
+- QCOM US Equity
+- QLGC US Equity
+- RATL US Equity
+- RFMD US Equity
+- SANM US Equity
+- SBUX US Equity
+- SEBL US Equity
+- SEPR US Equity
+- SIAL US Equity
+- SNPS US Equity
+- SSCCQ US Equity
+- TLAB US Equity
+- VIAV US Equity
+- VRSN US Equity
+- VTSS US Equity
+- XLNX US Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-11-01 ---
+ADD:
++ EBAY UQ Equity
++ ERIC UQ Equity
++ NXTL UQ Equity
+DEL:
+- EBAY US Equity
+- ERIC US Equity
+- NXTL US Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2002-12-01 ---
+ADD:
++ 3122066Q US Equity
++ CMCSA US Equity
++ TEVA UQ Equity
+DEL:
+- 3122066Q UQ Equity
+- 519239Q US Equity
+- CMCSK UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2003-01-01 ---
+ADD:
++ 2307532Q UQ Equity
++ CHRW UQ Equity
++ CMCSA UQ Equity
++ EXPD UQ Equity
++ FAST UQ Equity
++ FHCC UQ Equity
++ GNTX UQ Equity
++ HSIC UQ Equity
++ LAMR UQ Equity
++ PDCO UQ Equity
++ PETM UQ Equity
++ PIXR UQ Equity
++ PTEN UQ Equity
++ ROST UQ Equity
++ RYAAY UQ Equity
++ WFM UQ Equity
++ XRAY UQ Equity
+DEL:
+- 0945329D UQ Equity
+- 1040983D UQ Equity
+- 2471693D UQ Equity
+- 3122066Q US Equity
+- ABGX UQ Equity
+- ADRX UQ Equity
+- AMCC UQ Equity
+- ATML UQ Equity
+- CHTRQ UQ Equity
+- CMCSA US Equity
+- GMST UQ Equity
+- IDTI UQ Equity
+- PDLI UQ Equity
+- PMCS UQ Equity
+- RATL UQ Equity
+- SEPR UQ Equity
+- VTSS UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2003-12-01 ---
+ADD:
++ 2544554D UQ Equity
+DEL:
+- BGEN UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2004-01-01 ---
+ADD:
++ ATYT UQ Equity
++ BB UQ Equity
++ GRMN UQ Equity
++ ISIL UQ Equity
++ LRCX UQ Equity
++ LVLT UQ Equity
++ MRVL UQ Equity
++ PRDO UQ Equity
+DEL:
+- 1746513D UQ Equity
+- BRCD UQ Equity
+- CIEN UQ Equity
+- ERIC UQ Equity
+- HGSI UQ Equity
+- ICOS UQ Equity
+- MWW UQ Equity
+- RFMD UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2004-09-01 ---
+ADD:
++ SHLDQ UQ Equity
+DEL:
+- 1579957D UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2005-01-01 ---
+ADD:
++ 582663Q UQ Equity
++ 713075Q UQ Equity
++ 9210611D UQ Equity
++ ADSK UQ Equity
++ CTSH UQ Equity
++ ERIC UQ Equity
++ MCIP UQ Equity
++ WYNN UQ Equity
++ XMSR UQ Equity
+DEL:
+- 1519128D UQ Equity
+- 3029830Q UQ Equity
+- CEPH UQ Equity
+- FHCC UQ Equity
+- GNTX UQ Equity
+- HSIC UQ Equity
+- NVDA UQ Equity
+- PTEN UQ Equity
+- RYAAY UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2005-07-01 ---
+ADD:
++ 9990294D UQ Equity
+DEL:
+- 582663Q UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2005-08-01 ---
+ADD:
++ CELG UQ Equity
+DEL:
+- 3153670Q UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2005-09-01 ---
+ADD:
++ SEPR UQ Equity
+DEL:
+- NXTL UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-01-01 ---
+ADD:
++ ATVI UQ Equity
++ CDNS UQ Equity
++ CKFR UQ Equity
++ DISCA UQ Equity
++ EXPE UQ Equity
++ GOOGL UQ Equity
++ MWW UQ Equity
++ NIHDQ UQ Equity
++ NVDA UQ Equity
++ PTEN UQ Equity
++ RHT UQ Equity
++ URBN UQ Equity
+DEL:
+- 1255459D UQ Equity
+- 1280712D UQ Equity
+- 3437127Q UQ Equity
+- DLTR UQ Equity
+- ISIL UQ Equity
+- LVLT UQ Equity
+- MOLX UQ Equity
+- PRDO UQ Equity
+- QLGC UQ Equity
+- SANM UQ Equity
+- SNPS UQ Equity
+- SSCCQ UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-02-01 ---
+ADD:
++ AMLN UQ Equity
++ ISRG UQ Equity
++ JOY UQ Equity
+DEL:
+- 2217347D UQ Equity
+- MCIP UQ Equity
+- SEBL UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-04-01 ---
+ADD:
++ VMED UQ Equity
+DEL:
+- 713075Q UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-05-01 ---
+ADD:
++ AKAM UQ Equity
+DEL:
+- 1683351D UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-06-01 ---
+ADD:
++ TIGO UQ Equity
+DEL:
+- PIXR UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-08-01 ---
+ADD:
++ 0964591D UW Equity
++ 1683997D UW Equity
++ 1812212D UW Equity
++ 1920486D UW Equity
++ 2207158D UW Equity
++ 2307532Q UW Equity
++ 2544554D UW Equity
++ 2619871D UW Equity
++ 9210611D UW Equity
++ 9990294D UW Equity
++ AAPL UW Equity
++ ADBE UW Equity
++ ADSK UW Equity
++ AKAM UW Equity
++ AMAT UW Equity
++ AMGN UW Equity
++ AMLN UW Equity
++ AMZN UW Equity
++ APOL UW Equity
++ ATVI UW Equity
++ ATYT UW Equity
++ BB UW Equity
++ BBBYQ UW Equity
++ BEAS UW Equity
++ BIIB UW Equity
++ BRCM UW Equity
++ CDNS UW Equity
++ CDWC UW Equity
++ CELG UW Equity
++ CHKP UW Equity
++ CHRW UW Equity
++ CKFR UW Equity
++ CMCSA UW Equity
++ COST UW Equity
++ CSCO UW Equity
++ CTAS UW Equity
++ CTSH UW Equity
++ CTXS UW Equity
++ DISCA UW Equity
++ DISH UW Equity
++ EA UW Equity
++ EBAY UW Equity
++ ERIC UW Equity
++ ESRX UW Equity
++ EXPD UW Equity
++ EXPE UW Equity
++ FAST UW Equity
++ FISV UW Equity
++ FLEX UW Equity
++ GEN UW Equity
++ GENZ UW Equity
++ GILD UW Equity
++ GOOGL UW Equity
++ GRMN UW Equity
++ INTC UW Equity
++ INTU UW Equity
++ ISRG UW Equity
++ JNPR UW Equity
++ JOY UW Equity
++ KLAC UW Equity
++ LAMR UW Equity
++ LLTC UW Equity
++ LNCR UW Equity
++ LRCX UW Equity
++ MCHP UW Equity
++ MRVL UW Equity
++ MSFT UW Equity
++ MWW UW Equity
++ MXIM UW Equity
++ NIHDQ UW Equity
++ NTAP UW Equity
++ NVDA UW Equity
++ ORCL UW Equity
++ PAYX UW Equity
++ PCAR UW Equity
++ PDCO UW Equity
++ PETM UW Equity
++ PTEN UW Equity
++ QCOM UW Equity
++ RHT UW Equity
++ ROST UW Equity
++ SBUX UW Equity
++ SEPR UW Equity
++ SHLDQ UW Equity
++ SIAL UW Equity
++ TEVA UW Equity
++ TIGO UW Equity
++ TLAB UW Equity
++ URBN UW Equity
++ VIAV UW Equity
++ VMED UW Equity
++ VRSN UW Equity
++ WFM UW Equity
++ WYNN UW Equity
++ XLNX UW Equity
++ XMSR UW Equity
++ XRAY UW Equity
+DEL:
+- 0964591D UQ Equity
+- 1683997D UQ Equity
+- 1812212D UQ Equity
+- 1920486D UQ Equity
+- 2207158D UQ Equity
+- 2307532Q UQ Equity
+- 2544554D UQ Equity
+- 2619871D UQ Equity
+- 9210611D UQ Equity
+- 9990294D UQ Equity
+- AAPL UQ Equity
+- ADBE UQ Equity
+- ADSK UQ Equity
+- AKAM UQ Equity
+- AMAT UQ Equity
+- AMGN UQ Equity
+- AMLN UQ Equity
+- AMZN UQ Equity
+- APOL UQ Equity
+- ATVI UQ Equity
+- ATYT UQ Equity
+- BB UQ Equity
+- BBBYQ UQ Equity
+- BEAS UQ Equity
+- BIIB UQ Equity
+- BRCM UQ Equity
+- CDNS UQ Equity
+- CDWC UQ Equity
+- CELG UQ Equity
+- CHKP UQ Equity
+- CHRW UQ Equity
+- CKFR UQ Equity
+- CMCSA UQ Equity
+- COST UQ Equity
+- CSCO UQ Equity
+- CTAS UQ Equity
+- CTSH UQ Equity
+- CTXS UQ Equity
+- DISCA UQ Equity
+- DISH UQ Equity
+- EA UQ Equity
+- EBAY UQ Equity
+- ERIC UQ Equity
+- ESRX UQ Equity
+- EXPD UQ Equity
+- EXPE UQ Equity
+- FAST UQ Equity
+- FISV UQ Equity
+- FLEX UQ Equity
+- GEN UQ Equity
+- GENZ UQ Equity
+- GILD UQ Equity
+- GOOGL UQ Equity
+- GRMN UQ Equity
+- INTC UQ Equity
+- INTU UQ Equity
+- ISRG UQ Equity
+- JNPR UQ Equity
+- JOY UQ Equity
+- KLAC UQ Equity
+- LAMR UQ Equity
+- LLTC UQ Equity
+- LNCR UQ Equity
+- LRCX UQ Equity
+- MCHP UQ Equity
+- MRVL UQ Equity
+- MSFT UQ Equity
+- MWW UQ Equity
+- MXIM UQ Equity
+- NIHDQ UQ Equity
+- NTAP UQ Equity
+- NVDA UQ Equity
+- ORCL UQ Equity
+- PAYX UQ Equity
+- PCAR UQ Equity
+- PDCO UQ Equity
+- PETM UQ Equity
+- PTEN UQ Equity
+- QCOM UQ Equity
+- RHT UQ Equity
+- ROST UQ Equity
+- SBUX UQ Equity
+- SEPR UQ Equity
+- SHLDQ UQ Equity
+- SIAL UQ Equity
+- TEVA UQ Equity
+- TIGO UQ Equity
+- TLAB UQ Equity
+- URBN UQ Equity
+- VIAV UQ Equity
+- VMED UQ Equity
+- VRSN UQ Equity
+- WFM UQ Equity
+- WYNN UQ Equity
+- XLNX UQ Equity
+- XMSR UQ Equity
+- XRAY UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2006-11-01 ---
+ADD:
++ QVCGA UW Equity
+DEL:
+- ATYT UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-01-01 ---
+ADD:
++ AEO UW Equity
++ INFY UW Equity
++ LVLT UW Equity
++ VRTX UW Equity
+DEL:
+- LNCR UW Equity
+- RHT UW Equity
+- URBN UW Equity
+- VIAV UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-02-01 ---
+ADD:
++ LOGI UW Equity
+DEL:
+- CMVT UQ Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-03-01 ---
+ADD:
++ RYAAY UW Equity
+DEL:
+- 2307532Q UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-04-01 ---
+ADD:
++ UAL UW Equity
+DEL:
+- AEO UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-06-01 ---
+ADD:
++ CEPH UW Equity
+DEL:
+- 2207158D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-08-01 ---
+ADD:
++ FWLT UW Equity
+DEL:
+- 0964591D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2007-11-01 ---
+ADD:
++ 1841189D UW Equity
++ HSIC UW Equity
+DEL:
+- CDWC UW Equity
+- MXIM UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2008-01-01 ---
+ADD:
++ 1288453D UW Equity
++ 1541931D UW Equity
++ BIDU UW Equity
++ FMCN UW Equity
++ HOLX UW Equity
++ SRCL UW Equity
++ STLD UW Equity
+DEL:
+- 1541931D UQ Equity
+- CKFR UW Equity
+- ERIC UW Equity
+- PTEN UW Equity
+- ROST UW Equity
+- SEPR UW Equity
+- XMSR UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2008-05-01 ---
+ADD:
++ 1448062D UW Equity
+DEL:
+- BEAS UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2008-06-01 ---
+ADD:
++ 2326248D UW Equity
+DEL:
+- TLAB UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2008-08-01 ---
+ADD:
++ FLIR UW Equity
+DEL:
+- UAL UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2008-12-01 ---
+ADD:
++ STX UW Equity
+DEL:
+- MWW UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2009-01-01 ---
+ADD:
++ 1255459D UW Equity
++ ADP UW Equity
++ FSLR UW Equity
++ ILMN UW Equity
++ JBHT UW Equity
++ MXIM UW Equity
++ ORLY UW Equity
++ PPDI UW Equity
++ ROST UW Equity
++ URBN UW Equity
++ WCRX UW Equity
+DEL:
+- 1841189D UW Equity
+- 2544554D UW Equity
+- 9210611D UW Equity
+- AMLN UW Equity
+- CDNS UW Equity
+- DISCA UW Equity
+- LAMR UW Equity
+- LVLT UW Equity
+- PETM UW Equity
+- VMED UW Equity
+- WFM UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2009-02-01 ---
+ADD:
++ TFCFA UW Equity
+DEL:
+- FMCN UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2009-08-01 ---
+ADD:
++ CERN UW Equity
+DEL:
+- 1920486D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2009-11-01 ---
+ADD:
++ BKNG UW Equity
+DEL:
+- JNPR UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2010-01-01 ---
+ADD:
++ 2544554D UW Equity
++ BMC UW Equity
++ MAT UW Equity
++ MYL UW Equity
++ QGEN UW Equity
++ VMED UW Equity
++ VOD UW Equity
+DEL:
+- 1288453D UW Equity
+- 1812212D UW Equity
+- 9990294D UW Equity
+- AKAM UW Equity
+- PPDI UW Equity
+- RYAAY UW Equity
+- STLD UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2011-01-01 ---
+ADD:
++ AKAM UW Equity
++ DLTR UW Equity
++ FFIV UW Equity
++ MU UW Equity
++ NFLX UW Equity
++ TCOM UW Equity
++ WFM UW Equity
+DEL:
+- CTAS UW Equity
+- DISH UW Equity
+- FWLT UW Equity
+- HOLX UW Equity
+- JBHT UW Equity
+- LOGI UW Equity
+- PDCO UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2011-05-01 ---
+ADD:
++ ALXN UW Equity
+DEL:
+- GENZ UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2011-06-01 ---
+ADD:
++ GMCR UW Equity
+DEL:
+- TIGO UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2011-08-01 ---
+ADD:
++ 9210611D UW Equity
+DEL:
+- CEPH UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2012-01-01 ---
+ADD:
++ 1288453D UW Equity
++ 9999955D UW Equity
++ AVGO UW Equity
++ FOSL UW Equity
++ NUAN UW Equity
++ PRGO UW Equity
+DEL:
+- FLIR UW Equity
+- ILMN UW Equity
+- JOY UW Equity
+- NIHDQ UW Equity
+- QGEN UW Equity
+- URBN UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2012-05-01 ---
+ADD:
++ TXN UW Equity
+DEL:
+- FSLR UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2012-06-01 ---
+ADD:
++ VIAB UW Equity
+DEL:
+- TEVA UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2012-08-01 ---
+ADD:
++ MDLZ UW Equity
+DEL:
+- TCOM UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-01-01 ---
+ADD:
++ 9990294D UW Equity
++ ADI UW Equity
++ CTRX UW Equity
++ DISCA UW Equity
++ EQIX UW Equity
++ META UW Equity
++ REGN UW Equity
++ SBAC UW Equity
++ STRZA UW Equity
++ VRSK UW Equity
++ WDC UW Equity
+DEL:
+- APOL UW Equity
+- BB UW Equity
+- EA UW Equity
+- FLEX UW Equity
+- GMCR UW Equity
+- INFY UW Equity
+- LRCX UW Equity
+- MRVL UW Equity
+- NFLX UW Equity
+- VRSN UW Equity
+- WCRX UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-04-01 ---
+ADD:
++ KRFT UW Equity
+DEL:
+- STRZA UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-07-01 ---
+ADD:
++ 1396924D UW Equity
++ NFLX UW Equity
+DEL:
+- PRGO UW Equity
+- VMED UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-08-01 ---
+ADD:
++ CHTR UW Equity
++ TSLA UW Equity
+DEL:
+- BMC UW Equity
+- ORCL UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-09-01 ---
+ADD:
++ GMCR UW Equity
+DEL:
+- 1255459D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-11-01 ---
+ADD:
++ VEON UW Equity
+DEL:
+- 1683997D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2013-12-01 ---
+ADD:
++ MAR UW Equity
+DEL:
+- 9999955D UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2014-01-01 ---
+ADD:
++ DISH UW Equity
++ ILMN UW Equity
++ NXPI UW Equity
++ TRIP UW Equity
++ TSCO UW Equity
+DEL:
+- FOSL UW Equity
+- MCHP UW Equity
+- NUAN UW Equity
+- SHLDQ UW Equity
+- XRAY UW Equity
+TOTAL_COUNT: 100
+-------------------------
+--- PERIOD: 2014-05-01 ---
+ADD:
++ GOOG UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2014-08-01 ---
+ADD:
++ 1396926D UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2014-09-01 ---
+ADD:
++ DISCK UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2014-11-01 ---
+ADD:
++ LVNTA UW Equity
+TOTAL_COUNT: 104
+-------------------------
+--- PERIOD: 2015-01-01 ---
+ADD:
++ 9999794D UW Equity
++ AAL UW Equity
++ CMCSK UW Equity
++ EA UW Equity
++ LRCX UW Equity
++ TFCF UW Equity
+DEL:
+- EXPE UW Equity
+- FFIV UW Equity
+- MXIM UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2015-04-01 ---
+ADD:
++ WBA UW Equity
+DEL:
+- EQIX UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2015-07-01 ---
+ADD:
++ MNST UW Equity
+DEL:
+- 1288453D UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2015-08-01 ---
+ADD:
++ 9999825D UW Equity
++ 9999826D UW Equity
++ BMRN UW Equity
++ JD UW Equity
++ KHC UW Equity
+DEL:
+- 1448062D UW Equity
+- CTRX UW Equity
+- KRFT UW Equity
+TOTAL_COUNT: 109
+-------------------------
+--- PERIOD: 2015-09-01 ---
+ADD:
++ SWKS UW Equity
+DEL:
+- SIAL UW Equity
+TOTAL_COUNT: 109
+-------------------------
+--- PERIOD: 2015-11-01 ---
+ADD:
++ INCY UW Equity
+DEL:
+- 1541931D UW Equity
+TOTAL_COUNT: 109
+-------------------------
+--- PERIOD: 2015-12-01 ---
+ADD:
++ PYPL UW Equity
+DEL:
+- BRCM UW Equity
+TOTAL_COUNT: 109
+-------------------------
+--- PERIOD: 2016-01-01 ---
+ADD:
++ ENDPQ UW Equity
++ EXPE UW Equity
++ MXIM UW Equity
++ NCLH UW Equity
++ TCOM UW Equity
++ TMUS UW Equity
++ ULTA UW Equity
+DEL:
+- 2619871D UW Equity
+- 9999825D UW Equity
+- 9999826D UW Equity
+- CHRW UW Equity
+- CMCSK UW Equity
+- EXPD UW Equity
+- GMCR UW Equity
+- GRMN UW Equity
+- VEON UW Equity
+- WYNN UW Equity
+TOTAL_COUNT: 106
+-------------------------
+--- PERIOD: 2016-03-01 ---
+ADD:
++ CSX UW Equity
+DEL:
+- KLAC UW Equity
+TOTAL_COUNT: 106
+-------------------------
+--- PERIOD: 2016-04-01 ---
+ADD:
++ NTES UW Equity
+DEL:
+- 2544554D UW Equity
+TOTAL_COUNT: 106
+-------------------------
+--- PERIOD: 2016-05-01 ---
+ADD:
++ 2293940D UW Equity
++ 2293944D UW Equity
++ 2297264D UW Equity
++ 2297267D UW Equity
+DEL:
+- 1396924D UW Equity
+- 1396926D UW Equity
+TOTAL_COUNT: 108
+-------------------------
+--- PERIOD: 2016-07-01 ---
+ADD:
++ XRAY UW Equity
+DEL:
+- 2293940D UW Equity
+- 2293944D UW Equity
+- 2297264D UW Equity
+- 2297267D UW Equity
+TOTAL_COUNT: 105
+-------------------------
+--- PERIOD: 2016-08-01 ---
+ADD:
++ MCHP UW Equity
+DEL:
+- ENDPQ UW Equity
+TOTAL_COUNT: 105
+-------------------------
+--- PERIOD: 2016-11-01 ---
+ADD:
++ SHPG UW Equity
+DEL:
+- LLTC UW Equity
+TOTAL_COUNT: 105
+-------------------------
+--- PERIOD: 2017-01-01 ---
+ADD:
++ 9999825D UW Equity
++ 9999826D UW Equity
++ CTAS UW Equity
++ HAS UW Equity
++ HOLX UW Equity
++ KLAC UW Equity
+DEL:
+- BBBYQ UW Equity
+- NTAP UW Equity
+- SRCL UW Equity
+- WFM UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2017-03-01 ---
+ADD:
++ JBHT UW Equity
+DEL:
+- NXPI UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2017-04-01 ---
+ADD:
++ IDXX UW Equity
+DEL:
+- SBAC UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2017-05-01 ---
+ADD:
++ WYNN UW Equity
+DEL:
+- TRIP UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2017-07-01 ---
+ADD:
++ MELI UW Equity
+DEL:
+- 1518855D US Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2017-11-01 ---
+ADD:
++ ALGN UW Equity
+DEL:
+- MAT UW Equity
+TOTAL_COUNT: 107
+-------------------------
+--- PERIOD: 2018-01-01 ---
+ADD:
++ ASML UW Equity
++ CDNS UW Equity
++ SNPS UW Equity
++ TTWO UW Equity
++ WDAY UW Equity
+DEL:
+- AKAM UW Equity
+- DISCA UW Equity
+- DISCK UW Equity
+- NCLH UW Equity
+- TSCO UW Equity
+- VIAB UW Equity
+TOTAL_COUNT: 106
+-------------------------
+--- PERIOD: 2018-02-01 ---
+DEL:
+- 9999825D UW Equity
+- 9999826D UW Equity
+TOTAL_COUNT: 104
+-------------------------
+--- PERIOD: 2018-04-01 ---
+DEL:
+- LVNTA UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2018-08-01 ---
+ADD:
++ PEP UW Equity
+DEL:
+- DISH UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2018-12-01 ---
+ADD:
++ NXPI UW Equity
++ XEL UW Equity
+DEL:
+- 2326248D UW Equity
+- XRAY UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2019-01-01 ---
+ADD:
++ AMD UW Equity
++ LULU UW Equity
++ NTAP UW Equity
++ UAL UW Equity
++ VRSN UW Equity
++ WTW UW Equity
+DEL:
+- ESRX UW Equity
+- HOLX UW Equity
+- QVCGA UW Equity
+- SHPG UW Equity
+- STX UW Equity
+- VOD UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2019-04-01 ---
+ADD:
++ FOX UW Equity
++ FOXA UW Equity
+DEL:
+- TFCF UW Equity
+- TFCFA UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2019-12-01 ---
+ADD:
++ EXC UW Equity
+DEL:
+- CELG UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-01-01 ---
+ADD:
++ ANSS UW Equity
++ CDW UW Equity
++ CPRT UW Equity
++ CSGP UW Equity
++ SGEN UW Equity
++ SPLK UW Equity
+DEL:
+- GEN UW Equity
+- HAS UW Equity
+- HSIC UW Equity
+- JBHT UW Equity
+- MYL UW Equity
+- WYNN UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-05-01 ---
+ADD:
++ DXCM UW Equity
++ ZM UW Equity
+DEL:
+- AAL UW Equity
+- WTW UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-07-01 ---
+ADD:
++ DOCU UW Equity
+DEL:
+- UAL UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-08-01 ---
+ADD:
++ MRNA UW Equity
+DEL:
+- CSGP UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-09-01 ---
+ADD:
++ PDD UW Equity
+DEL:
+- NTAP UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2020-11-01 ---
+ADD:
++ KDP UW Equity
+DEL:
+- WDC UW Equity
+TOTAL_COUNT: 103
+-------------------------
+--- PERIOD: 2021-01-01 ---
+ADD:
++ AEP UW Equity
++ MRVL UW Equity
++ MTCH UW Equity
++ OKTA UW Equity
++ PTON UW Equity
++ TEAM UW Equity
+DEL:
+- 9990294D UW Equity
+- 9999794D UW Equity
+- BMRN UW Equity
+- CTXS UW Equity
+- EXPE UW Equity
+- TTWO UW Equity
+- ULTA UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2021-08-01 ---
+ADD:
++ HON UW Equity
+DEL:
+- ALXN UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2021-09-01 ---
+ADD:
++ CRWD UW Equity
+DEL:
+- MXIM UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2022-01-01 ---
+ADD:
++ ABNB UW Equity
++ DDOG UW Equity
++ FTNT UW Equity
++ LCID UW Equity
++ PANW UW Equity
++ ZS UW Equity
+DEL:
+- CDW UW Equity
+- CERN UW Equity
+- CHKP UW Equity
+- FOX UW Equity
+- FOXA UW Equity
+- INCY UW Equity
+- TCOM UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2022-02-01 ---
+ADD:
++ ODFL UW Equity
+DEL:
+- PTON UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2022-03-01 ---
+ADD:
++ 9996651D UW Equity
++ CEG UW Equity
+DEL:
+- XLNX UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2022-12-01 ---
+ADD:
++ ENPH UQ Equity
+DEL:
+- OKTA UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2023-01-01 ---
+ADD:
++ BKR UW Equity
++ CSGP UW Equity
++ FANG UW Equity
++ GFS UW Equity
++ RIVN UW Equity
++ WBD UW Equity
+DEL:
+- BIDU UW Equity
+- DOCU UW Equity
+- MTCH UW Equity
+- NTES UW Equity
+- SPLK UW Equity
+- SWKS UW Equity
+- VRSN UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2023-07-01 ---
+ADD:
++ GEHC UW Equity
++ ON UW Equity
+DEL:
+- FISV UW Equity
+- RIVN UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2023-08-01 ---
+ADD:
++ TTD UQ Equity
+DEL:
+- ATVI UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2024-01-01 ---
+ADD:
++ CCEP UW Equity
++ CDW UW Equity
++ DASH UN Equity
++ MDB UQ Equity
++ ROP UN Equity
++ SPLK UW Equity
++ TTWO UW Equity
+DEL:
+- ALGN UW Equity
+- EBAY UW Equity
+- ENPH UQ Equity
+- JD UW Equity
+- LCID UW Equity
+- SGEN UW Equity
+- ZM UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2024-02-01 ---
+ADD:
++ DASH UW Equity
++ ROP UW Equity
+DEL:
+- DASH UN Equity
+- ROP UN Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2024-04-01 ---
+ADD:
++ LIN UW Equity
+DEL:
+- SPLK UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2024-07-01 ---
+ADD:
++ ARM UW Equity
++ GRAL UW Equity
+DEL:
+- 9210611D UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2024-08-01 ---
+ADD:
++ SMCI UW Equity
+DEL:
+- GRAL UW Equity
+- WBA UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2024-12-01 ---
+ADD:
++ APP UW Equity
+DEL:
+- DLTR UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2025-01-01 ---
+ADD:
++ AXON UW Equity
++ MSTR UW Equity
++ PLTR UW Equity
+DEL:
+- ILMN UW Equity
+- MRNA UW Equity
+- SMCI UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2025-06-01 ---
+ADD:
++ SHOP UN Equity
+DEL:
+- MDB UQ Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2025-08-01 ---
+ADD:
++ SHOP UW Equity
++ TRI UN Equity
+DEL:
+- ANSS UW Equity
+- SHOP UN Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2025-09-01 ---
+ADD:
++ TRI UW Equity
+DEL:
+- TRI UN Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2025-11-01 ---
+ADD:
++ SOLS UW Equity
+TOTAL_COUNT: 102
+-------------------------
+--- PERIOD: 2025-12-01 ---
+DEL:
+- SOLS UW Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2026-01-01 ---
+ADD:
++ ALNY UW Equity
++ FER UW Equity
++ INSM UW Equity
++ MPWR UW Equity
++ STX UW Equity
++ WDC UW Equity
+DEL:
+- BIIB UW Equity
+- CDW UW Equity
+- GFS UW Equity
+- LULU UW Equity
+- ON UW Equity
+- TTD UQ Equity
+TOTAL_COUNT: 101
+-------------------------
+--- PERIOD: 2026-02-01 ---
+ADD:
++ WMT UW Equity
+DEL:
+- 9996651D UW Equity
+TOTAL_COUNT: 101
+-------------------------
+
+[END OF REPORT]
