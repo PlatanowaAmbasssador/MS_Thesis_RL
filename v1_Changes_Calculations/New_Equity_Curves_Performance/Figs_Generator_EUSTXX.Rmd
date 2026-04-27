@@ -1,0 +1,637 @@
+---
+output: 
+  pdf_document:
+    keep_tex: true
+    fig_caption: true
+    latex_engine: xelatex
+
+mainfont: "Times New Roman"
+fontsize: 11pt
+geometry: margin=2.5cm
+
+header-includes:
+  - \usepackage{setspace}
+  - \setstretch{1.5}
+  - \usepackage{placeins}
+  - \usepackage{soul}
+  - \usepackage{xcolor}
+  - \DeclareMathOperator*{\maximum}{max}
+  - \usepackage{float}
+  - \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2) 
+library(gridExtra)
+library(knitr)
+library('pacman')
+library(kableExtra)
+p_load(dplyr, forcats, knitr, kableExtra, tinytex, janitor)
+```
+
+# Empirical Result
+
+## CASH: LSTM_DAILY_1 and LSTM_DAILY_2
+
+```{r fig_1, fig.cap="Equity Curves for EUSTX Strategies", fig.width=12, fig.height=6, results='hide', results='hide', warning=FALSE, message=FALSE, fig.topcaption = TRUE}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+df_ndx <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/equity_curves_oos.csv')
+df_ndx <- subset(df_ndx, select = -Inverse.Volatility)
+df_ndx <- subset(df_ndx, select = -Supervised...MVO)
+df_ndx <- subset(df_ndx, select = -Equal.Weight.Monthly)
+df_rl_1  <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/rl_equity_oos.csv')
+df_rl_2  <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_2/rl_equity_oos.csv')
+
+# Convert dates
+df_ndx$date <- as.Date(df_ndx$date)
+df_rl_1$date  <- as.Date(df_rl_1$date)
+df_rl_2$date  <- as.Date(df_rl_2$date) 
+
+# Keep only RL.Agent from df_rl
+df_rl_1_plot <- df_rl_1 %>%
+  select(date, RL.Agent)
+df_rl_2_plot <- df_rl_2 %>%
+  select(date, RL.Agent)
+
+# Rename Buy & Hold so it appears nicely in legend
+df_ndx_plot <- df_ndx %>%
+  rename(`Buy & Hold` = QQQ.Buy.and.Hold)
+
+# Combine both datasets by date
+df_plot <- df_ndx_plot %>%
+  left_join(df_rl_1_plot, by = "date") %>%
+  left_join(df_rl_2_plot, by = "date") %>%
+  rename(LSTM_1 = RL.Agent.x, LSTM_2 = RL.Agent.y) # Renaming the joined columns here
+
+# Convert to long format
+df_plot_long <- df_plot %>%
+  pivot_longer(cols = -date, names_to = "Strategy", values_to = "Value")
+
+# Set legend order
+df_plot_long$Strategy <- factor(
+  df_plot_long$Strategy,
+  levels = c(
+    "Buy & Hold",
+    "Momentum.Top.20.",
+    "LSTM_1",
+    "LSTM_2"
+  )
+)
+
+ec_plot <- ggplot(df_plot_long, aes(x = date, y = Value, color = Strategy)) +
+  geom_line(size = 0.8) +
+  scale_color_manual(
+    values = c(
+      "Buy & Hold" = "black",
+      "Momentum.Top.20." = "darkgreen",
+      "LSTM_1" = "darkred",
+      "LSTM_2" = "purple"
+    )
+  ) +
+  theme_bw() +
+  ylab("Equity") +
+  xlab("Date") +
+  theme(
+    legend.position = c(.02, .98),
+    legend.justification = c("left", "top"),
+    legend.box.just = "left",
+    legend.margin = margin(1, 1, 1, 1),
+    legend.background = element_blank(),
+    legend.box.background = element_rect(colour = "black"),
+    legend.title = element_blank(),
+    legend.spacing.y = unit(0, "mm")
+  )
+
+ec_plot
+```
+
+\newpage
+
+## NO CASH: LSTM_NC_DAILY and LSTM_NC_DAILY_2
+
+```{r fig_2, fig.cap="Equity Curves for EUSTX Strategies", fig.width=12, fig.height=6, results='hide', results='hide', warning=FALSE, message=FALSE, fig.topcaption = TRUE}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+df_ndx <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/equity_curves_oos.csv')
+df_ndx <- subset(df_ndx, select = -Inverse.Volatility)
+df_ndx <- subset(df_ndx, select = -Supervised...MVO)
+df_ndx <- subset(df_ndx, select = -Equal.Weight.Monthly)
+df_rl_1  <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_NC_DAILY/rl_equity_oos.csv')
+df_rl_2  <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_NC_DAILY_2/rl_equity_oos.csv')
+
+# Convert dates
+df_ndx$date <- as.Date(df_ndx$date)
+df_rl_1$date  <- as.Date(df_rl_1$X)
+df_rl_2$date  <- as.Date(df_rl_2$X) 
+
+# Keep only RL.Agent from df_rl
+df_rl_1_plot <- df_rl_1 %>%
+  select(date, RL.Agent)
+df_rl_2_plot <- df_rl_2 %>%
+  select(date, RL.Agent)
+
+# Rename Buy & Hold so it appears nicely in legend
+df_ndx_plot <- df_ndx %>%
+  rename(`Buy & Hold` = QQQ.Buy.and.Hold)
+
+# Combine both datasets by date
+df_plot <- df_ndx_plot %>%
+  left_join(df_rl_1_plot, by = "date") %>%
+  left_join(df_rl_2_plot, by = "date") %>%
+  rename(LSTM_NC_1 = RL.Agent.x, LSTM_NC_2 = RL.Agent.y) # Renaming the joined columns here
+
+# Convert to long format
+df_plot_long <- df_plot %>%
+  pivot_longer(cols = -date, names_to = "Strategy", values_to = "Value")
+
+# Set legend order
+df_plot_long$Strategy <- factor(
+  df_plot_long$Strategy,
+  levels = c(
+    "Buy & Hold",
+    "Momentum.Top.20.",
+    "LSTM_NC_1",
+    "LSTM_NC_2"
+  )
+)
+
+ec_plot <- ggplot(df_plot_long, aes(x = date, y = Value, color = Strategy)) +
+  geom_line(size = 0.8) +
+  scale_color_manual(
+    values = c(
+      "Buy & Hold" = "black",
+      "Momentum.Top.20." = "darkgreen",
+      "LSTM_NC_1" = "darkred",
+      "LSTM_NC_2" = "purple"
+    )
+  ) +
+  theme_bw() +
+  ylab("Equity") +
+  xlab("Date") +
+  theme(
+    legend.position = c(.02, .98),
+    legend.justification = c("left", "top"),
+    legend.box.just = "left",
+    legend.margin = margin(1, 1, 1, 1),
+    legend.background = element_blank(),
+    legend.box.background = element_rect(colour = "black"),
+    legend.title = element_blank(),
+    legend.spacing.y = unit(0, "mm")
+  )
+
+ec_plot
+```
+
+\newpage
+
+## TRANSFORMERS: TRANSFORMERS
+
+```{r fig_3, fig.cap="Equity Curves for EUSTX Strategies", fig.width=12, fig.height=6, results='hide', results='hide', warning=FALSE, message=FALSE, fig.topcaption = TRUE}
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+df_ndx <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/equity_curves_oos.csv')
+df_ndx <- subset(df_ndx, select = -Inverse.Volatility)
+df_ndx <- subset(df_ndx, select = -Supervised...MVO)
+df_ndx <- subset(df_ndx, select = -Equal.Weight.Monthly)
+df_rl_1  <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_TRANSFORMERS_DAILY_1/rl_equity_oos.csv')
+
+# Convert dates
+df_ndx$date <- as.Date(df_ndx$date)
+df_rl_1$date  <- as.Date(df_rl_1$date)
+
+# Keep only RL.Agent from df_rl
+df_rl_1_plot <- df_rl_1 %>%
+  select(date, RL.Agent)
+
+# Rename Buy & Hold so it appears nicely in legend
+df_ndx_plot <- df_ndx %>%
+  rename(`Buy & Hold` = QQQ.Buy.and.Hold)
+
+# Combine both datasets by date
+df_plot <- df_ndx_plot %>%
+  left_join(df_rl_1_plot, by = "date") %>%
+  rename(TRANSFORMERS = RL.Agent) # Renaming the joined columns here
+
+# Convert to long format
+df_plot_long <- df_plot %>%
+  pivot_longer(cols = -date, names_to = "Strategy", values_to = "Value")
+
+# Set legend order
+df_plot_long$Strategy <- factor(
+  df_plot_long$Strategy,
+  levels = c(
+    "Buy & Hold",
+    "Momentum.Top.20.",
+    "TRANSFORMERS"
+  )
+)
+
+ec_plot <- ggplot(df_plot_long, aes(x = date, y = Value, color = Strategy)) +
+  geom_line(size = 0.8) +
+  scale_color_manual(
+    values = c(
+      "Buy & Hold" = "black",
+      "Momentum.Top.20." = "darkgreen",
+      "TRANSFORMERS" = "darkred"
+    )
+  ) +
+  theme_bw() +
+  ylab("Equity") +
+  xlab("Date") +
+  theme(
+    legend.position = c(.02, .98),
+    legend.justification = c("left", "top"),
+    legend.box.just = "left",
+    legend.margin = margin(1, 1, 1, 1),
+    legend.background = element_blank(),
+    legend.box.background = element_rect(colour = "black"),
+    legend.title = element_blank(),
+    legend.spacing.y = unit(0, "mm")
+  )
+
+ec_plot
+```
+\newpage
+
+# Performance Tables
+
+## CASH: LSTM_DAILY_1 and LSTM_DAILY_2
+
+```{r perf_metric_1, results='asis', warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# 1. Load Baseline Metrics
+perf_metrics_base_model_NDX <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/performance_metrics_oos.csv')
+
+# Remove unwanted strategies
+perf_metrics_base_model_NDX <- perf_metrics_base_model_NDX[
+  !(perf_metrics_base_model_NDX$Strategy %in% c("Inverse Volatility", "Supervised + MVO", "Equal-Weight Monthly")),
+]
+
+# 2. Load RL Metrics for both agents
+perf_metrics_rl1 <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/rl_performance_metrics.csv')
+perf_metrics_rl2 <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_2/rl_performance_metrics.csv')
+
+# Prepare RL Agent 1
+rl_agent_1 <- perf_metrics_rl1 %>%
+  filter(X == "RL Agent") %>%
+  mutate(Strategy = "LSTM_1")
+
+# Prepare RL Agent 2
+rl_agent_2 <- perf_metrics_rl2 %>%
+  filter(X == "RL Agent") %>%
+  mutate(Strategy = "LSTM_2")
+
+# Define columns to keep
+cols_keep <- c(
+  "Strategy",
+  "Absolute.Return....",
+  "ARC....",
+  "ASD....",
+  "Max.Drawdown....",
+  "MLD..years.",
+  "IR1",
+  "IR2",
+  "Sharpe",
+  "Avg.Daily.Turnover...."
+)
+
+# Clean baseline table
+ndx_table <- perf_metrics_base_model_NDX %>%
+  mutate(Strategy = ifelse(Strategy == "QQQ Buy-and-Hold", "Buy & Hold", Strategy)) %>%
+  select(all_of(cols_keep))
+
+# Clean RL tables
+rl_table <- bind_rows(rl_agent_1, rl_agent_2) %>%
+  select(all_of(cols_keep))
+
+# 3. Combine in your EXACT specified order:
+final_table <- bind_rows(
+  ndx_table %>% filter(Strategy == "Buy & Hold"),        # First: Buy & Hold
+  ndx_table %>% filter(Strategy == "Momentum Top-20%"),  # Second: Momentum
+  rl_table                                               # Third: LSTMs
+)
+
+# 3. Formatting Function
+bold_best <- function(x, type = "max", ignore_zeros = FALSE) {
+  # Convert to numeric and strip existing LaTeX tags if any
+  x_num <- suppressWarnings(as.numeric(gsub("\\\\text.*\\{|\\}", "", as.character(x))))
+  
+  # Logic to ignore zeros (specifically for ADT)
+  search_space <- if(ignore_zeros) x_num[x_num != 0 & !is.na(x_num)] else x_num
+  
+  # If the search space becomes empty (e.g., all zeros), fall back to original
+  if (length(search_space) == 0) search_space <- x_num
+  
+  best <- if (type == "max") {
+    max(search_space, na.rm = TRUE)
+  } else {
+    min(search_space, na.rm = TRUE)
+  }
+  
+  x_fmt <- format(signif(x_num, 4), scientific = FALSE, trim = TRUE)
+  
+  # Bold the cell if it matches the 'best' value calculated above
+  ifelse(!is.na(x_num) & x_num == best, paste0("\\textbf{", x_fmt, "}"), x_fmt)
+}
+
+# Apply bolding to columns
+final_table$Absolute.Return.... <- bold_best(final_table$Absolute.Return...., "max")
+final_table$ARC.... <- bold_best(final_table$ARC...., "max")
+final_table$ASD.... <- bold_best(final_table$ASD...., "min")
+final_table$Max.Drawdown.... <- bold_best(final_table$Max.Drawdown...., "min")
+final_table$MLD..years. <- bold_best(final_table$MLD..years., "min")
+final_table$IR1 <- bold_best(final_table$IR1, "max")
+final_table$IR2 <- bold_best(final_table$IR2, "max")
+final_table$Sharpe <- bold_best(final_table$Sharpe, "max")
+final_table$Avg.Daily.Turnover.... <- bold_best(final_table$Avg.Daily.Turnover...., "min", ignore_zeros = TRUE)
+
+# Escape LaTeX special characters
+final_table$Strategy <- gsub("&", "\\\\&", final_table$Strategy)
+final_table$Strategy <- gsub("_", "\\\\_", final_table$Strategy)
+final_table$Strategy <- gsub("%", "\\\\&", final_table$Strategy)
+
+# 4. Generate Table
+kable(
+  final_table,
+  format = "latex",
+  escape = FALSE,
+  booktabs = TRUE,
+  longtable = FALSE,
+  col.names = c(
+    "Strategy",
+    "AR (\\%)",
+    "ARC (\\%)",
+    "ASD (\\%)",
+    "MD (\\%)",
+    "MLD",
+    "IR1",
+    "IR2",
+    "Sharpe",
+    "ADT"
+  ),
+  caption = "Performance Metrics for NASDAQ 100 Strategies",
+  align = "c"
+) %>%
+  kable_styling(latex_options = "hold_position", "scale_down")
+```
+
+\newpage
+
+## NO CASH: LSTM_NC_DAILY and LSTM_NC_DAILY_2
+
+```{r perf_metric_NDX_NC_2, results='asis', warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# 1. Load Baseline Metrics
+perf_metrics_base_model_NDX <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/performance_metrics_oos.csv')
+
+# Remove unwanted strategies
+perf_metrics_base_model_NDX <- perf_metrics_base_model_NDX[
+  !(perf_metrics_base_model_NDX$Strategy %in% c("Inverse Volatility", "Supervised + MVO", "Equal-Weight Monthly")),
+]
+
+# 2. Load RL Metrics for both NC agents
+perf_metrics_rl1 <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_NC_DAILY/rl_performance_metrics.csv')
+perf_metrics_rl2 <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_NC_DAILY_2/rl_performance_metrics.csv')
+
+# Prepare RL Agent NC 1
+rl_agent_1 <- perf_metrics_rl1 %>%
+  filter(X == "RL Agent") %>%
+  mutate(Strategy = "LSTM_NC_1")
+
+# Prepare RL Agent NC 2
+rl_agent_2 <- perf_metrics_rl2 %>%
+  filter(X == "RL Agent") %>%
+  mutate(Strategy = "LSTM_NC_2")
+
+# Define columns to keep
+cols_keep <- c(
+  "Strategy",
+  "Absolute.Return....",
+  "ARC....",
+  "ASD....",
+  "Max.Drawdown....",
+  "MLD..years.",
+  "IR1",
+  "IR2",
+  "Sharpe",
+  "Avg.Daily.Turnover...."
+)
+
+# Clean baseline table
+ndx_table <- perf_metrics_base_model_NDX %>%
+  mutate(Strategy = ifelse(Strategy == "QQQ Buy-and-Hold", "Buy & Hold", Strategy)) %>%
+  select(all_of(cols_keep))
+
+# Clean RL tables
+rl_table <- bind_rows(rl_agent_1, rl_agent_2) %>%
+  select(all_of(cols_keep))
+
+# 3. Combine in your EXACT specified order:
+final_table <- bind_rows(
+  ndx_table %>% filter(Strategy == "Buy & Hold"),        # First: Buy & Hold
+  ndx_table %>% filter(Strategy == "Momentum Top-20%"),  # Second: Momentum
+  rl_table                                               # Third: LSTMs
+)
+
+# 3. Formatting Function
+bold_best <- function(x, type = "max", ignore_zeros = FALSE) {
+  # Convert to numeric and strip existing LaTeX tags if any
+  x_num <- suppressWarnings(as.numeric(gsub("\\\\text.*\\{|\\}", "", as.character(x))))
+  
+  # Logic to ignore zeros (specifically for ADT)
+  search_space <- if(ignore_zeros) x_num[x_num != 0 & !is.na(x_num)] else x_num
+  
+  # If the search space becomes empty (e.g., all zeros), fall back to original
+  if (length(search_space) == 0) search_space <- x_num
+  
+  best <- if (type == "max") {
+    max(search_space, na.rm = TRUE)
+  } else {
+    min(search_space, na.rm = TRUE)
+  }
+  
+  x_fmt <- format(signif(x_num, 4), scientific = FALSE, trim = TRUE)
+  
+  # Bold the cell if it matches the 'best' value calculated above
+  ifelse(!is.na(x_num) & x_num == best, paste0("\\textbf{", x_fmt, "}"), x_fmt)
+}
+
+# Apply bolding
+final_table$Absolute.Return.... <- bold_best(final_table$Absolute.Return...., "max")
+final_table$ARC.... <- bold_best(final_table$ARC...., "max")
+final_table$ASD.... <- bold_best(final_table$ASD...., "min")
+final_table$Max.Drawdown.... <- bold_best(final_table$Max.Drawdown...., "min")
+final_table$MLD..years. <- bold_best(final_table$MLD..years., "min")
+final_table$IR1 <- bold_best(final_table$IR1, "max")
+final_table$IR2 <- bold_best(final_table$IR2, "max")
+final_table$Sharpe <- bold_best(final_table$Sharpe, "max")
+final_table$Avg.Daily.Turnover.... <- bold_best(final_table$Avg.Daily.Turnover...., "min", ignore_zeros = TRUE)
+
+# Escape LaTeX special characters (handles the underscores in LSTM_NC_1)
+final_table$Strategy <- gsub("&", "\\\\&", final_table$Strategy)
+final_table$Strategy <- gsub("_", "\\\\_", final_table$Strategy)
+final_table$Strategy <- gsub("%", "\\\\&", final_table$Strategy)
+
+# 4. Generate Table
+kable(
+  final_table,
+  format = "latex",
+  escape = FALSE,
+  booktabs = TRUE,
+  longtable = FALSE,
+  col.names = c(
+    "Strategy",
+    "AR (\\%)",
+    "ARC (\\%)",
+    "ASD (\\%)",
+    "MD (\\%)",
+    "MLD",
+    "IR1",
+    "IR2",
+    "Sharpe",
+    "ADT"
+  ),
+  caption = "Performance Metrics for NASDAQ 100 (NC Models)",
+  align = "c"
+) %>%
+  kable_styling(latex_options = "hold_position", "scale_down")
+```
+
+\newpage
+
+## TRANSFORMERS: TRANSFORMERS
+
+```{r perf_metric_3, results='asis', warning=FALSE, message=FALSE}
+
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+# 1. Load Baseline Metrics
+perf_metrics_base_model_NDX <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_LSTM_DAILY_1/performance_metrics_oos.csv')
+
+# Remove unwanted strategies
+perf_metrics_base_model_NDX <- perf_metrics_base_model_NDX[
+  !(perf_metrics_base_model_NDX$Strategy %in% c("Inverse Volatility", "Supervised + MVO", "Equal-Weight Monthly")),
+]
+
+# 2. Load RL Metrics for Transformers
+perf_metrics_rl_trans <- read.csv('/Users/kamilkashif/Documents/University/Masters Thesis/Master_Thesis_DRL/Results_Daily/EUSTX/EUSTX_TRANSFORMERS_DAILY_1/rl_performance_metrics.csv')
+
+# Prepare Transformer Agent row
+rl_agent_trans <- perf_metrics_rl_trans %>%
+  filter(X == "RL Agent") %>%
+  mutate(Strategy = "TRANSFORMERS")
+
+# Define columns to keep
+cols_keep <- c(
+  "Strategy",
+  "Absolute.Return....",
+  "ARC....",
+  "ASD....",
+  "Max.Drawdown....",
+  "MLD..years.",
+  "IR1",
+  "IR2",
+  "Sharpe",
+  "Avg.Daily.Turnover...."
+)
+
+# Clean baseline table
+ndx_table <- perf_metrics_base_model_NDX %>%
+  mutate(Strategy = ifelse(Strategy == "QQQ Buy-and-Hold", "Buy & Hold", Strategy)) %>%
+  select(all_of(cols_keep))
+
+# Clean RL table
+rl_table <- rl_agent_trans %>%
+  select(all_of(cols_keep))
+
+# 3. Combine in your EXACT specified order:
+final_table <- bind_rows(
+  ndx_table %>% filter(Strategy == "Buy & Hold"),        # First: Buy & Hold
+  ndx_table %>% filter(Strategy == "Momentum Top-20%"),  # Second: Momentum
+  rl_table                                               # Third: LSTMs
+)
+
+# 3. Formatting Function
+bold_best <- function(x, type = "max", ignore_zeros = FALSE) {
+  # Convert to numeric and strip existing LaTeX tags if any
+  x_num <- suppressWarnings(as.numeric(gsub("\\\\text.*\\{|\\}", "", as.character(x))))
+  
+  # Logic to ignore zeros (specifically for ADT)
+  search_space <- if(ignore_zeros) x_num[x_num != 0 & !is.na(x_num)] else x_num
+  
+  # If the search space becomes empty (e.g., all zeros), fall back to original
+  if (length(search_space) == 0) search_space <- x_num
+  
+  best <- if (type == "max") {
+    max(search_space, na.rm = TRUE)
+  } else {
+    min(search_space, na.rm = TRUE)
+  }
+  
+  x_fmt <- format(signif(x_num, 4), scientific = FALSE, trim = TRUE)
+  
+  # Bold the cell if it matches the 'best' value calculated above
+  ifelse(!is.na(x_num) & x_num == best, paste0("\\textbf{", x_fmt, "}"), x_fmt)
+}
+
+# Apply bolding
+final_table$Absolute.Return.... <- bold_best(final_table$Absolute.Return...., "max")
+final_table$ARC.... <- bold_best(final_table$ARC...., "max")
+final_table$ASD.... <- bold_best(final_table$ASD...., "min")
+final_table$Max.Drawdown.... <- bold_best(final_table$Max.Drawdown...., "min")
+final_table$MLD..years. <- bold_best(final_table$MLD..years., "min")
+final_table$IR1 <- bold_best(final_table$IR1, "max")
+final_table$IR2 <- bold_best(final_table$IR2, "max")
+final_table$Sharpe <- bold_best(final_table$Sharpe, "max")
+final_table$Avg.Daily.Turnover.... <- bold_best(final_table$Avg.Daily.Turnover...., "min", ignore_zeros = TRUE)
+
+# Escape LaTeX special characters
+final_table$Strategy <- gsub("&", "\\\\&", final_table$Strategy)
+final_table$Strategy <- gsub("_", "\\\\_", final_table$Strategy)
+final_table$Strategy <- gsub("%", "\\\\&", final_table$Strategy)
+
+# 4. Generate Table
+kable(
+  final_table,
+  format = "latex",
+  escape = FALSE,
+  booktabs = TRUE,
+  longtable = FALSE,
+  col.names = c(
+    "Strategy",
+    "AR (\\%)",
+    "ARC (\\%)",
+    "ASD (\\%)",
+    "MD (\\%)",
+    "MLD",
+    "IR1",
+    "IR2",
+    "Sharpe",
+    "ADT"
+  ),
+  caption = "Performance Metrics for NASDAQ 100 (Transformers)",
+  align = "c"
+) %>%
+  kable_styling(latex_options = "hold_position", "scale_down")
+```
