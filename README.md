@@ -70,3 +70,5 @@ python 03_Train_RL_Daily.py
 ```
 
 Outputs go to **`Results_Daily/`** (see `functions/RL_1/train.py`).
+
+Currently its set for QQQ (LSTM_1).
